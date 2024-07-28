@@ -1,8 +1,9 @@
 import { RemovedEnum } from 'src/enum'
-import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm'
 import { Column as Col } from 'src/column/column.entity'
 import { Authcode } from 'src/authcode/authcode.entity'
 import { User } from 'src/user/user.entity'
+import { VArticle } from 'src/varticle/varticle.entity'
 @Entity()
 export class Article {
   @PrimaryGeneratedColumn('uuid') id: string
@@ -20,6 +21,9 @@ export class Article {
     nullable: true
   })
   fromEditionId: string // 来源版本 id
+
+  @OneToMany(() => VArticle, varticle => varticle.primary)
+  varticles: VArticle[]
 
   @Column('uuid') userId: string
   @ManyToOne(() => User, user => user.articles)
@@ -84,6 +88,11 @@ export class Article {
   })
   removed: RemovedEnum
 
+  @Column('varchar') penname: string // 笔名 便利查询
+
+  @Column('varchar') email: string // 邮箱 便利查询
+
+  // 作者的其它信息
   @Column({
     type: 'simple-json',
     nullable: true

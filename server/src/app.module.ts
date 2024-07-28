@@ -10,6 +10,8 @@ import { ColumnModule } from './column/column.module'
 import { UploadfileModule } from './uploadfile/uploadfile.module'
 import { UserModule } from './user/user.module'
 import { VarticleModule } from './varticle/varticle.module'
+import { AuthModule } from './auth/auth.module';
+import { LoggerModule } from './logger/logger.module'
 
 @Module({
   imports: [
@@ -44,7 +46,9 @@ import { VarticleModule } from './varticle/varticle.module'
     ColumnModule,
     UploadfileModule,
     UserModule,
-    VarticleModule
+    VarticleModule,
+    AuthModule,
+    LoggerModule,
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -7,28 +7,4 @@ import { CreateAuthcodeDto } from './dto/create-authcode.dto';
 export class AuthcodeController {
   constructor(private readonly authcodeService: AuthcodeService) {}
 
-  @Post()
-  create(@Body() createAuthcodeDto: CreateAuthcodeDto) {
-    return this.authcodeService.create(createAuthcodeDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.authcodeService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authcodeService.findOne(+id);
-  }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateAuthcodeDto: UpdateAuthcodeDto) {
-  //   return this.authcodeService.update(+id, updateAuthcodeDto);
-  // }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authcodeService.remove(+id);
-  }
 }

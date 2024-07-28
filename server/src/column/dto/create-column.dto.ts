@@ -1,1 +1,5 @@
-export class CreateColumnDto {}
+export class CreateColumnDto {
+  name: string
+  cover: string
+  desc: string
+}

@@ -4,10 +4,17 @@ import { Column as Col } from 'src/column/column.entity'
 import { RemovedEnum } from 'src/enum'
 import { UploadFile } from 'src/uploadfile/uploadfile.entity'
 import { Entity, ObjectId, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
+import { Exclude } from 'class-transformer'
+
+export type ReceiverConfig = {
+  status: 0 | 1 | 2
+  autoParse: boolean
+  sizeLimit: number
+}
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn('uuid') id: ObjectId
+  @PrimaryGeneratedColumn('uuid') id: string
 
   @OneToMany(() => Article, article => article.authcode)
   articles: Article[]
@@ -23,7 +30,7 @@ export class User {
 
   @Column('varchar') UID: string
   @Column('varchar') account: string
-  @Column('varchar') encryptedPassword: string
+  @Exclude() @Column('varchar') encryptedPassword: string
   @Column('varchar') nickname: string
   @Column('varchar') avatar: string
   @Column('varchar') desc: string
@@ -41,11 +48,7 @@ export class User {
     type: 'simple-json',
     nullable: true
   })
-  receiverConfig: {
-    status: 0 | 1 | 2
-    autoParse: boolean
-    sizeLimit: number
-  }
+  receiverConfig: ReceiverConfig
 
   @Column({
     type: 'simple-array',

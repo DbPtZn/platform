@@ -1,6 +1,6 @@
 
 export interface ParseArticleDto {
-  _id: string
+  id: string
 
   // title: string // 标题
   

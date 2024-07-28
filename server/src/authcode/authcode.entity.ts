@@ -1,10 +1,10 @@
 import { Article } from 'src/article/article.entity'
 import { User } from 'src/user/user.entity'
-import { Entity, ObjectId, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm'
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm'
 
 @Entity()
 export class Authcode {
-  @PrimaryGeneratedColumn('uuid') id: ObjectId
+  @PrimaryGeneratedColumn('uuid') id: string
 
   @Column('uuid') userId: string
   @ManyToOne(() => User, user => user.authcodes)
@@ -16,7 +16,12 @@ export class Authcode {
   @Column('varchar') name: string
   @Column('varchar') code: string
   @Column('varchar') desc: string
-  @Column('boolean') disabled: boolean
+  
+  @Column({
+    type: 'boolean',
+    default: false
+  })
+  disabled: boolean
 
   @CreateDateColumn() createAt: Date
   @UpdateDateColumn() updateAt: Date

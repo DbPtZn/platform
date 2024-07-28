@@ -3,17 +3,36 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Article } from './article.entity'
 import { Repository } from 'typeorm'
 import { UserService } from 'src/user/user.service'
-import { CreateArticleDto, ParseArticleDto } from './dto'
+import { ArticleFilter, CreateArticleDto, ParseArticleDto } from './dto'
 import UUID from 'uuid'
+import path from 'path'
+import fs from 'fs'
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from 'nestjs-typeorm-paginate'
 import { UploadfileService } from 'src/uploadfile/uploadfile.service'
+import { Column } from 'src/column/column.entity'
+import { RemovedEnum } from 'src/enum'
+import { ConfigService } from '@nestjs/config'
+import { User } from 'src/user/user.entity'
+import { Authcode } from 'src/authcode/authcode.entity'
 
 @Injectable()
 export class ArticleService {
   constructor(
     @InjectRepository(Article)
     private articlesRepository: Repository<Article>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+    @InjectRepository(Authcode)
+    private authcodesRepository: Repository<Authcode>,
+    @InjectRepository(Column)
+    private columnsRepository: Repository<Column>,
     private readonly fileService: UploadfileService,
-    private readonly userService: UserService
+    private readonly configService: ConfigService,
+    // private readonly userService: UserService
   ) {}
 
   /** 查询文章版本是否存在 */
@@ -21,11 +40,18 @@ export class ArticleService {
     return this.articlesRepository.existsBy({ editionId })
   }
 
-  create(dto: CreateArticleDto, userId: string, fromEditionId: string) {
+  async create(dto: CreateArticleDto, userId: string, fromEditionId: string) {
     const { UID, isParsed, editorVersion, authcodeId, penname, email, blog, msg, type, title, abbrev, content, audio } =
       dto
     try {
-      const article = {
+      const user = await this.usersRepository.findOneBy({ id: userId })
+      if (!user) throw new Error('用户不存在！')
+      const authcode = await this.authcodesRepository.findOneBy({ id: authcodeId })
+      if (!user) throw new Error('授权不存在！')
+      const article = new Article()
+      article.user = user
+      article.authcode = authcode
+      const data = {
         isParsed,
         editionId: !fromEditionId ? UUID.v4() : null,
         fromEditionId: fromEditionId ? fromEditionId : null,
@@ -37,221 +63,182 @@ export class ArticleService {
         abbrev,
         content,
         audio,
+        penname,
+        email,
         author: {
           penname,
           email,
           blog
         },
-        createAt: new Date(),
-        updateAt: new Date(),
         userId,
         UID
       }
+      const entity = Object.assign(article, data)
+      return this.articlesRepository.save(entity)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async parse(dto: ParseArticleDto, userId: string, UID: string) {
+    try {
+      const {
+        id,
+        cover,
+        content,
+        duration,
+        promoterSequence,
+        keyframeSequence,
+        subtitleSequence,
+        subtitleKeyframeSequence
+      } = dto
+      const article = await this.articlesRepository.findOneBy({id})
+      if (!article) {
+        throw new Error('文章不存在！')
+      }
+      let filepath = ''
+      if (article.type === 'course' && article.audio) {
+        filepath = await this.fileService.saveAudio(
+          {
+            sourcePath: article.audio,
+            extname: path.extname(article.audio),
+            dirname: UID
+          },
+          userId
+        )
+        // console.log(filepath)
+      }
+      const text = content.replace(/<[^>]+>/g, '')
+      article.isParsed = true
+      article.cover = cover
+      article.content = content
+      article.audio = filepath
+      article.abbrev = text.slice(0, 100)
+      article.detail = {
+        duration: duration,
+        wordage: text.length,
+        fileSize: 0
+      }
+      article.promoterSequence = promoterSequence
+      article.keyframeSequence = keyframeSequence
+      article.subtitleSequence = subtitleSequence
+      article.subtitleKeyframeSequence = subtitleKeyframeSequence
+
       return this.articlesRepository.save(article)
     } catch (error) {
       throw error
     }
   }
 
-  // async parse(dto: ParseArticleDto, userId: string, UID: string) {
-  //   try {
-  //     const {
-  //       _id,
-  //       cover,
-  //       content,
-  //       duration,
-  //       promoterSequence,
-  //       keyframeSequence,
-  //       subtitleSequence,
-  //       subtitleKeyframeSequence
-  //     } = dto
-  //     const article = await this.articlesRepository.findOneBy(_id)
-  //     if (!article) {
-  //       throw new Error('文章不存在！')
-  //     }
-  //     let filepath = ''
-  //     if (article.type === 'course' && article.audio) {
-  //       filepath = await this.fileService.saveAudio(
-  //         {
-  //           sourcePath: article.audio,
-  //           extname: path.extname(article.audio),
-  //           dirname: UID
-  //         },
-  //         userId
-  //       )
-  //       // console.log(filepath)
-  //     }
-  //     const result = await this.articlesRepository.updateOne(
-  //       { _id },
-  //       {
-  //         $set: {
-  //           isParsed: true,
-  //           cover,
-  //           content,
-  //           audio: filepath,
-  //           abbrev: content.replace(/<[^>]+>/g, '').slice(0, 100),
-  //           'detail.duration': duration,
-  //           'detail.wordage': content.replace(/<[^>]+>/g, '').length,
-  //           promoterSequence,
-  //           keyframeSequence,
-  //           subtitleSequence,
-  //           subtitleKeyframeSequence
-  //         }
-  //       }
-  //     )
-  //     // console.log(result)
-  //     return result.acknowledged
-  //   } catch (error) {
-  //     throw error
-  //   }
-  // }
+  findOne(id: string, userId: string) {
+    return this.articlesRepository.findOneBy({ id, userId })
+  }
 
-  // findOne(_id: string, userId: string) {
-  //   return this.articlesRepository.findOne({ _id, userId })
-  // }
+  async find(options: IPaginationOptions, filter: ArticleFilter, userId: string) {
+    // console.log(filter)
+    try {
+      const result = await paginate<Article>(this.articlesRepository, options, {
+        where: { ...filter, userId },
+        relations: ['authcode', 'column'],
+        select: [
+          'id',
+          'UID',
+          'editionId',
+          'fromEditionId',
+          'authcodeId',
+          'columnId',
+          'isParsed',
+          'title',
+          'msg',
+          'editorVersion',
+          'type',
+          'abbrev',
+          'author',
+          'createAt',
+          'updateAt'
+        ]
+      })
+      return result
+    } catch (error) {
+      throw error
+    }
+  }
 
-  // async find(dto: GetArticleDto, userId: string) {
-  //   const { filter, limit, page, sort } = dto
-  //   // console.log(filter)
-  //   const result = await this.articlesRepository.paginate(
-  //     { ...filter, userId },
-  //     {
-  //       projection: {
-  //         _id: 1,
-  //         UID: 1,
-  //         editionId: 1,
-  //         fromEditionId: 1,
-  //         authcodeId: 1,
-  //         columnId: 1,
-  //         isParsed: 1,
-  //         title: 1,
-  //         msg: 1,
-  //         editorVersion: 1,
-  //         type: 1,
-  //         abbrev: 1,
-  //         author: 1,
-  //         createAt: 1,
-  //         updateAt: 1
-  //       },
-  //       populate: ['authcodeId', 'columnId'],
-  //       limit: limit || 10,
-  //       page: page || 1,
-  //       sort
-  //     }
-  //   )
-  //   result.docs = result.docs.map(artilce => {
-  //     const { authcodeId, columnId, ...members } = artilce.toJSON()
-  //     // console.log(columnId)
-  //     return {
-  //       ...members,
-  //       authcode: artilce.authcodeId,
-  //       authcodeId: (authcodeId as unknown as any)['_id'],
-  //       column: columnId || null,
-  //       columnId: (columnId as unknown as any)?.['_id'] || null
-  //     }
-  //   }) as any[]
-  //   // console.log(result.docs)
-  //   return result
-  // }
+  async getUnparsedFile(id: string) {
+    try {
+      const article = await this.articlesRepository.findOneBy({id})
+      if (article && !article.isParsed) {
+        const filepath = article.content
+        if (fs.existsSync(filepath)) {
+          const file = fs.readFileSync(filepath)
+          return file
+        } else {
+          throw new Error('目标文件不存在！')
+        }
+      } else {
+        throw new Error('目标项目不存在！')
+      }
+    } catch (error) {
+      throw error
+    }
+  }
 
-  // async getUnparsedFile(_id: string) {
-  //   try {
-  //     const article = await this.articlesRepository.findById(_id)
-  //     if (article && !article.isParsed) {
-  //       const filepath = article.content
-  //       if (fs.existsSync(filepath)) {
-  //         const file = fs.readFileSync(filepath)
-  //         return file
-  //       } else {
-  //         throw new Error('目标文件不存在！')
-  //       }
-  //     } else {
-  //       throw new Error('目标项目不存在！')
-  //     }
-  //   } catch (error) {
-  //     throw error
-  //   }
-  // }
+  async allot(id: string, columnId: string, userId: string) {
+    try {
+      const article = await this.articlesRepository.findOneBy({ id, userId })
+      const column = await this.columnsRepository.findOneBy({ id: columnId })
+      article.column = column 
+      article.columnId = columnId
+      const result = await this.articlesRepository.save(article)
+      return result
+    } catch (error) {
+      throw error
+    }
+  }
 
-  // async allot(_id: string, columnId: string, userId: string) {
-  //   try {
-  //     const result = await this.articlesRepository.updateOne({ _id, userId }, { $set: { columnId } })
-  //     return result.acknowledged
-  //   } catch (error) {
-  //     throw error
-  //   }
-  // }
+  async get(id: string) {
+    try {
+      const article = await this.articlesRepository.findOne({
+        where: { id, removed: RemovedEnum.NEVER, isParsed: true },
+        select: {
+          editionId: false,
+          fromEditionId: false,
+          msg: false,
+          removed: false
+        },
+        relations: ['user']
+      })
+      if (!article) throw new Error('文章不存在！')
+      const prefix = this.configService.get('common.staticPrefix')
+      article.author.avatar = article.author.avatar ? prefix + article.author.avatar.split(prefix)[1] : ''
+      return article
+    } catch (error) {
+      throw error
+    }
+  }
 
-  // async get(_id: string) {
-  //   try {
-  //     const article = await this.articlesRepository.findOne(
-  //       { _id, removed: RemovedEnum.NEVER, isParsed: true },
-  //       {
-  //         editionId: 0,
-  //         fromEditionId: 0,
-  //         msg: 0,
-  //         removed: 0
-  //       },
-  //       {
-  //         populate: ['userId']
-  //       }
-  //     )
-  //     if (!article) throw new Error('文章不存在！')
-  //     const { userId, ...meta } = article.toJSON()
-  //     const data = Object.assign({}, meta) as any
-  //     const user = userId as unknown as UserSchema
-  //     const userinfo: ArticleUserInfo = {
-  //       UID: user.UID,
-  //       nickname: user.nickname,
-  //       avatar: user.avatar ? user.avatar.split('public')[1] : ''
-  //     }
-  //     data['user'] = userinfo
-  //     // console.log(data)
-  //     return data
-  //   } catch (error) {
-  //     throw error
-  //   }
-  // }
-
-  // async getAll(UID: string, limit?: number, page?: number, sort?: any) {
-  //   try {
-  //     const result = await this.articlesRepository.paginate(
-  //       { UID: UID, isParsed: true, removed: RemovedEnum.NEVER },
-  //       {
-  //         projection: {
-  //           _id: 1,
-  //           columnId: 1,
-  //           cover: 1,
-  //           title: 1,
-  //           abbrev: 1,
-  //           detail: 1,
-  //           author: 1,
-  //           meta: 1,
-  //           tags: 1,
-  //           createdAt: 1,
-  //           updatedAt: 1
-  //         },
-  //         populate: ['columnId'],
-  //         limit: limit || 10,
-  //         page: page || 1,
-  //         sort
-  //       }
-  //     )
-  //     result.docs = result.docs.map(artilce => {
-  //       const { columnId, ...members } = artilce.toJSON()
-  //       // console.log(columnId)
-  //       return {
-  //         ...members,
-  //         column: (columnId as unknown as ColumnSchema) || null,
-  //         columnId: (columnId as unknown as any)?.['_id'] || null
-  //       }
-  //     }) as any[]
-  //     // console.log(result.docs[0])
-  //     // TODO 1. 文章要isPublish true 才能显示，同时要过滤 column 也要 isPublish true， 非所有文章都有 column , 所以要进行判断 当且仅当 column 存在且 isPublish 为 false 时将其过滤
-  //     // .filter(article => article.column.isPublish) as any[]
-  //     return result.docs
-  //   } catch (error) {
-  //     throw error
-  //   }
-  // }
+  async getAll(options: IPaginationOptions, filter: ArticleFilter) {
+    try {
+      const result = await paginate<Article>(this.articlesRepository, options, {
+        where: { ...filter },
+        relations: ['column'],
+        select: {
+          id: true,
+          columnId: true,
+          cover: true,
+          title: true,
+          abbrev: true,
+          detail: { wordage: true, duration: true, fileSize: true },
+          author: { penname: true, avatar: true, email: true, blog: true },
+          meta: { views: true, likes: true, collections: true, comments: true },
+          tags: true,
+          createAt: true,
+          updateAt: true
+        }
+      })
+      return result
+    } catch (error) {
+      throw error
+    }
+  }
 }

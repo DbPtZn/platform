@@ -5,7 +5,7 @@ import { Entity, ObjectId, Column as Col, CreateDateColumn, UpdateDateColumn, Af
 
 @Entity()
 export class Column {
-  @PrimaryGeneratedColumn('uuid') id: ObjectId
+  @PrimaryGeneratedColumn('uuid') id: string
 
   @Col('uuid') userId: string
   @ManyToOne(() => User, user => user.columns)

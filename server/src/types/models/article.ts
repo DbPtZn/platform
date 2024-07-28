@@ -51,8 +51,8 @@ export type ArticleCard = Omit<
   'content' | 'promoterSequence' | 'keyframeSequence' | 'subtitleSequence' | 'subtitleKeyframeSequence' | 'removed' | 'author' | 'detail' | 'meta'
 >
 
-export type ArticleType = Omit<ArticleSchema, '_id' | 'userId' | 'authcodeId' | 'columnId' | 'removed' | 'createAt' | 'updateAt'> & {
-  _id: string
+export type ArticleType = Omit<ArticleSchema, 'id' | 'userId' | 'authcodeId' | 'columnId' | 'removed' | 'createAt' | 'updateAt'> & {
+  id: string
   userId: string
   authcodeId: string
   columnId: string
@@ -60,16 +60,16 @@ export type ArticleType = Omit<ArticleSchema, '_id' | 'userId' | 'authcodeId' | 
   updateAt: string
 }
 
-export type PublicArticleType = Omit<ArticleSchema, '_id' | 'userId' | 'authcodeId' | 'columnId' | 'removed' | 'createAt' | 'updateAt'> & {
-  _id: string
+export type PublicArticleType = Omit<ArticleSchema, 'id' | 'userId' | 'authcodeId' | 'columnId' | 'removed' | 'createAt' | 'updateAt'> & {
+  id: string
   user: ArticleUserInfo
   columnId: string
   createAt: string
   updateAt: string
 }
 
-export type ArticleFilter = Omit<ArticleSchema, '_id' | 'userId' | 'authcodeId' | 'columnId' | 'createAt' | 'updateAt'> & {
-  _id: string
+export type ArticleFilter = Omit<ArticleSchema, 'id' | 'userId' | 'authcodeId' | 'columnId' | 'createAt' | 'updateAt'> & {
+  id: string
   userId: string
   authcodeId: string
   columnId: string
@@ -79,7 +79,7 @@ export type ArticleFilter = Omit<ArticleSchema, '_id' | 'userId' | 'authcodeId' 
 
 export type Subfile = Pick<
   ArticleType,
-  | '_id'
+  | 'id'
   | 'UID'
   | 'editionId'
   | 'fromEditionId'
@@ -99,7 +99,7 @@ export type Subfile = Pick<
 
 export type Submission = Pick<
   ArticleType,
-  | '_id'
+  | 'id'
   | 'UID'
   | 'editionId'
   | 'fromEditionId'
@@ -143,7 +143,7 @@ export type ArticleListItem = Omit<
 
 
 
-// _id: '',
+// id: '',
 // UID: '',
 // editionId: '',
 // fromEditionId: '',
