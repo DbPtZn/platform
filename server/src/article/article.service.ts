@@ -134,7 +134,7 @@ export class ArticleService {
     return this.articlesRepository.findOneBy({ id, userId })
   }
 
-  async find(options: IPaginationOptions, filter: ArticleFilter, userId: string) {
+  async find(options: IPaginationOptions, filter: Partial<ArticleFilter>, userId: string) {
     // console.log(filter)
     try {
       const result = await paginate<Article>(this.articlesRepository, options, {
@@ -217,7 +217,7 @@ export class ArticleService {
     }
   }
 
-  async getAll(options: IPaginationOptions, filter: ArticleFilter) {
+  async getAll(options: IPaginationOptions, filter: Partial<ArticleFilter>) {
     try {
       const result = await paginate<Article>(this.articlesRepository, options, {
         where: { ...filter },

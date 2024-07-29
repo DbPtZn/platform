@@ -20,4 +20,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src') // 路径别名
     }
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: "@use '@/assets/styles/var.scss' as *;"
+      }
+    }
+  },
 })

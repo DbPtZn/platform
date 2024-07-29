@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-// import { ManageView } from '@/views'
+import { Manage } from '@/views'
 </script>
 
 <template>
   <div class="main-page">
-    <!-- <ManageView /> -->
+    <ManageView />
   </div>
 </template>
 
