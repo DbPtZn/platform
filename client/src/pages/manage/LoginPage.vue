@@ -4,7 +4,7 @@ import { Login } from '@/views'
 
 <template>
   <div class="login-page" draggable="false">
-    <LoginView />
+    <Login />
   </div>
 </template>
 

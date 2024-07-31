@@ -18,8 +18,8 @@ export interface UserSchema {
     sizeLimit: number
   }
   columnSequence: string[]
-  createAt: Date
-  updateAt: Date
+  createAt: string
+  updateAt: string
 }
 
 

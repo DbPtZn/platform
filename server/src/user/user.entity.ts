@@ -28,12 +28,44 @@ export class User {
   @OneToMany(() => UploadFile, file => file.user)
   files: UploadFile[]
 
-  @Column('varchar') UID: string
-  @Column('varchar') account: string
-  @Exclude() @Column('varchar') encryptedPassword: string
-  @Column('varchar') nickname: string
-  @Column('varchar') avatar: string
-  @Column('varchar') desc: string
+  @Column({
+    type: 'varchar',
+    unique: true,
+    length: 24
+  })
+  UID: string
+  
+  @Column({
+    type: 'varchar',
+    unique: true,
+    length: 32
+  })
+  account: string
+
+  @Exclude() 
+  @Column({
+    type: 'varchar',
+    length: 64
+  })
+  encryptedPassword: string
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  nickname: string
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  avatar: string
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  desc: string
 
   @Column({
     type: 'simple-json',

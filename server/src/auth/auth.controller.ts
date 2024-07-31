@@ -9,7 +9,7 @@ import { LoginDto } from './dto/login.dto'
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post(`${REST.W}/register`)
+  @Post(`/register`)
   register(@Body() createUserDto: CreateUserDto, @Res() res) {
     try {
       // console.log(createUserDto)
@@ -30,7 +30,7 @@ export class AuthController {
   /** 登录请求 */
   // @UseGuards(AuthGuard('local'))
   @UseGuards(LocalAuthGuard)
-  @Post(`${REST.R}/login`)
+  @Post(`/login`)
   async login(@Body() loginDto: LoginDto, @Req() req, @Res() res) {
     // console.log(loginDto)
     // console.log('验证码：' + this.authService.validateCode(loginDto.code, loginDto.hashCode))

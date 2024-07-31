@@ -7,8 +7,8 @@ import managerRoutes from './manage'
 // import errorRoutes from './error'
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '',
-    redirect: { name: RouteNameEnum.MANAGE },
+    path: '/',
+    redirect: { name: RouteNameEnum.BLOG },
   },
   ...managerRoutes,
   ...bloggerRoutes

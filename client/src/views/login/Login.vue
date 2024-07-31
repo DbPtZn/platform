@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import useStore from '@/store';
 import { useMessage, useThemeVars, FormRules, FormItemRule } from 'naive-ui'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -9,12 +10,13 @@ interface ModelType {
 const router = useRouter()
 const message = useMessage()
 const themeVars = useThemeVars()
+const { userStore } = useStore('manage')
 const formRef = ref()
 const model = ref<ModelType>({
   account: '261849747@qq.com',
   password: 'dbx5201314',
 })
-const rules: any = {
+const rules: FormRules = {
   account: [
     {
       required: true,
@@ -40,39 +42,15 @@ function handleLogin() {
 const submit = () => {
   formRef.value?.validate(async (errors: any) => {
     if (!errors) {
-      // 先判断是否已经登录
-      // try {
-      //   const accessToken = await $fetch('/api/auth/login', {
-      //     method: 'post',
-      //     body: {
-      //       account: model.value.account,
-      //       password: model.value.password
-      //     }
-      //   })
-      //   if (!accessToken) {
-      //     message.error('账号或密码错误！')
-      //     return
-      //   }
-      //   console.log(accessToken)
-      //   const accessTokenCookie = useCookie('Authorization',{ maxAge: 60*60*24 })
-      //   accessTokenCookie.value = `Bearer ${accessToken}`
-      //   // localStorage.setItem('accessToken', accessToken)
-      //   router.push('/manage')
-      // } catch (error) {
-      //   console.log(error)
-      //   message.error('登录失败！')
-      // }
-   
-      // userStore.login({
-      //   account: model.value.account,
-      //   password: model.value.password,
-      // }, model.value.hostname).then((res) => {
-        
-      //   message.success('登录成功')
-      // }).catch(err => {
-      //   console.log(err)
-      //   message.error('登录失败！')
-      // })
+      userStore.login({
+        account: model.value.account,
+        password: model.value.password,
+      }).then((res) => {
+        message.success('登录成功')
+      }).catch(err => {
+        console.log(err)
+        message.error('登录失败！')
+      })
     } else {
       message.error('表单校验失败！')
       console.log(errors)

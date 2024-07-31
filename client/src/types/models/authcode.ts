@@ -7,8 +7,8 @@ export interface AuthCode {
   code: string
   desc: string
   disabled: boolean
-  createAt: Date
-  updateAt: Date
+  createAt: string
+  updateAt: string
 }
 
 // export type AuthCodeType = Omit<

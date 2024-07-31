@@ -11,8 +11,8 @@ export interface Column {
   desc: string
   isPublish: boolean
   removed: RemovedEnum
-  createAt: Date
-  updateAt: Date
+  createAt: string
+  updateAt: string
 }
 
 export type ColumnType = Omit<Column, 'id' | 'userId' | 'removed' | 'createAt' | 'updateAt'> & {

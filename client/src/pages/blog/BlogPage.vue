@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { BlogView } from '@/views'
+// import { BlogView } from '@/views'
 </script>
 
 <template>
   <div class="blogger-page">
-    <BlogView />
+    blog
+    <!-- <BlogView /> -->
   </div>
 </template>
 

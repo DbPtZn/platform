@@ -26,6 +26,13 @@
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true,
 
+    "esModuleInterop": true,
+    // "sourceMap": true,
+    // "jsx": "react-jsx",
+    // "jsxImportSource": "@textbus/core",
+    // "experimentalDecorators": true,
+    // "downlevelIteration": true,
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],

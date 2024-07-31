@@ -9,6 +9,6 @@ export interface UploadFileSchema {
   size: number
   md5: string
   path: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
 }

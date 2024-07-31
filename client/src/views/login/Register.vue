@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import useStore from '@/store'
 import { useMessage, useThemeVars, FormInst, FormItemRule, FormRules } from 'naive-ui'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -11,6 +12,7 @@ const router = useRouter()
 const formRef = ref()
 const message = useMessage()
 const themeVars = useThemeVars()
+const { userStore } = useStore('manage')
 /** 表单数据 */
 const model = ref<ModelType>({
   nickname: 'dbx',
@@ -18,7 +20,7 @@ const model = ref<ModelType>({
   password: 'dbx5201314'
 })
 /** 表单规则 */
-const rules = {
+const rules: FormRules = {
   nickname: [
     {
       required: true,
@@ -50,7 +52,7 @@ const rules = {
       message: '密码长度应该在8~24个字符之间',
       trigger: 'blur',
       validator: (rule: any, value: string) => {
-        return value.length >= 8 && value.length <= 24 
+        return value.length >= 8 && value.length <= 24
       }
     }
   ]
@@ -71,30 +73,23 @@ function handleRegister(e: MouseEvent) {
   e.preventDefault()
   formRef.value?.validate((errors: any) => {
     if (!errors) {
-      // $fetch('/api/auth/register', {
-      //     method: 'post',
-      //     body: {
-      //       account: model.value.account,
-      //       password: model.value.password,
-      //       nickname: model.value.nickname
-      //     }
-      //   })
-      //   .then(res => {
-      //     console.log(res)
-      //     if(res.msg) {
-      //       router.push('./login')
-      //     }
-      //     // if(res.status?.value !== 'error') {
-      //     //   router.push('./login')
-      //     // } else {
-      //     //   console.log(res.error?.value)
-      //     //   message.error('注册失败！')
-      //     // }
-      //   })
-      //   .catch(err => {
-      //     console.log(err)
-      //     message.error('注册失败！')
-      //   })
+      userStore
+        .register({
+          account: model.value.account,
+          password: model.value.password,
+          nickname: model.value.nickname
+        })
+        .then(res => {
+          message.success('注册成功！')
+          console.log(res)
+          if (res) {
+            router.push('./login')
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          message.error('注册失败！')
+        })
     } else {
       message.error('表单校验失败！')
       console.log(errors)

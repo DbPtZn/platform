@@ -6,7 +6,7 @@ import RootPage from './pages/RootPage.vue'
   <RootPage />
 </template>
 
-<style scoped>
+<style>
 html {
   height: 100%;
   width: 100%;

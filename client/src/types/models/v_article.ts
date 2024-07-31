@@ -39,8 +39,8 @@ export interface VArticleSchema {
     collections: number
     comments: number
   }
-  createAt: Date
-  updateAt: Date
+  createAt: string
+  updateAt: string
 }
 
 export type VArticleCard = Omit<

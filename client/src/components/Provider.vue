@@ -4,7 +4,7 @@ import { darkTheme, lightTheme } from 'naive-ui'
 const { settingStore } = useStore()
 </script>
 <template>
-  <n-config-provider :theme="settingStore.theme" :theme-overrides="settingStore.theme === 'dark' ? darkTheme : lightTheme">
+  <n-config-provider :theme="settingStore.theme === 'dark' ? darkTheme : lightTheme">
     <n-dialog-provider>
       <n-message-provider>
         <slot />

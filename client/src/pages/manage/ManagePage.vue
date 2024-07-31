@@ -4,7 +4,7 @@ import { Manage } from '@/views'
 
 <template>
   <div class="main-page">
-    <ManageView />
+    <Manage />
   </div>
 </template>
 

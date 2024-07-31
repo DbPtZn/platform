@@ -11,7 +11,7 @@ import { useParser } from './hooks/useParser'
 // import type { AllotArticleDto, ParseArticleDto } from '@/dto'
 import { RemovedEnum } from '@/enums'
 import { useRouter } from 'vue-router'
-import Icon from '@iconify/vue'
+import * as Icon from '@iconify/vue'
 type Model = Submission
 const { userStore, submissionStore, columnListStore } = useStore('manage')
 const message = useMessage()
