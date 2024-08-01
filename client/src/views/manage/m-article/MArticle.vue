@@ -118,7 +118,6 @@ onUnmounted(() => {
 <template>
   <div class="product" ref="rootRef">
     <div class="product-wrapper" :bordered="false">
-      <Client-only>
         <div ref="scrollerRef" class="product-scroller">
           <!-- 文章头部 -->
           <div class="product-header">
@@ -142,7 +141,6 @@ onUnmounted(() => {
           </div>
           <n-divider class="product-footer-divider" dashed />
         </div>
-      </Client-only>
     </div>
     <div v-show="state.type === 'course'" ref="controllerRef" :class="['controller']"></div>
   </div>

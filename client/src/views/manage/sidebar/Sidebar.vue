@@ -167,14 +167,14 @@ function handleColumnClick(column: Column) {
     <div class="sidebar">
       <n-space class="wrapper" :vertical="true" size="large">
         <n-space class="btn-group" :vertical="true" size="large">
-          <Nuxt-link to="/manage/auth">
+          <router-link class="collapse-item" to="/manage/auth">
             <n-button class="collapse-item-btn" size="large" quaternary block>
                 <n-space align="center">
                   <Icon icon="hugeicons:authorized" :size="'24'" />
                   <span>授权管理</span>
                 </n-space>
             </n-button>
-          </Nuxt-link>
+          </router-link>
           <!-- 布局管理 -->
           <!-- <n-button class="collapse-item-btn" size="large" quaternary block disabled>
             <n-space align="center">
@@ -183,7 +183,7 @@ function handleColumnClick(column: Column) {
             </n-space>
           </n-button> -->
           <!-- 稿件管理 -->
-          <Nuxt-link to="/manage/submission">
+          <router-link class="collapse-item" to="/manage/submission">
             <n-button 
               class="collapse-item-btn"
               size="large" 
@@ -200,7 +200,7 @@ function handleColumnClick(column: Column) {
                 <span>稿件管理</span>
               </n-space>
             </n-button>
-          </Nuxt-link>
+          </router-link>
         </n-space>
         <!-- 折叠面板项 -->
         <n-collapse class="collapse-wrapper" :expanded-names="expandedNames" @update:expanded-names="handleExpandedNamesChange">
@@ -284,6 +284,7 @@ function handleColumnClick(column: Column) {
   user-select: none;
   .collapse-item-btn {
     font-size: 18px;
+    border-radius: 0;
   }
   .collapse-item-icon {
     transition: opacity 0.3s ease-in-out;

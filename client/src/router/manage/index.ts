@@ -6,17 +6,34 @@ const managerRoutes: Array<RouteRecordRaw> = [
   {
     path: RoutePathEnum.MANAGE,
     name: RouteNameEnum.MANAGE,
-    component: () => import(/* webpackChunkName: "about" */ '@/pages/manage/ManagePage.vue'),
-  },
-  {
-    path: RoutePathEnum.DEFAULT,
-    name: RouteNameEnum.DEFAULT,
-    component: () =>  import(/* webpackChunkName: "about" */ '@/pages/manage/DefaultPage.vue'),
+    component: () => import(/* webpackChunkName: "about" */ '@/views/manage/Manage.vue'),
+    children: [
+      {
+        path: '',
+        name: 'default',
+        component: () => import(/* webpackChunkName: "about" */ '@/pages/manage/DefaultPage.vue')
+      },
+      {
+        path: 'auth',
+        name: 'auth',
+        component: () => import(/* webpackChunkName: "about" */ '@/views/manage/authcode/Authcode.vue')
+      },
+      {
+        path: 'article',
+        name: 'article',
+        component: () => import(/* webpackChunkName: "about" */ '@/views/manage/m-article/MArticle.vue')
+      },
+      {
+        path: 'submission',
+        name: 'submission',
+        component: () => import(/* webpackChunkName: "about" */ '@/views/manage/submission/Submission.vue')
+      },
+    ]
   },
   {
     path: RoutePathEnum.LOGIN,
     name: RouteNameEnum.LOGIN,
-    component: () => import(/* webpackChunkName: "about" */ '@/pages/manage/LoginPage.vue'),
+    component: () => import(/* webpackChunkName: "about" */ '@/views/login/Login.vue'),
     // 访问该路由之前执行：
     beforeEnter(to, from, next) {
       const token = sessionStorage.getItem('managerToken')
@@ -26,7 +43,7 @@ const managerRoutes: Array<RouteRecordRaw> = [
   {
     path: RoutePathEnum.REGISTER,
     name: RouteNameEnum.REGISTER,
-    component: () => import(/* webpackChunkName: "about" */ '@/pages/manage/RegisterPage.vue'),
+    component: () => import(/* webpackChunkName: "about" */ '@/views/login/Register.vue'),
   },
 ].map((route, index, arr) => {
   if (![RouteNameEnum.REGISTER, RouteNameEnum.LOGIN].includes(route.name)) {

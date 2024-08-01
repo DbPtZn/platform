@@ -4,7 +4,7 @@
 
 <template>
   <div class="default-page">
-    default
+    
   </div>
 </template>
 

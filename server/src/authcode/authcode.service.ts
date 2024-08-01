@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Patch } from '@nestjs/common'
 import { CreateAuthcodeDto } from './dto/create-authcode.dto'
 import { Authcode } from './authcode.entity'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -15,7 +15,7 @@ export class AuthcodeService {
 
   add(userId: string) {
     try {
-      return this.authcodesRepository.create({
+      return this.authcodesRepository.save({
         userId: userId,
         name: '',
         code: '',
@@ -28,7 +28,7 @@ export class AuthcodeService {
 
   findAll(userId: string) {
     try {
-      return this.authcodesRepository.findOneBy({ userId: userId })
+      return this.authcodesRepository.findBy({ userId: userId })
     } catch (error) {
       throw error
     }

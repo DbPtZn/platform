@@ -50,13 +50,17 @@ export const useUserStore = defineStore('userStore', {
     },
     fetch() {
       return manageApi.user.get<UserState>()
-      // return $fetch<UserState>('/api/user/info').then(data => {
-      //   // console.log(data)
-      //   this.set(data)
-      // })
     },
     set(data: UserState) {
       this.$patch(data)
+    },
+    fetchAndSet() {
+      this.fetch().then(res => {
+        const data = res.data
+        if (data) {
+          this.set(data)
+        }
+      })
     },
     updateColumnSequence(oldIndex: number, newIndex: number, columnId: string) {
       // this.columnSequence.splice(oldIndex, 1)
@@ -65,6 +69,13 @@ export const useUserStore = defineStore('userStore', {
       //   method: 'POST',
       //   body: { sequence: this.columnSequence }
       // })
+    },
+    updateReceiverStatus(status: 0 | 1 | 2) {
+      return manageApi.user.updateReceiverStatus(status).then(res => {
+        if (res.data) {
+          this.receiverConfig.status = status
+        }
+      })
     }
   },
   getters: {}

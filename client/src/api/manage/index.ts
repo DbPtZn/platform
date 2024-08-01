@@ -8,17 +8,12 @@ import axios, { AxiosResponse } from 'axios'
 
 // 为该用户创建请求体实例
 export const maxios = axios.create()
-
+// console.log(import.meta.env.VITE_BASE_URL)
+maxios.defaults.baseURL = import.meta.env.VITE_BASE_URL
 maxios.interceptors.request.use(config => {
   if (!config?.headers) {
     throw new Error(`Expected 'config' and 'config.headers' not to be undefined`)
   }
-  // console.log('manager axios')
-  // if (!config.baseURL) {
-  //   const hostname = sessionStorage.getItem('hostname') || ''
-  //   config.baseURL = hostname
-  // }
-
   if (!config.headers.get('Authorization')) {
     const managerToken = sessionStorage.getItem('managerToken') || ''
     if (managerToken) {

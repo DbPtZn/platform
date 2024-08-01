@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { RoutePathEnum } from '@/enums';
 import useStore from '@/store';
 import { useMessage, useThemeVars, FormRules, FormItemRule } from 'naive-ui'
 import { ref } from 'vue'
@@ -47,6 +48,7 @@ const submit = () => {
         password: model.value.password,
       }).then((res) => {
         message.success('登录成功')
+        router.push(RoutePathEnum.MANAGE)
       }).catch(err => {
         console.log(err)
         message.error('登录失败！')

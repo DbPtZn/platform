@@ -6,37 +6,34 @@ import ShowOrSelect from './private/ShowOrSelect.vue'
 import DateDisplay from './private/DateDisplay.vue'
 import CancelBtn from './private/CancelBtn.vue'
 import _ from 'lodash'
-// import dayjs from 'dayjs'
+import dayjs from 'dayjs'
 import { Component, h, nextTick, onMounted, reactive, ref } from 'vue'
 import { computed } from 'vue'
-import type { AuthCode, UserType } from '@/types'
+import type { AuthCode } from '@/types'
 import { Icon } from '@iconify/vue'
 import useStore from '@/store'
+import { manageApi } from '@/api'
 
 type Model = AuthCode
 const { userStore } = useStore('manage')
 const message = useMessage()
 const dialog = useDialog()
 const themeVars = useThemeVars()
-// const user = ref<UserType>()
-// onMounted(() => {
-//   console.log(JSON.parse(localStorage.getItem('userInfo')!))
-//   user.value = JSON.parse(localStorage.getItem('userInfo')!)
-//   console.log(user)
-// })
 const data = ref<AuthCode[]>([])
-// useFetch<AuthCode[]>('/api/manage/authcode/getAll').then(res => {
-//   // console.log(res)
-//   if(res.data.value) data.value = res.data.value
-// })
+
+/** 载入数据 */
+onMounted(() => {
+  manageApi.authcode.getAll<AuthCode[]>().then(res => {
+    // console.log(res.data)
+    data.value = res.data
+  })
+})
 
 let editData = ref<Model | null>(null)
-
-const renderIcon = (component: Component | string) => {
+const renderIcon = (component: string) => {
   if (typeof component === 'string') {
     return h(Icon, { icon: component })
   }
-  return h(NIcon, { component: component, size: 24 })
 }
 const handleEdit = (row: Model) => {
   if (editData.value && editData.value.id !== row.id) {
@@ -44,33 +41,28 @@ const handleEdit = (row: Model) => {
     return
   }
   if (!editData.value || editData.value.id !== row.id) {
-    console.log(editData)
+    // console.log(editData)
     editData.value = Object.assign({}, row)
   } else {
     if (_.isEqual(editData, row)) {
       editData.value = null
       return
     }
-    // $fetch<AuthCode>('/api/manage/authcode/update', {
-    //   method: 'POST',
-    //   body: editData.value
-    // }).then(res => {
-    //   // console.log(res)
-    //   data.value.some((item, index, arr) => {
-    //     if (item.id === res.id) {
-    //       arr[index].name = res.name
-    //       arr[index].code = res.code
-    //       arr[index].desc = res.desc
-    //       arr[index].disabled = res.disabled
-    //       arr[index].updateAt = res.updateAt
-    //       return true
-    //     }
-    //   })
-    //   editData.value = null
-    // }).catch(err => {
-    //   message.error('保存失败,可能该授权码已存在!')
-    //   if (editData.value) editData.value = null
-    // })
+    manageApi.authcode.update<AuthCode>(editData.value).then(res => {
+      // console.log(res)
+      data.value.some((item, index, arr) => {
+        if (item.id === res.data.id) {
+          arr[index].name = res.data.name
+          arr[index].code = res.data.code
+          arr[index].desc = res.data.desc
+          arr[index].disabled =res.data.disabled
+        }
+      })
+      editData.value = null
+    }).catch(err => {
+      message.error('保存失败,可能该授权码已存在!')
+      if (editData.value) editData.value = null
+    })
   }
 }
 const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColumns<Model> => {
@@ -123,10 +115,10 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
             editData.value!.desc = v
           }
         })
+      },
+      ellipsis: {
+        tooltip: true
       }
-      // ellipsis: {
-      //   tooltip: true
-      // }
     },
     {
       title: '更新时间',
@@ -228,12 +220,10 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                       positiveText: '确定',
                       negativeText: '取消',
                       onPositiveClick: () => {
-                        // $fetch(`/api/manage/authcode/delete/${row.id}`, {
-                        //   method: 'delete'
-                        // }).then(() => {
-                        //   const index = data.value.findIndex(item => item.id === row.id)
-                        //   data.value.splice(index, 1)
-                        // })
+                        manageApi.authcode.delete(row.id).then(() => {
+                          const index = data.value.findIndex(item => item.id === row.id)
+                          data.value.splice(index, 1)
+                        })
                       },
                       onNegativeClick: () => {
                         message.error('取消')
@@ -243,6 +233,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                 },
                 { default: () => '移除' }
               )
+              // TODO 查询通过该授权投稿的作品
             ]
           }
         )
@@ -272,32 +263,24 @@ const paginationReactive = reactive({
 
 /** 添加 */
 function handleAdd() {
-  // $fetch<AuthCode>('/api/manage/authcode/add').then(res => {
-  //   data.value.push(res)
-  // }).catch(err => {
-  //   message.error(err.response._data.message)
-  // })
+  manageApi.authcode.add<AuthCode>().then(res => {
+    data.value.push(res.data)
+  })
 }
 
 /** 全局配置 */
-// const value = ref(user.receiverStatus)
 const status = [
   { label: '完全开放', value: 0 },
   { label: '启用', value: 1 },
   { label: '禁用', value: 2 }
 ]
 function handleStatusUpdate(value: 0 | 1 | 2) {
-  // $fetch('/api/user/updateReceiver', {
-  //   method: 'post',
-  //   body: {
-  //     status: value
-  //   }
-  // }).then(() => {
-  //   message.success('更新成功')
-  // }).catch(err => {
-  //   console.log(err)
-  //   message.error('更新失败')
-  // })
+  userStore.updateReceiverStatus(value).then(() => {
+    message.success('更新成功')
+  }).catch(err => {
+    console.log(err)
+    message.error('更新失败')
+  })
 }
 
 /** 排序 */
@@ -331,7 +314,6 @@ const rowProps = (row: Model) => {
     style: { height: '59px' },
     onContextmenu: (e: MouseEvent) => {
       targetRow.value = row
-      // message.info(JSON.stringify(row, null, 2))
       e.preventDefault()
       showDropdownRef.value = false
       nextTick().then(() => {
@@ -363,12 +345,10 @@ const options = ref<DropdownOption[]>([
           positiveText: '确定',
           negativeText: '取消',
           onPositiveClick: () => {
-            // targetRow.value && $fetch(`/api/manage/authcode/delete/${targetRow.value?.id}`, {
-            //   method: 'delete'
-            // }).then(() => {
-            //   const index = data.value.findIndex(row => row.id === targetRow.value?.id)
-            //   data.value.splice(index, 1)
-            // })
+            targetRow.value && manageApi.authcode.delete(targetRow.value.id).then(() => {
+              const index = data.value.findIndex(row => row.id === targetRow.value?.id)
+              data.value.splice(index, 1)
+            })
           },
           onNegativeClick: () => {
             message.error('取消')
@@ -396,7 +376,6 @@ const options = ref<DropdownOption[]>([
         </n-flex>
       </div>
       <div class="group" v-show="columnSelect">
-        <ClientOnly>
           <n-checkbox-group v-model:value="cities">
             <n-space item-style="display: flex;">
               <n-checkbox value="name" label="名称" />
@@ -407,7 +386,6 @@ const options = ref<DropdownOption[]>([
               <n-checkbox value="disable" label="状态" />
             </n-space>
           </n-checkbox-group>
-        </ClientOnly>
       </div>
       <div class="group">
         <n-button secondary @click="handleAdd">

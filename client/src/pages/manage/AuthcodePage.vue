@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-
+import { Authcode } from '@/views'
 </script>
 
 <template>
   <div class="default-page">
-    default
+    123
   </div>
 </template>
 

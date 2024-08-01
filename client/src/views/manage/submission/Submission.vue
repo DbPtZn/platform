@@ -440,7 +440,6 @@ function handlePageChange(page: number) {
         </n-flex>
       </div>
       <div class="group" v-show="columnSelect">
-        <ClientOnly>
           <n-checkbox-group v-model:value="cities">
             <n-space item-style="display: flex;">
               <n-checkbox value="type" label="类型" />
@@ -456,7 +455,6 @@ function handlePageChange(page: number) {
               <n-checkbox value="actions" label="操作" />
             </n-space>
           </n-checkbox-group>
-        </ClientOnly>
       </div>
       <div class="group">
         <n-select

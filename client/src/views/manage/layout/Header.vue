@@ -39,7 +39,7 @@ function handleBack() {
     <div class="nav-container">
       <n-page-header class="wrapper">
         <template #title>
-          <nuxt-link to="/">Tapenote</nuxt-link>
+          <router-link to="/">Tapenote</router-link>
         </template>
         <template #avatar>
           <img class="logo" src="/logo.png" />

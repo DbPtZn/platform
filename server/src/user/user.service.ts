@@ -7,11 +7,13 @@ import bcrypt from 'bcryptjs'
 import path from 'path'
 import fs from 'fs'
 import { UpdateColumnSequenceDto } from './dto/updateColumnSequence.dto'
+import { ConfigService } from '@nestjs/config'
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>
+    private usersRepository: Repository<User>,
+    private readonly configService: ConfigService
   ) {}
   /** 创建新用户 */
   async create(createUserDto: CreateUserDto) {
@@ -84,6 +86,8 @@ export class UserService {
       const user = await this.usersRepository.findOne({
         where: { id }
       })
+      const prefix = this.configService.get('common.staticPrefix')
+      user.avatar = user.avatar ? prefix + user.avatar.split(prefix)[1] : ''
       return user
     } catch (error) {
       throw error
