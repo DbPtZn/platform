@@ -42,7 +42,7 @@ export class AuthcodeService {
     }
   }
 
-  findOneByCode(code: string, userId: string) {
+  validateCode(code: string, userId: string) {
     try {
       return this.authcodesRepository.findOneBy({ code, userId })
     } catch (error) {

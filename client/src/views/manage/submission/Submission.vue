@@ -3,7 +3,7 @@ import { NButton, NIcon, NSelect, NSpace, useDialog, useMessage, useThemeVars } 
 import type { DataTableColumns, PaginationInfo } from 'naive-ui'
 import _ from 'lodash'
 import { onMounted, createApp, computed, ref, onUnmounted, h, nextTick } from 'vue'
-import type { Submission } from '@/types'
+import type { ParsedArticleFile, Submission } from '@/types'
 import useStore from '@/store'
 import dayjs from 'dayjs'
 import '@textbus/editor/bundles/textbus.min.css'
@@ -11,7 +11,7 @@ import { useParser } from './hooks/useParser'
 // import type { AllotArticleDto, ParseArticleDto } from '@/dto'
 import { RemovedEnum } from '@/enums'
 import { useRouter } from 'vue-router'
-import * as Icon from '@iconify/vue'
+import { Icon } from '@iconify/vue'
 type Model = Submission
 const { userStore, submissionStore, columnListStore } = useStore('manage')
 const message = useMessage()
@@ -21,39 +21,56 @@ const router = useRouter()
 // const user = ref<UserType>()
 const id = computed(() => router.currentRoute.value.query.id as string)
 const page = computed(() => Number(router.currentRoute.value.query.page))
-const docs = ref<Submission[]>([])
-// const state = reactive({
-//   docs: [] as Submission[],
-//   totalDocs: 2,
-//   limit: 2,
-//   totalPages: 2,
-//   page: 1,
-//   pagingCounter: 2,
-//   hasPrevPage: false,
-//   hasNextPage: false,
-//   prevPage: null,
-//   nextPage: 2,
-
-//   isParsed: 'all'
-// })
+// const docs = computed<Submission[]>(() => submissionStore.items)
 onMounted(() => {
   // 考虑在离开页面的时候在 store 保存当前的状态(分页、id)
   // 返回稿件管理页面时恢复状态
-  // submissionStore.fetch({
-  //   filter: { removed: RemovedEnum.NEVER },
-  //   limit: 2,
-  //   page:  1
-  // }).then(data => docs.value = data)
-  // console.log(submissionStore.docs)
+  console.log(submissionStore.items.length)
+  if(submissionStore.items.length === 0) {
+    submissionStore.fetchAndSet({
+      filter: { removed: RemovedEnum.NEVER },
+      limit: 2,
+      page:  1
+    })
+  }
 })
 onUnmounted(() => {
   console.log('离开')
-  submissionStore.$reset()
+  // submissionStore.$reset()
 })
-const renderIcon = (component: string) => {
-  return h(Icon, { name: component })
+const renderIcon = (name: string) => {
+  return h(Icon, { icon: name, height: 'auto' })
 }
 const handleParse = (row: Model) => {
+  submissionStore.getUnparsedFile<ParsedArticleFile>(row.id).then(async res => {
+    console.log(res)
+    const data = res.data
+    try {
+      const parser = useParser()
+      const result = await parser.parseContent(data.content)
+      console.log(result)
+      submissionStore.parse({
+        id: row.id,
+        content: result.content,
+        cover: result.cover.split(window.location.host)[1],
+        promoterSequence: data.promoterSequence, // 启动子序列
+        keyframeSequence: data.keyframeSequence, // 关键帧序列
+        subtitleSequence: data.subtitleSequence, // 字幕序列
+        subtitleKeyframeSequence: data.subtitleKeyframeSequence // 字幕关键帧序列
+      })
+        .then(() => {
+          message.success('解析成功')
+          row.abbrev = result.content.replace(/<[^>]+>/g, '').slice(0, 100)
+          row.isParsed = true
+        })
+        .catch(error => {
+          console.log(error)
+          message.error('解析失败,项目文件可能损坏或不符合稿件规范！')
+        })
+    } catch (error) {
+      console.log(error)
+    }
+  })
   // $fetch('/api/manage/parse/' + row.id).then(async (res: any) => {
   //   try {
   //     const parser = useParser()
@@ -99,7 +116,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       key: 'type',
       resizable: true,
       width: '8%',
-      render: row => h(Icon, { name: row.type === 'note' ? 'mdi:notebook' : 'material-symbols-light:play-lesson-rounded', size: '24px' })
+      render: row => renderIcon(row.type === 'note' ? 'mdi:notebook' : 'material-symbols-light:play-lesson-rounded')
     },
     {
       title: '专栏',
@@ -140,7 +157,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
         tooltip: true
       },
       render(row) {
-        return row.authcode.name
+        return row.authcode?.name
       }
     },
     {
@@ -152,7 +169,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
         tooltip: true
       },
       render(row) {
-        return row.author.penname
+        return row.penname
       }
     },
     {
@@ -169,7 +186,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       key: 'isParsed',
       resizable: true,
       width: '10%',
-      render: row => h(Icon, { name: row.isParsed ? 'mdi:email-open' : 'material-symbols-light:mail-lock', size: '24px' })
+      render: row => renderIcon(row.isParsed ? 'mdi:email-open' : 'material-symbols-light:mail-lock')
     },
     {
       title: '更新时间',
@@ -407,7 +424,7 @@ function handleShowSelectOptionUpdate(value) {
 
 /** 翻页 */
 function handlePageChange(page: number) {
-  console.log('page change')
+  console.log('page change' + page)
   // router.push({
   //   path: router.currentRoute.value.path,
   //   query: {
@@ -415,11 +432,12 @@ function handlePageChange(page: number) {
   //     page: page,
   //   }
   // })
-  // submissionStore.fetch({
-  //   filter: { id: id.value, removed: RemovedEnum.NEVER },
-  //   limit: 2,
-  //   page: page || 1
-  // }).then(data => docs.value = data)
+  
+  submissionStore.fetchAndSet({
+    filter: { removed: RemovedEnum.NEVER },
+    limit: 2,
+    page: page || 1
+  })
 }
 
 </script>
@@ -467,14 +485,14 @@ function handlePageChange(page: number) {
     </div>
     <n-data-table
       :columns="columns"
-      :data="docs"
+      :data="submissionStore.items"
       :bordered="false"
       :row-props="rowProps"
       @update:sorter="handleSorterChange"
     />
     <div class="footer">
       <n-pagination 
-        v-model:page="submissionStore.page"
+        v-model:page="submissionStore.meta.currentPage"
         :page-count="submissionStore.getTotalPages"
         @update:page="handlePageChange"
       />

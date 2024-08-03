@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config'
 import { commonConfig } from 'src/config'
 import randomstring from 'randomstring'
 
-type Category = 'audio' | 'image' | 'bgm' | 'logs'
+type Category = 'audio' | 'image' | 'bgm' | 'logs' | 'json'
 const __rootdirname = process.cwd()
 @Injectable()
 export class UploadfileService {
@@ -19,12 +19,11 @@ export class UploadfileService {
     private configService: ConfigService
   ) {}
 
-  getFilePath(args: { filename: string; dirname: string | string[]; category: Category }) {
+  getFilePath(args: { filename: string; dirname: string | string[]; category: Category }, prv=false) {
     const config = this.configService.get<ReturnType<typeof commonConfig>>('common')
     const { dirname, category, filename } = args
     const dir = typeof dirname === 'string' ? dirname : dirname.join('/')
-    // const dirPath = path.join(__rootdirname, 'public', dir, category)
-    const dirPath = path.join(config.appDir, config.userDir, dir, category)
+    const dirPath = path.join(prv ? config.fullPrivateDir : config.fullPublicDir, dir, category)
     return `${dirPath}/${filename}`
   }
 
@@ -64,11 +63,11 @@ export class UploadfileService {
           reject(err)
         } else {
           // 这里可以异步处理
-          this.filesRepository.create({
+          this.filesRepository.save({
             userId,
             name: filename,
             extname,
-            type: 'image',
+            type: 'json',
             path: filepath,
             size,
             md5
@@ -115,11 +114,62 @@ export class UploadfileService {
           reject(err)
         } else {
           // 这里可以异步处理
-          this.filesRepository.create({
+          this.filesRepository.save({
             userId,
             name: filename,
             extname,
-            type: 'audio',
+            type: 'json',
+            path: filepath,
+            size,
+            md5
+          })
+
+          resolve(filepath)
+        }
+      })
+    })
+  }
+
+  saveJSON(args: { sourcePath: string; extname: string; dirname: string }, userId: string) {
+    const { sourcePath, extname, dirname } = args
+
+    return new Promise<string>(async (resolve, reject) => {
+      const { size, md5 } = await this.calculateFileStats(sourcePath)
+      // console.log({ size, md5 })
+      const file = await this.filesRepository.findOneBy({ md5, size, userId })
+      if (file) {
+        const isExists = fs.existsSync(file.path)
+        if (isExists) {
+          console.log('用户上传的文件已存在，直接返回文件路径!')
+          resolve(file.path)
+          return
+        }
+      }
+
+      const extWithoutDot = extname.charAt(0) === '.' ? extname.slice(1) : extname
+      const filename = `${randomstring.generate(3)}${new Date().getTime()}.${extWithoutDot}`
+      const filepath = this.getFilePath({
+        dirname,
+        filename,
+        category: 'json'
+      }, true)
+      console.log(filepath)
+      const targetDir = path.dirname(filepath)
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true })
+      }
+
+      // 移动文件
+      fs.rename(sourcePath, filepath, err => {
+        if (err) {
+          reject(err)
+        } else {
+          // 这里可以异步处理
+          this.filesRepository.save({
+            userId,
+            name: filename,
+            extname,
+            type: 'json',
             path: filepath,
             size,
             md5

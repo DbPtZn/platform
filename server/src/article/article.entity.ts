@@ -29,23 +29,69 @@ export class Article {
   @ManyToOne(() => User, user => user.articles)
   user: User
 
-  @Column('uuid') authcodeId: string
   @ManyToOne(() => Authcode, code => code.articles)
   authcode: Authcode
   
-  @Column('uuid') columnId: string
+  @Column({
+    type: 'uuid',
+    nullable: true
+  })
+  columnId: string
+
   @ManyToOne(() => Col, col => col.articles)
   column: Col
 
-  @Column('varchar') type: 'note' | 'course' | 'other'
-  @Column('boolean') isParsed: boolean
-  @Column('varchar') msg: string
-  @Column('varchar') editorVersion: string
-  @Column('varchar') cover: string
-  @Column('varchar') title: string
-  @Column('varchar') content: string
-  @Column('varchar') abbrev: string
-  @Column('varchar') audio: string
+  @Column({
+    type: 'varchar',
+    default: 'other'
+  })
+  type: 'note' | 'course' | 'other'
+  @Column({
+    type: 'boolean',
+    default: false
+  })
+  isParsed: boolean
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  msg: string
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  editorVersion: string
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  cover: string
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  title: string
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  content: string
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  abbrev: string
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  audio: string
 
   @Column({
     type: 'simple-array',
@@ -81,16 +127,35 @@ export class Article {
   })
   tags: string[]
 
-  @Column('boolean') isPublish: boolean
+  @Column({
+    type: 'boolean',
+    default: false
+  })
+  isPublish: boolean
+
   @Column({
     type: 'varchar',
     default: RemovedEnum.NEVER
   })
   removed: RemovedEnum
 
-  @Column('varchar') penname: string // 笔名 便利查询
+  @Column({
+    type: 'varchar',
+    default: '佚名'
+  })
+  penname: string // 笔名 便利查询
 
-  @Column('varchar') email: string // 邮箱 便利查询
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  email: string // 邮箱 便利查询
+
+  @Column({
+    type: 'varchar',
+    default: ''
+  })
+  avatar: string
 
   // 作者的其它信息
   @Column({
@@ -98,19 +163,27 @@ export class Article {
     nullable: true
   })
   author: {
-    penname?: string
-    avatar?: string
-    email?: string
     blog?: string
   }
 
+  @Column({
+    type: 'int',
+    default: 0
+  })
+  wordage: number
+
+  @Column({
+    type: 'float',
+    default: 0
+  })
+  duration: number
+
+  // 作品的其它信息
   @Column({
     type: 'simple-json',
     nullable: true
   })
   detail: {
-    wordage?: number
-    duration?: number
     fileSize?: number
   }
 

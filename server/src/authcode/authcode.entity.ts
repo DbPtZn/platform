@@ -13,9 +13,26 @@ export class Authcode {
   @OneToMany(() => Article, article => article.authcode)
   articles: Article[]
 
-  @Column('varchar') name: string
-  @Column('varchar') code: string
-  @Column('varchar') desc: string
+  @Column({
+    type: 'varchar',
+    length: 20,
+    default: ''
+  })
+  name: string
+  
+  @Column({
+    type: 'varchar',
+    length: 20,
+    default: ''
+  })
+  code: string
+
+  @Column({
+    type: 'varchar',
+    length: 60,
+    default: ''
+  })
+  desc: string
   
   @Column({
     type: 'boolean',

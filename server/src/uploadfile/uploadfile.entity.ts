@@ -10,7 +10,7 @@ export class UploadFile {
   @ManyToOne(() => User, user => user.files)
   user: User
 
-  @Column('varchar') type: 'image' | 'audio'
+  @Column('varchar') type: 'image' | 'audio' | 'json' | 'log' | 'text'
   @Column('varchar') name: string
   @Column('varchar') extname: string
   @Column('int') size: number

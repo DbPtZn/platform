@@ -1,23 +1,16 @@
+import { manageApi } from "@/api"
+
 export function useUploadImg() {
   function uploadImgFunction(img: string) {
     return new Promise<string>((resolve, reject) => {
       const formdata = new FormData()
       const file = base64ImgtoFile(img)
       formdata.append('file', file) //图片文件
-      // axiosInstance
-      //   .post(uploadImgUrl, formdata)
-      //   .then(res => {
-      //     const url = res.config.baseURL + res.data
-      //     resolve(url)
-      //   })
-      //   .catch(err => reject(err))
-      // $fetch('/api/upload/img', {
-      //   method: 'POST',
-      //   body: formdata
-      // }).then(url => {
-      //     resolve(url)
-      //   })
-      //   .catch(err => reject(err))
+      manageApi.upload.uploadImg(formdata).then(res => {
+        // TODO 如果是上传到对象存储库，这里可能返回的就是完整的图片路径
+        const url = res.config.baseURL + res.data
+        resolve(url)
+      }).catch(err => reject(err))
     })
   }
   return {

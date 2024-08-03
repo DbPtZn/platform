@@ -4,6 +4,7 @@ import { column } from './column'
 import { article } from './article'
 import { authcode } from './authcode'
 import { submission } from './submission'
+import { upload } from './upload'
 import axios, { AxiosResponse } from 'axios'
 
 // 为该用户创建请求体实例
@@ -51,5 +52,6 @@ export const manageApi = {
   column,
   article,
   authcode,
-  submission
+  submission,
+  upload
 }

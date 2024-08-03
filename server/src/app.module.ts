@@ -12,6 +12,7 @@ import { UserModule } from './user/user.module'
 import { VarticleModule } from './varticle/varticle.module'
 import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from './logger/logger.module'
+import { ReceiverModule } from './receiver/receiver.module'
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { LoggerModule } from './logger/logger.module'
     VarticleModule,
     AuthModule,
     LoggerModule,
+    ReceiverModule
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -4,7 +4,7 @@ import { Article } from './article.entity'
 import { Repository } from 'typeorm'
 import { UserService } from 'src/user/user.service'
 import { ArticleFilter, CreateArticleDto, ParseArticleDto } from './dto'
-import UUID from 'uuid'
+import * as UUID from 'uuid'
 import path from 'path'
 import fs from 'fs'
 import {
@@ -41,7 +41,7 @@ export class ArticleService {
   }
 
   async create(dto: CreateArticleDto, userId: string, fromEditionId: string) {
-    const { UID, isParsed, editorVersion, authcodeId, penname, email, blog, msg, type, title, abbrev, content, audio } =
+    const { UID, isParsed, editorVersion, authcodeId, penname, email, blog, msg, type, title, abbrev, content, audio, duration, wordage } =
       dto
     try {
       const user = await this.usersRepository.findOneBy({ id: userId })
@@ -56,7 +56,7 @@ export class ArticleService {
         editionId: !fromEditionId ? UUID.v4() : null,
         fromEditionId: fromEditionId ? fromEditionId : null,
         editorVersion,
-        authcodeId,
+        // authcodeId,
         msg,
         type,
         title,
@@ -66,9 +66,12 @@ export class ArticleService {
         penname,
         email,
         author: {
-          penname,
-          email,
           blog
+        },
+        duration,
+        wordage,
+        detail: {
+          fileSize: 0
         },
         userId,
         UID
@@ -96,27 +99,28 @@ export class ArticleService {
       if (!article) {
         throw new Error('文章不存在！')
       }
-      let filepath = ''
-      if (article.type === 'course' && article.audio) {
-        filepath = await this.fileService.saveAudio(
-          {
-            sourcePath: article.audio,
-            extname: path.extname(article.audio),
-            dirname: UID
-          },
-          userId
-        )
-        // console.log(filepath)
-      }
+      // let filepath = ''
+      // if (article.type === 'course' && article.audio) {
+      //   // filepath = await this.fileService.saveAudio(
+      //   //   {
+      //   //     sourcePath: article.audio,
+      //   //     extname: path.extname(article.audio),
+      //   //     dirname: UID
+      //   //   },
+      //   //   userId
+      //   // )
+      //   // console.log(filepath)
+      //   filepath = article.audio
+      // }
       const text = content.replace(/<[^>]+>/g, '')
       article.isParsed = true
       article.cover = cover
       article.content = content
-      article.audio = filepath
+      // article.audio = filepath
       article.abbrev = text.slice(0, 100)
+      article.duration = duration
+      article.wordage = text.length
       article.detail = {
-        duration: duration,
-        wordage: text.length,
         fileSize: 0
       }
       article.promoterSequence = promoterSequence
@@ -145,7 +149,6 @@ export class ArticleService {
           'UID',
           'editionId',
           'fromEditionId',
-          'authcodeId',
           'columnId',
           'isParsed',
           'title',
@@ -158,15 +161,16 @@ export class ArticleService {
           'updateAt'
         ]
       })
+      // console.log(result)
       return result
     } catch (error) {
       throw error
     }
   }
 
-  async getUnparsedFile(id: string) {
+  async getUnparsedFile(id: string, userId: string) {
     try {
-      const article = await this.articlesRepository.findOneBy({id})
+      const article = await this.articlesRepository.findOneBy({id, userId})
       if (article && !article.isParsed) {
         const filepath = article.content
         if (fs.existsSync(filepath)) {
@@ -210,7 +214,7 @@ export class ArticleService {
       })
       if (!article) throw new Error('文章不存在！')
       const prefix = this.configService.get('common.staticPrefix')
-      article.author.avatar = article.author.avatar ? prefix + article.author.avatar.split(prefix)[1] : ''
+      article.avatar = article.avatar ? prefix + article.avatar.split(prefix)[1] : ''
       return article
     } catch (error) {
       throw error
@@ -228,8 +232,13 @@ export class ArticleService {
           cover: true,
           title: true,
           abbrev: true,
-          detail: { wordage: true, duration: true, fileSize: true },
-          author: { penname: true, avatar: true, email: true, blog: true },
+          penname: true,
+          email: true,
+          avatar: true,
+          duration: true,
+          wordage: true,
+          detail: { fileSize: true },
+          author: { blog: true },
           meta: { views: true, likes: true, collections: true, comments: true },
           tags: true,
           createAt: true,
@@ -240,5 +249,9 @@ export class ArticleService {
     } catch (error) {
       throw error
     }
+  }
+
+  delete(id: string, userId: string) {
+    return this.articlesRepository.delete({ id, userId })
   }
 }

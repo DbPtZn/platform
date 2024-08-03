@@ -1,30 +1,12 @@
 /** 导出编辑器配置 */
 // import type { EditorOptions } from '@textbus/editor'
 
-import { Injector, Subscription } from '@textbus/core'
+import { Injector, Subscription, debounceTime } from '@textbus/core'
 import { useUploadImg } from './useUploadImg'
-import type { Editor } from '@textbus/editor'
+import { defaultComponentLoaders, defaultComponents, defaultFormatLoaders, defaultFormatters, rootComponent, rootComponentLoader, type Editor, createEditor, Layout } from '@textbus/editor'
+import { ImgToUrlService, animeIgnoreComponent, animeIgnoreComponentLoader, animePlayerComponent, animePlayerComponentLoader, animePlayerFormatLoader, animePlayerFormatter, imageB2UComponent, imageB2UComponentLoader, colorFormatLoader, colorFormatter, textBackgroundColorFormatLoader, textBackgroundColorFormatter } from '@/editor'
 
 async function getEditorConfig() {
-  const { defaultComponentLoaders, defaultComponents, defaultFormatLoaders, defaultFormatters, rootComponent, rootComponentLoader } = await import(
-    '@textbus/editor'
-  )
-  const {
-    colorFormatter,
-    textBackgroundColorFormatLoader,
-    colorFormatLoader,
-    textBackgroundColorFormatter,
-    animeIgnoreComponentLoader,
-    animePlayerComponent,
-    animeIgnoreComponent,
-    animePlayerComponentLoader,
-    imageB2UComponent,
-    imageB2UComponentLoader,
-    animePlayerFormatter,
-    animePlayerFormatLoader,
-    ImgToUrlService
-  } = await import('@/editor')
-  // const { Injector } = await import('@textbus/core')
   const config = {
     rootComponent: rootComponent,
     rootComponentLoader: rootComponentLoader,
@@ -51,9 +33,9 @@ function parseContent(content: string) {
   const host = document.createElement('div')
   return new Promise<{ content: string; cover: string }>(async (resolve, reject) => {
     const config = await getEditorConfig()
-    const { createEditor, Layout } = await import('@textbus/editor')
-    const { ImgToUrlService } = await import('@/editor')
-    const { debounceTime } = await import('@textbus/core')
+    // const { createEditor, Layout } = await import('@textbus/editor')
+    // const { ImgToUrlService } = await import('@/editor')
+    // const { debounceTime } = await import('@textbus/core')
     editor = createEditor(config)
     // console.log(config)
     editor.mount(host)

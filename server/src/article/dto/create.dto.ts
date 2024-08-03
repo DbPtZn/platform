@@ -29,6 +29,8 @@ export interface CreateArticleDto {
 
   duration: number // 音频时长
 
+  wordage: number // 字数
+
   // promoterSequence: Array<string> // 启动子序列
 
   // keyframeSequence: Array<number> // 关键帧序列

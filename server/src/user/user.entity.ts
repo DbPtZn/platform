@@ -1,9 +1,8 @@
 import { Article } from 'src/article/article.entity'
 import { Authcode } from 'src/authcode/authcode.entity'
 import { Column as Col } from 'src/column/column.entity'
-import { RemovedEnum } from 'src/enum'
 import { UploadFile } from 'src/uploadfile/uploadfile.entity'
-import { Entity, ObjectId, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
 import { Exclude } from 'class-transformer'
 
 export type ReceiverConfig = {

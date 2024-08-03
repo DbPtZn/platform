@@ -29,15 +29,13 @@ export interface Article {
   removed: RemovedEnum
   penname: string
   email: string
+  avatar: string
   author: {
-    penname?: string
-    avatar?: string
-    email?: string
     blog?: string
   }
+  wordage: number
+  duration: number
   detail: {
-    wordage?: number
-    duration?: number
     fileSize?: number
   }
   meta: {
@@ -64,28 +62,56 @@ export type Submission = Pick<
   | 'editorVersion'
   | 'type'
   | 'abbrev'
+  | 'penname'
+  | 'email'
+  | 'avatar'
   | 'author'
+  | 'duration'
+  | 'wordage'
   | 'detail'
   | 'createAt'
   | 'updateAt'
 > & {
-  authcode: AuthCode
-  column: ColumnType
+  authcode?: AuthCode
+  column?: ColumnType
 }
 
 export interface SubmissionState {
-  docs: [],
-  totalDocs: number,
-  limit: number,
-  totalPages: number,
-  page: number,
-  pagingCounter: number,
-  hasPrevPage: boolean,
-  hasNextPage: boolean,
-  prevPage: number | null,
-  nextPage: number | null,
+  items: Submission[],
+  meta: {
+    totalItems: number,
+    itemCount: number,
+    itemsPerPage: number,
+    totalPages: number,
+    currentPage: number
+  },
+  links: undefined
   isParsed: 'true' | 'false' | 'all'
 }
+
+export type ParsedArticleFile = Pick<
+  Article,
+  | 'title'
+  | 'content'
+  | 'promoterSequence'
+  | 'keyframeSequence'
+  | 'subtitleSequence'
+  | 'subtitleKeyframeSequence'
+>
+
+// export interface SubmissionState {
+//   docs: Submission[],
+//   totalDocs: number,
+//   limit: number,
+//   totalPages: number,
+//   page: number,
+//   pagingCounter: number,
+//   hasPrevPage: boolean,
+//   hasNextPage: boolean,
+//   prevPage: number | null,
+//   nextPage: number | null,
+//   isParsed: 'true' | 'false' | 'all'
+// }
 
 export type Subfile = Pick<
   Article,

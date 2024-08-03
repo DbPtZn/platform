@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { commonConfig } from './config'
 async function bootstrap() {
   dotenv.config({
     path:
@@ -24,13 +25,9 @@ async function bootstrap() {
   })
 
   const configService = app.get(ConfigService)
-  const __rootdirname = process.cwd()
-  const appDir = configService.get('common.appDir')
-  const userDir = configService.get('common.userDir')
-  const publicDir = configService.get('common.publicDir')
-  const staticPrefix = configService.get('common.staticPrefix')
+  const common = configService.get<ReturnType<typeof commonConfig>>('common')
   // console.log(path.join(__rootdirname, userDir, publicDir), staticPrefix)
-  app.useStaticAssets(path.join(appDir ? appDir : __rootdirname, userDir, publicDir), { prefix: staticPrefix })
+  app.useStaticAssets(common.fullPublicDir, { prefix: common.staticPrefix })
 
   /** 数据验证错误的响应 */
   app.useGlobalPipes(new ValidationPipe())

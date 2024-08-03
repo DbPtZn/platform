@@ -86,8 +86,9 @@ export class UserService {
       const user = await this.usersRepository.findOne({
         where: { id }
       })
+      const publicDir = this.configService.get('common.publicDir')
       const prefix = this.configService.get('common.staticPrefix')
-      user.avatar = user.avatar ? prefix + user.avatar.split(prefix)[1] : ''
+      user.avatar = user.avatar ? prefix + user.avatar.split(publicDir)[1] : ''
       return user
     } catch (error) {
       throw error
@@ -99,6 +100,11 @@ export class UserService {
       const users = await this.usersRepository.find({
         where: {},
         select: ['UID', 'nickname', 'avatar', 'desc', 'updateAt', 'createAt']      
+      })
+      users.forEach(user => {
+        const publicDir = this.configService.get('common.publicDir')
+        const prefix = this.configService.get('common.staticPrefix')
+        user.avatar = user.avatar ? prefix + user.avatar.split(publicDir)[1] : ''
       })
       return users
     } catch (error) {
@@ -147,7 +153,7 @@ export class UserService {
   async updateReceiverConfig(status: 0 | 1 | 2, id: string) {
     try {
       const user = await this.usersRepository.findOneBy({ id })
-      user.receiverConfig.status = status
+      user.receiverConfig.status = Number(status) as 0 | 1 | 2
       return this.usersRepository.save(user)
     } catch (error) {
       throw error
