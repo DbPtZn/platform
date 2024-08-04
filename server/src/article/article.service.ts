@@ -256,4 +256,34 @@ export class ArticleService {
   delete(id: string, userId: string) {
     return this.articlesRepository.delete({ id, userId })
   }
+
+  async findAll(options: IPaginationOptions, filter: Partial<ArticleFilter>) {
+    // console.log(filter)
+    try {
+      const result = await paginate<Article>(this.articlesRepository, options, {
+        where: { ...filter },
+        relations: ['authcode', 'album'],
+        select: [
+          'id',
+          'UID',
+          'editionId',
+          'fromEditionId',
+          'albumId',
+          'isParsed',
+          'title',
+          'msg',
+          'editorVersion',
+          'type',
+          'abbrev',
+          'author',
+          'createAt',
+          'updateAt'
+        ]
+      })
+      // console.log(result)
+      return result
+    } catch (error) {
+      throw error
+    }
+  }
 }

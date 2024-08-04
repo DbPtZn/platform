@@ -1,6 +1,6 @@
 
 
-export interface UserSchema {
+export interface User {
   id: string
   UID: string
   account: string
@@ -23,23 +23,23 @@ export interface UserSchema {
 }
 
 
-export type UserType = Omit<
-  UserSchema,
- 'id' | 'removed' | 'encryptedPassword' | 'createAt' | 'updateAt'
-> & { 
-  id: string
-  createAt: string
-  updateAt: string
-}
+// export type UserType = Omit<
+//   User,
+//  'id' | 'removed' | 'encryptedPassword' | 'createAt' | 'updateAt'
+// > & { 
+//   id: string
+//   createAt: string
+//   updateAt: string
+// }
 
-export type UserState = UserType
+export type UserState = User
 
 export type UserListItem = Pick<
-  UserType,
+  User,
   'UID' | 'nickname' | 'avatar' | 'desc' | 'createAt' | 'updateAt'
 > 
 
 export type ArticleUserInfo = Pick<
-  UserType,
+  User,
   'UID' | 'nickname' | 'avatar'
 > 

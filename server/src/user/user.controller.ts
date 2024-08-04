@@ -29,5 +29,15 @@ export class UserController {
       res.status(400).send(error.message)
     }
   }
+
+  @Get('list')
+  async getList(@Req() req, @Res() res) {
+    try {
+      const users = await this.userService.findAll()
+      res.send(users)
+    } catch (error) {
+      res.status(400).send(error.message)
+    }
+  }
   
 }

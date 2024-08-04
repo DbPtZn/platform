@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import useStore from '@/store';
+import useStore from '@/store'
 import MenuIcon from './MenuIcon.vue'
 import { useThemeVars } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 const { settingStore } = useStore('common')
-const { theme } = settingStore
+// const { theme } = settingStore
 const router = useRouter()
 const route = useRoute()
 const themeVars = useThemeVars()
@@ -49,7 +49,8 @@ function handleNavClick(to: string) {
 }
 
 function handleThemeUpdate(value: boolean) {
-  // theme.dark = value
+  console.log(value)
+  settingStore.theme = value ? 'dark' : 'light'
 }
 function handleDblClick() {
   console.log('dbclick')
@@ -63,7 +64,7 @@ function handleDblClick() {
       <div class="left">
         <div class="title">
           <img class="tapenote-icon logo" src="/logo.png" alt="" @dblclick="handleDblClick" />
-          <nuxt-link class="tapenote-name" to="/">blogger</nuxt-link>
+          <router-link class="tapenote-name" to="/">blogger</router-link>
         </div>
       </div>
       <div class="right">
@@ -83,24 +84,24 @@ function handleDblClick() {
               <span class="menu-btn">{{ item.label }}</span>
             </n-button>
             <!-- <n-button text>
-              <nuxt-link class="menu-btn" :to="'/' + uid">{{ $t('home') }}</nuxt-link>
+              <router-link class="menu-btn" :to="'/' + uid">{{ $t('home') }}</router-link>
             </n-button>
             <n-button text>
-              <nuxt-link class="menu-btn" :to="uid + '/column'">{{ $t('column') }}</nuxt-link>
+              <router-link class="menu-btn" :to="uid + '/column'">{{ $t('column') }}</router-link>
             </n-button>
             <n-button text>
-              <nuxt-link class="menu-btn" :to="uid + '/tag'">{{ $t('tag') }}</nuxt-link>
+              <router-link class="menu-btn" :to="uid + '/tag'">{{ $t('tag') }}</router-link>
             </n-button>
             <n-button text>
-              <nuxt-link class="menu-btn" :to="uid + '/about'">{{ $t('about') }}</nuxt-link>
+              <router-link class="menu-btn" :to="uid + '/about'">{{ $t('about') }}</router-link>
             </n-button> -->
           </n-flex>
         </div>
         <n-divider class="divider" vertical />
-        <n-switch class="theme-switch" @update:value="handleThemeUpdate" :value="theme" size="medium">
+        <n-switch class="theme-switch" @update:value="handleThemeUpdate" :value="settingStore.theme === 'dark'" size="medium">
           <template #icon>
-            <span v-if="theme === 'light'">☀</span>
-            <span v-if="theme === 'dark'">🌙</span>
+            <span v-if="settingStore.theme === 'light'">☀</span>
+            <span v-if="settingStore.theme === 'dark'">🌙</span>
           </template>
         </n-switch>
         <!-- 用户配置自定义外链（图标 + 超链接） -->

@@ -1,8 +1,9 @@
 import { RouteNameEnum, RoutePathEnum } from '@/enums'
 // import useStore from '@/store'
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-import bloggerRoutes from './blog'
+import blogRoutes from './blog'
 import managerRoutes from './manage'
+import platformRoutes from './platform'
 // import useStore from '@/store'
 // import errorRoutes from './error'
 const routes: Array<RouteRecordRaw> = [
@@ -11,7 +12,8 @@ const routes: Array<RouteRecordRaw> = [
     redirect: { name: RouteNameEnum.BLOG },
   },
   ...managerRoutes,
-  ...bloggerRoutes
+  ...blogRoutes,
+  ...platformRoutes
 ]
 
 const router = createRouter({

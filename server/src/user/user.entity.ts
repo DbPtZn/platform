@@ -87,6 +87,12 @@ export class User {
   })
   albumSequence: string[]
 
+  @Column({
+    type: 'boolean',
+    default: false
+  })
+  isPublish: boolean // 是否公开博客
+
   @CreateDateColumn() createAt: Date
   @UpdateDateColumn() updateAt: Date
 

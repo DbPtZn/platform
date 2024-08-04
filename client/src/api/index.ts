@@ -30,7 +30,8 @@ axios.interceptors.response.use(
       switch (err.response?.status) {
         case 401:
           // sessionStorage.removeItem('managerToken')
-          router.push({ path: RoutePathEnum.LOGIN })
+          // router.push({ path: RoutePathEnum.LOGIN })
+          console.log('权限不足')
           break
         case 403:
           console.log('服务器禁止请求')
@@ -43,3 +44,4 @@ axios.interceptors.response.use(
 export default axios
 export * from './manage'
 export * from './blog'
+export * from './platform'

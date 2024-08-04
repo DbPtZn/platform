@@ -108,4 +108,31 @@ export class ArticleController {
     }
   }
 
+  @Post('/blog/list')
+  async getBlogArticleList(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+    @Body() filter: Partial<ArticleFilter>,
+    @Req() req,
+    @Res() res
+  ) {
+    // console.log(page)
+    // console.log(limit)
+    // console.log(filter)
+    try {
+      const result = await this.articleService.findAll(
+        {
+          page,
+          limit,
+          // route: '/list'
+        },
+        filter
+      )
+      // console.log(result)
+      res.send(result)
+    } catch (error) {
+      res.status(400).send(error.message)
+    }
+  }
+
 }

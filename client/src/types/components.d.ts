@@ -10,6 +10,7 @@ declare module 'vue' {
     HelloWorld: typeof import('./../components/HelloWorld.vue')['default']
     Icon: typeof import('./../components/Icon.vue')['default']
     NAutoComplete: typeof import('naive-ui')['NAutoComplete']
+    NAvatar: typeof import('naive-ui')['NAvatar']
     NBackTop: typeof import('naive-ui')['NBackTop']
     NButton: typeof import('naive-ui')['NButton']
     NCard: typeof import('naive-ui')['NCard']

@@ -1,5 +1,6 @@
 export enum RouteNameEnum {
   // blog
+  PLATFORM = 'platform',
   HOME = 'home',
   BLOG = 'blog',
   DEFAULT = 'default',
@@ -18,6 +19,7 @@ export enum RouteNameEnum {
 
 export enum RoutePathEnum {
   // blog
+  PLATFORM = '',
   BLOG = '/blog',
   HOME = '/home', // 注意，子路由不能带 '/'
   ARTICLE = '/article',

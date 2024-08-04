@@ -144,6 +144,11 @@ export type PublicArticleType = Omit<Article, | 'userId' | 'authcodeId' | 'remov
   updateAt: string
 }
 
+export type ArticleListItem = Omit<
+  Article,
+  'editionId' | 'fromEditionId' | 'authcodeId' | 'isParsed' | 'msg' | 'editorVersion' |'content' | 'audio' | 'promoterSequence' | 'keyframeSequence' | 'subtitleSequence' | 'subtitleKeyframeSequence' | 'removed'
+>
+
 // export type ArticleFilter = Omit<ArticleSchema, 'id' | 'userId' | 'authcodeId' | 'albumId' | 'createAt' | 'updateAt'> & {
 //   id: string
 //   userId: string
@@ -194,10 +199,7 @@ export type PublicArticleType = Omit<Article, | 'userId' | 'authcodeId' | 'remov
 // //   | 'pagingCounter'
 // // >
 
-// export type ArticleListItem = Omit<
-//   ArticleType,
-//   'editionId' | 'fromEditionId' | 'authcodeId' | 'isParsed' | 'msg' | 'editorVersion' |'content' | 'audio' | 'promoterSequence' | 'keyframeSequence' | 'subtitleSequence' | 'subtitleKeyframeSequence' | 'removed'
-// >
+
 
 
 
