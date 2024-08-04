@@ -1,9 +1,9 @@
 import { Article } from 'src/article/article.entity'
 import { Authcode } from 'src/authcode/authcode.entity'
-import { Column as Col } from 'src/column/column.entity'
 import { UploadFile } from 'src/uploadfile/uploadfile.entity'
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
 import { Exclude } from 'class-transformer'
+import { Album } from 'src/album/album.entity'
 
 export type ReceiverConfig = {
   status: 0 | 1 | 2
@@ -21,8 +21,8 @@ export class User {
   @OneToMany(() => Authcode, authcode => authcode.user)
   authcodes: Authcode[]
 
-  @OneToMany(() => Col, col => col.user)
-  columns: Col[]
+  @OneToMany(() => Album, album => album.user)
+  albums: Album[]
 
   @OneToMany(() => UploadFile, file => file.user)
   files: UploadFile[]
@@ -85,7 +85,7 @@ export class User {
     type: 'simple-array',
     nullable: true
   })
-  columnSequence: string[]
+  albumSequence: string[]
 
   @CreateDateColumn() createAt: Date
   @UpdateDateColumn() updateAt: Date

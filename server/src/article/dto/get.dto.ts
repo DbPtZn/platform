@@ -2,7 +2,7 @@ import { Article } from '../article.entity'
 
 export type ArticleFilter = Pick<
   Article,
-  'columnId' | 'type' | 'isParsed' | 'isPublish' | 'removed' | 'penname' | 'email'
+  'albumId' | 'type' | 'isParsed' | 'isPublish' | 'removed' | 'penname' | 'email'
 >
 
 // export interface GetArticleDto {

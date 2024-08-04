@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 // import type { GetArticleDto } from '@/dto'
-import type {  Submission, SubmissionState } from '@/types'
+import type {  Album, ParsedArticleFile, Submission, SubmissionState } from '@/types'
 import { RemovedEnum } from '@/enums'
 import { manageApi } from '@/api'
 
@@ -32,11 +32,21 @@ export const useSubmissionStore = defineStore('submissionStore', {
         this.links = res.data.links
       })
     },
-    getUnparsedFile<T>(id: string) {
-      return manageApi.article.getUnparsedFile<T>(id)
+    getUnparsedFile(id: string) {
+      return manageApi.article.getUnparsedFile<ParsedArticleFile>(id)
     },
-    parse<T>(dto: Parameters<typeof manageApi.article.parse>[0]) {
-      return manageApi.article.parse<T>(dto)
+    parse(dto: Parameters<typeof manageApi.article.parse>[0]) {
+      return manageApi.article.parse(dto)
+    },
+    allot(dto: Parameters<typeof manageApi.article.allot>[0]) {
+      return manageApi.article.allot<Album>(dto).then(res => {
+        this.items.some(item => {
+          if (item.id === dto.articleId) {
+            item.album = res.data
+            return true
+          }
+        })
+      })
     },
     delete(id: string) {
       return manageApi.article.delete(id)

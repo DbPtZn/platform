@@ -21,7 +21,7 @@ export const useUserStore = defineStore('userStore', {
         autoParse: false,
         sizeLimit: 0
       },
-      columnSequence: [],
+      albumSequence: [],
       createAt: '',
       updateAt: ''
     }

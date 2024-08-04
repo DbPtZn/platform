@@ -37,6 +37,11 @@ export interface ParseArticleDto {
   subtitleKeyframeSequence: Array<number> // 字幕关键帧序列
 }
 
+export interface AllotArticleDto {
+  articleId: string
+  albumId: string
+}
+
 export const article = {
   getList<T>(dto: GetArticleListDto) {
     return axios.post<T>(`/article/list?page=${dto.page}&limit=${dto.limit}`, dto.filter)
@@ -49,6 +54,9 @@ export const article = {
   },
   parse<T>(dto: ParseArticleDto) {
     return axios.patch<T>(`/article/parse`, dto)
+  },
+  allot<T>(dto: AllotArticleDto) {
+    return axios.patch<T>(`/article/allot`, dto)
   },
   delete<T>(id: string) {
     return axios.delete<T>(`/article/${id}`)

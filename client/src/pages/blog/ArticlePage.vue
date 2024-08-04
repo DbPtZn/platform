@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { ArticleView } from '@/views'
+import { Article } from '@/views'
 </script>
 
 <template>
   <div class="article-page">
-    <ArticleView />
+    article
+    <!-- <Article /> -->
   </div>
 </template>
 

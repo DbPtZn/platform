@@ -1,11 +1,11 @@
 import { useSubmissionStore } from './submission'
-import { useColumnListStore } from './column-list'
-import { useColumnStore } from './column'
+import { useAlbumListStore } from './album-list'
+import { useAlbumStore } from './album'
 import { useUserStore } from './user'
 
 export const useManageStore = () => ({
   submissionStore: useSubmissionStore(),
-  columnListStore: useColumnListStore(),
-  columnStore: useColumnStore(),
+  albumListStore: useAlbumListStore(),
+  albumStore: useAlbumStore(),
   userStore: useUserStore()
 })

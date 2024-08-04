@@ -1,9 +1,9 @@
 import { RemovedEnum } from 'src/enum'
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm'
-import { Column as Col } from 'src/column/column.entity'
 import { Authcode } from 'src/authcode/authcode.entity'
 import { User } from 'src/user/user.entity'
 import { VArticle } from 'src/varticle/varticle.entity'
+import { Album } from 'src/album/album.entity'
 @Entity()
 export class Article {
   @PrimaryGeneratedColumn('uuid') id: string
@@ -36,10 +36,10 @@ export class Article {
     type: 'uuid',
     nullable: true
   })
-  columnId: string
+  albumId: string
 
-  @ManyToOne(() => Col, col => col.articles)
-  column: Col
+  @ManyToOne(() => Album, album => album.articles)
+  album: Album
 
   @Column({
     type: 'varchar',
@@ -76,8 +76,7 @@ export class Article {
   title: string
 
   @Column({
-    type: 'varchar',
-    default: ''
+    type: 'text',
   })
   content: string
 

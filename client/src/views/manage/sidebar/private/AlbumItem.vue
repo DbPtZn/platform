@@ -2,9 +2,9 @@
 import {  useThemeVars } from 'naive-ui'
 import { defineComponent, h, ref } from 'vue'
 // import { DragIndicatorFilled, MenuBookRound, BookRound, BookOutlined } from '@vicons/material'
-import useStore from '@/store'
+import useStore, { useManageStore } from '@/store'
 // import { Icon } from '#components'
-type Column = ReturnType<typeof useManageStore>['columnListStore']['data'][0]
+type Column = ReturnType<typeof useManageStore>['albumListStore']['data'][0]
 defineProps<{
   item: Column
 }>()

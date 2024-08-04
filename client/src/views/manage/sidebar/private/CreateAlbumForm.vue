@@ -69,13 +69,16 @@ function handleFinish(args: { file: UploadFileInfo; event?: ProgressEvent }) {
     // console.log(args.event.currentTarget)
     const path = (args.event.currentTarget as XMLHttpRequest).response
     // console.log(path)
-    model.value.cover = path
+    model.value.cover = baseurl + path
   }
 }
 function handleError(ev: Event) {
   const target = ev.target as HTMLImageElement
   target.src = '/empty.png'
 }
+/** 上传图片 */
+const baseurl = import.meta.env.VITE_BASE_URL
+const managerToken = sessionStorage.getItem('managerToken') || ''
 </script>
 
 <template>
@@ -86,10 +89,16 @@ function handleError(ev: Event) {
           <n-input class="form-input" v-model:value="model.name" type="text" placeholder="请输入专栏名称" maxlength="18" show-count />
         </n-form-item>
         <n-form-item path="cover" label="封面">
-          <n-upload :action="`/api/upload/img`" :show-file-list="false" @finish="handleFinish">
+          <n-upload 
+          :action="`${baseurl}/upload/img`"
+          :headers="{
+            'Authorization': `Bearer ${managerToken}`
+          }" 
+          :show-file-list="false" 
+          @finish="handleFinish">
             <div class="upload">
               <img v-if="model.cover" class="cover" :src="model.cover" style="max-width: 100%" @error="handleError" />
-              <Icon v-if="!model.cover" name="material-symbols:add-rounded" size="48px" />
+              <Icon v-if="!model.cover" name="material-symbols:add-rounded" height="48px" />
             </div>
           </n-upload>
         </n-form-item>

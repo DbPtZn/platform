@@ -1,6 +1,6 @@
 import { auth } from './auth'
 import { user } from './user'
-import { column } from './column'
+import { album } from './album'
 import { article } from './article'
 import { authcode } from './authcode'
 import { submission } from './submission'
@@ -49,7 +49,7 @@ maxios.interceptors.response.use(
 export const manageApi = {
   user,
   auth,
-  column,
+  album,
   article,
   authcode,
   submission,

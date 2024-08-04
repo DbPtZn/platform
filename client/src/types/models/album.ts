@@ -2,7 +2,7 @@
 import type { RemovedEnum } from "@/enums"
 import type { Subfile } from "."
 
-export interface Column {
+export interface Album {
   id: string
   userId: string
   UID: string
@@ -15,13 +15,13 @@ export interface Column {
   updateAt: string
 }
 
-export type ColumnType = Omit<Column, 'id' | 'userId' | 'removed' | 'createAt' | 'updateAt'> & {
+export type AlbumType = Omit<Album, 'id' | 'userId' | 'removed' | 'createAt' | 'updateAt'> & {
   id: string
   userId: string
   createAt: string
   updateAt: string
 }
 
-export type ColumnState = Pick<ColumnType, 'id' | 'name' | 'isPublish'> & {
+export type AlbumState = Pick<AlbumType, 'id' | 'name' | 'isPublish'> & {
   subfiles: Subfile[]
 }

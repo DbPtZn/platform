@@ -1,13 +1,33 @@
-import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Post, Query, Req, Res, UseGuards } from '@nestjs/common'
+import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common'
 import { ArticleService } from './article.service'
 import { Pagination } from 'nestjs-typeorm-paginate'
 import { Article } from './article.entity'
-import { ArticleFilter, ParseArticleDto } from './dto'
+import { AllotArticleDto, ArticleFilter, ParseArticleDto } from './dto'
 import { AuthGuard } from '@nestjs/passport'
+import { ConfigService } from '@nestjs/config'
+import { commonConfig } from 'src/config'
 
 @Controller('article')
 export class ArticleController {
-  constructor(private readonly articleService: ArticleService) {}
+  constructor(
+    private readonly articleService: ArticleService,
+    private readonly configService: ConfigService
+  ) {}
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/:id')
+  async getArticle(@Param('id') id: string, @Req() req, @Res() res) {
+    try {
+      const result = await this.articleService.findOne(id, req.user.id)
+      const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+      if(result.audio) {
+        result.audio = common.staticPrefix + result.audio.split(common.publicDir.slice(1))[1]
+      }
+      res.send(result)
+    } catch (error) {
+      res.status(400).send(error.message)
+    }
+  }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('list')
@@ -67,9 +87,21 @@ export class ArticleController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Patch('parse')
   async parse(@Body() dto: ParseArticleDto, @Req() req, @Res() res) {
     try {
       const result = await this.articleService.parse(dto, req.user.id, req.user.UID)
+      res.send(result)
+    } catch (error) {
+      res.status(400).send(error.message)
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('allot')
+  async allot(@Body() dto: AllotArticleDto, @Req() req, @Res() res) {
+    try {
+      const result = await this.articleService.allot(dto, req.user.id)
       res.send(result)
     } catch (error) {
       res.status(400).send(error.message)

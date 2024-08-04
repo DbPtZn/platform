@@ -19,7 +19,7 @@ const managerRoutes: Array<RouteRecordRaw> = [
         component: () => import(/* webpackChunkName: "about" */ '@/views/manage/authcode/Authcode.vue')
       },
       {
-        path: 'article',
+        path: 'article/:id',
         name: 'article',
         component: () => import(/* webpackChunkName: "about" */ '@/views/manage/m-article/MArticle.vue')
       },

@@ -6,7 +6,7 @@ const blogRoutes: Array<RouteRecordRaw> = [
   {
     name: RouteNameEnum.BLOG,
     path: `/`,
-    component: () => import(/* webpackChunkName: "about" */ '@/pages/blog/BlogPage.vue'),
+    component: () => import(/* webpackChunkName: "about" */ '@/views/blog/Blog.vue'),
     children: [
       {
         // name: RouteNameEnum.HOME,

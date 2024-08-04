@@ -1,4 +1,4 @@
-export interface UpdateColumnSequenceDto {
+export interface UpdateAlbumSequenceDto {
   // columnId: string
   // oldIndex: number
   // newIndex: number

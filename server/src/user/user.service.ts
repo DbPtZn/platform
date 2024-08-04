@@ -6,7 +6,7 @@ import { CreateUserDto } from './dto/create.dto'
 import bcrypt from 'bcryptjs'
 import path from 'path'
 import fs from 'fs'
-import { UpdateColumnSequenceDto } from './dto/updateColumnSequence.dto'
+import { UpdateAlbumSequenceDto } from './dto/updateAlbumSequence.dto'
 import { ConfigService } from '@nestjs/config'
 @Injectable()
 export class UserService {
@@ -161,12 +161,12 @@ export class UserService {
   }
 
   /** 更新比较麻烦，需要考虑增删改的情况，所以先直接用前端改完的数据覆盖 */
-  async updateColumnsSequence(dto: UpdateColumnSequenceDto, id: string) {
+  async updateAlbumsSequence(dto: UpdateAlbumSequenceDto, id: string) {
     try {
       const { sequence } = dto
       // console.log(sequence)
       const user = await this.usersRepository.findOneBy({ id })
-      user.columnSequence = sequence
+      user.albumSequence = sequence
       return this.usersRepository.save(user)
     } catch (error) {
       throw error

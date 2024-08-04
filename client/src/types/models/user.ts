@@ -17,7 +17,7 @@ export interface UserSchema {
     autoParse: boolean
     sizeLimit: number
   }
-  columnSequence: string[]
+  albumSequence: string[]
   createAt: string
   updateAt: string
 }

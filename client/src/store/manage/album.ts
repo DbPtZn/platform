@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import type { Subfile, ColumnState } from '@/types'
+import type { Subfile, AlbumState } from '@/types'
 import _ from 'lodash'
 import { SortType } from '@/enums'
+import { manageApi } from '@/api'
 
-export const useColumnStore = defineStore('columnStore',{
-    state(): ColumnState {
+export const useAlbumStore = defineStore('albumStore',{
+    state(): AlbumState {
       return {
         id: '',
         name: '',
@@ -13,14 +14,13 @@ export const useColumnStore = defineStore('columnStore',{
       }
     },
     actions: {
-      fetch(id: string) {
-        // $fetch<ColumnState>('/api/manage/column/list/' + id).then(res => {
-        //   console.log(res)
-        //   this._id = res._id
-        //   this.name = res.name
-        //   this.isPublish = res.isPublish
-        //   this.subfiles = res.subfiles
-        // })
+      fetchAndSet(id: string) {
+        return manageApi.album.get<AlbumState>(id).then(res => {
+          this.id = res.data.id
+          this.name = res.data.name
+          this.isPublish = res.data.isPublish
+          this.subfiles = res.data.subfiles
+        })
       },
       getSubfiles(sortType?: SortType) {
         switch (sortType) {

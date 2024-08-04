@@ -5,6 +5,7 @@ import { useListDropDown } from './hooks/useListDropdown'
 import dayjs from 'dayjs'
 import useStore from '@/store'
 import { useRouter } from 'vue-router'
+import FileCard from './private/FileCard.vue'
 enum SortType {
   UPDATE = 'update',
   UPDATE_REVERSE = 'update_reverse',
@@ -13,7 +14,7 @@ enum SortType {
   NAME = 'name',
   NAME_REVERSE = 'name_reverse'
 }
-const { columnStore } = useStore('manage')
+const { albumStore } = useStore('manage')
 const themeVars = useThemeVars()
 const router = useRouter()
 const value = ref()
@@ -94,7 +95,7 @@ const { dropdownState, options, handleClickoutside, handleContextmenu, handleMor
           <!-- 普通文件夹模式下 -->
           <div class="header-nav-left-item">
             <div class="name">
-              <!-- {{ collectionStore.name }} -->
+              {{ albumStore.name }}
             </div>
           </div>
         </div>
@@ -110,8 +111,8 @@ const { dropdownState, options, handleClickoutside, handleContextmenu, handleMor
     </div>
     <div ref="scrollerRef" class="main">
       <div ref="listRef" class="list">
-        <MItemlistFileCard
-          v-for="item in columnStore.getSubfiles(sortType)"
+        <FileCard
+          v-for="item in albumStore.getSubfiles(sortType)"
           :key="item.id"
           :id="item.id"
           :type="item.type"
@@ -204,6 +205,7 @@ const { dropdownState, options, handleClickoutside, handleContextmenu, handleMor
   overflow: hidden;
   border-right: 1px solid v-bind('themeVars.dividerColor');
   background-color: v-bind('themeVars.bodyColor');
+  color: v-bind('themeVars.textColor1');
   box-sizing: border-box;
   &:hover {
     /*定义滑块 内阴影+圆角*/

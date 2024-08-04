@@ -3,7 +3,7 @@ import useStore from '@/store'
 import Layout from './layout/Layout.vue'
 import { Sidebar, Itemlist } from '.'
 import { onMounted } from 'vue'
-const { columnStore, userStore } = useStore('manage')
+const { albumStore, userStore } = useStore('manage')
 onMounted(() => {
   // 获取用户数据
   userStore.fetchAndSet()
@@ -16,7 +16,7 @@ onMounted(() => {
       <div class="sidebar-wrapper">
         <Sidebar />
       </div>
-      <div v-if="columnStore.id" class="itemlist-wrapper">
+      <div v-if="albumStore.id" class="itemlist-wrapper">
         <Itemlist />
       </div>
       <div class="workbench-wrapper">

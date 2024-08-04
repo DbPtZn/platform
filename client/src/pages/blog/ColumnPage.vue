@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { ColumnView } from '@/views'
+// import { ColumnView } from '@/views'
 </script>
 
 <template>
   <div class="column-page">
-    <ColumnView />
+    <!-- <ColumnView /> -->
   </div>
 </template>
 

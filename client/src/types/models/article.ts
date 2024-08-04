@@ -1,6 +1,6 @@
 
 import type { RemovedEnum } from '@/enums'
-import type { ArticleUserInfo, AuthCode, ColumnType } from '.'
+import type { ArticleUserInfo, AuthCode, Album } from '.'
 
 
 export interface Article {
@@ -10,7 +10,7 @@ export interface Article {
   fromEditionId: string
   userId: string
   authcodeId: string
-  columnId: string
+  albumId: string
   type: 'note' | 'course' | 'other'
   isParsed: boolean
   msg: string
@@ -54,7 +54,7 @@ export type Submission = Pick<
   | 'UID'
   | 'editionId'
   | 'fromEditionId'
-  | 'columnId'
+  | 'albumId'
   | 'isParsed'
   | 'isPublish'
   | 'title'
@@ -73,7 +73,7 @@ export type Submission = Pick<
   | 'updateAt'
 > & {
   authcode?: AuthCode
-  column?: ColumnType
+  album?: Album
 }
 
 export interface SubmissionState {
@@ -120,7 +120,7 @@ export type Subfile = Pick<
   | 'editionId'
   | 'fromEditionId'
   | 'authcodeId'
-  | 'columnId'
+  | 'albumId'
   | 'isParsed'
   | 'isPublish'
   | 'title'
@@ -144,11 +144,11 @@ export type PublicArticleType = Omit<Article, | 'userId' | 'authcodeId' | 'remov
   updateAt: string
 }
 
-// export type ArticleFilter = Omit<ArticleSchema, 'id' | 'userId' | 'authcodeId' | 'columnId' | 'createAt' | 'updateAt'> & {
+// export type ArticleFilter = Omit<ArticleSchema, 'id' | 'userId' | 'authcodeId' | 'albumId' | 'createAt' | 'updateAt'> & {
 //   id: string
 //   userId: string
 //   authcodeId: string
-//   columnId: string
+//   albumId: string
 //   createAt: string
 //   updateAt: string
 // }
@@ -161,7 +161,7 @@ export type PublicArticleType = Omit<Article, | 'userId' | 'authcodeId' | 'remov
 //   | 'UID'
 //   | 'editionId'
 //   | 'fromEditionId'
-//   | 'columnId'
+//   | 'albumId'
 //   | 'isParsed'
 //   | 'isPublish'
 //   | 'title'
@@ -175,7 +175,7 @@ export type PublicArticleType = Omit<Article, | 'userId' | 'authcodeId' | 'remov
 //   | 'updateAt'
 // > & {
 //   authcode: AuthCodeType
-//   column: ColumnType
+//   album: albumType
 // }
 
 // // export type ArticlePaginateResult = PaginateResult<Submission>

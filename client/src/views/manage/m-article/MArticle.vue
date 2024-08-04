@@ -8,20 +8,24 @@ import { usePlayer } from './hooks/usePlayer'
 import type { Editor } from '@textbus/editor'
 import '@/editor/style.css'
 import 'material-icons/iconfont/material-icons.css'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { RemovedEnum } from '@/enums'
+import { Player, OutlineService, DialogProvider, AnimeProvider, Structurer, ThemeProvider, RootEventService, AnimeEventService } from '@/editor'
+import { manageApi } from '@/api'
 const themeVars = useThemeVars()
 const route = useRoute()
 const scrollerRef = ref()
 const controllerRef = ref()
 const editorRef = ref()
 const rootRef = ref()
+const router = useRouter()
+const id = computed(() => router.currentRoute.value.params.id as string)
 const state = ref<Article>({
   id: '',
   UID: '',
   userId: '',
   authcodeId: '',
-  columnId: '',
+  albumId: '',
   type: 'other',
   isParsed: false,
   editorVersion: '',
@@ -36,15 +40,15 @@ const state = ref<Article>({
   subtitleKeyframeSequence: [],
   tags: [],
   isPublish: false,
+  penname: '',
+  avatar: '',
+  email: '',
   author: {
-    penname: '',
-    avatar: '',
-    email: '',
     blog: ''
   },
+  wordage: 0,
+  duration: 0,
   detail: {
-    wordage: 0,
-    duration: 0,
     fileSize: 0
   },
   meta: {
@@ -53,59 +57,46 @@ const state = ref<Article>({
     collections: 0,
     comments: 0
   },
-  // createAt: '',
-  // updateAt: '',
   editionId: '',
   fromEditionId: '',
   msg: '',
   removed: RemovedEnum.NEVER,
-  penname: '',
-  email: '',
   createAt: '',
   updateAt: ''
 })
 
-// useFetch<Article>(`/api/manage/article/${route.params.id}`).then(res => {
-//   console.log('use fetch')
-//   if(res.error.value) {
-//     return
-//   }
-//   // console.log(res.data.value)
-//   if(res.data.value) state.value = res.data.value
-// })
-
 let player: Editor
-let pck: typeof import('@/editor')
-onMounted(async () => {
-  // console.log('onMounted')
-  pck = await import('@/editor')
-  // $fetch<Article>(`/api/manage/article/${route.params.id}`).then(async res => {
-  //   console.log('use fetch')
-  //   state.value = res
-  //   usePlayer({
-  //     rootRef,
-  //     editorRef,
-  //     scrollerRef,
-  //     controllerRef,
-  //     data: state.value
-  //   }).then(res => {
-  //     player = res
-  //     console.log(player)
-  //   })
-  // })
+onMounted(() => {
+  console.log(id.value)
+  manageApi.article.get<Article>(id.value).then(res => {
+    // console.log(res)
+    res.data.audio = res.config.baseURL + res.data.audio
+    // console.log(res.data.audio)
+    state.value = res.data
+    usePlayer({
+      rootRef,
+      editorRef,
+      scrollerRef,
+      controllerRef,
+      data: state.value
+    }).then(res => {
+      player = res
+      // console.log(player)
+    })
+  })
 })
 
 onUnmounted(() => {
   try {
     console.log('销毁依赖')
-    player.get(pck.Player).destory()
-    player.get(pck.OutlineService).destory()
-    player.get(pck.DialogProvider).destory()
-    player.get(pck.AnimeProvider).destory()
-    player.get(pck.Structurer).destory()
-    player.get(pck.ThemeProvider).destory()
-    player.get(pck.RootEventService).destory()
-    player.get(pck.AnimeEventService).destory()
+    player.get(Player).destory()
+    player.get(OutlineService).destory()
+    player.get(DialogProvider).destory()
+    player.get(AnimeProvider).destory()
+    player.get(Structurer).destory()
+    player.get(ThemeProvider).destory()
+    player.get(RootEventService).destory()
+    player.get(AnimeEventService).destory()
     player.destroy()
     console.log('编辑器是否已经销毁：' + player.destroyed)
   } catch (error) {
@@ -121,14 +112,14 @@ onUnmounted(() => {
         <div ref="scrollerRef" class="product-scroller">
           <!-- 文章头部 -->
           <div class="product-header">
-            <div class="product-header-item">作者：{{ state.author.penname }}</div>
+            <div class="product-header-item">作者：{{ state.penname }}</div>
             <div class="product-header-item">时间：{{ dayjs(state.createAt).format('YYYY-MM-DD HH:mm:ss') }}</div>
-            <div class="product-header-item">字数：{{ state.detail.wordage }}</div>
-            <div class="product-header-item" v-if="state.type === 'course' && state.detail.duration">
+            <div class="product-header-item">字数：{{ state.wordage }}</div>
+            <div class="product-header-item" v-if="state.type === 'course' && state.duration">
               时长：{{
                 dayjs()
-                  .minute(Math.floor(state.detail.duration / 60))
-                  .second(state.detail.duration % 60)
+                  .minute(Math.floor(state.duration / 60))
+                  .second(state.duration % 60)
                   .format('mm:ss')
               }}
             </div>

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Article } from './article.entity'
 import { Repository } from 'typeorm'
 import { UserService } from 'src/user/user.service'
-import { ArticleFilter, CreateArticleDto, ParseArticleDto } from './dto'
+import { AllotArticleDto, ArticleFilter, CreateArticleDto, ParseArticleDto } from './dto'
 import * as UUID from 'uuid'
 import path from 'path'
 import fs from 'fs'
@@ -13,11 +13,12 @@ import {
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate'
 import { UploadfileService } from 'src/uploadfile/uploadfile.service'
-import { Column } from 'src/column/column.entity'
+import { Album } from 'src/album/album.entity'
 import { RemovedEnum } from 'src/enum'
 import { ConfigService } from '@nestjs/config'
 import { User } from 'src/user/user.entity'
 import { Authcode } from 'src/authcode/authcode.entity'
+import { commonConfig } from 'src/config'
 
 @Injectable()
 export class ArticleService {
@@ -28,8 +29,8 @@ export class ArticleService {
     private usersRepository: Repository<User>,
     @InjectRepository(Authcode)
     private authcodesRepository: Repository<Authcode>,
-    @InjectRepository(Column)
-    private columnsRepository: Repository<Column>,
+    @InjectRepository(Album)
+    private albumsRepository: Repository<Album>,
     private readonly fileService: UploadfileService,
     private readonly configService: ConfigService,
     // private readonly userService: UserService
@@ -127,7 +128,7 @@ export class ArticleService {
       article.keyframeSequence = keyframeSequence
       article.subtitleSequence = subtitleSequence
       article.subtitleKeyframeSequence = subtitleKeyframeSequence
-
+      console.log('解析成功')
       return this.articlesRepository.save(article)
     } catch (error) {
       throw error
@@ -143,13 +144,13 @@ export class ArticleService {
     try {
       const result = await paginate<Article>(this.articlesRepository, options, {
         where: { ...filter, userId },
-        relations: ['authcode', 'column'],
+        relations: ['authcode', 'album'],
         select: [
           'id',
           'UID',
           'editionId',
           'fromEditionId',
-          'columnId',
+          'albumId',
           'isParsed',
           'title',
           'msg',
@@ -187,14 +188,15 @@ export class ArticleService {
     }
   }
 
-  async allot(id: string, columnId: string, userId: string) {
+  async allot(dto: AllotArticleDto, userId: string) {
     try {
-      const article = await this.articlesRepository.findOneBy({ id, userId })
-      const column = await this.columnsRepository.findOneBy({ id: columnId })
-      article.column = column 
-      article.columnId = columnId
-      const result = await this.articlesRepository.save(article)
-      return result
+      const { articleId, albumId } = dto
+      const article = await this.articlesRepository.findOneBy({ id: articleId, userId })
+      const album = await this.albumsRepository.findOneBy({ id: albumId })
+      article.album = album 
+      article.albumId = albumId
+      await this.articlesRepository.save(article)
+      return album
     } catch (error) {
       throw error
     }
@@ -213,8 +215,8 @@ export class ArticleService {
         relations: ['user']
       })
       if (!article) throw new Error('文章不存在！')
-      const prefix = this.configService.get('common.staticPrefix')
-      article.avatar = article.avatar ? prefix + article.avatar.split(prefix)[1] : ''
+      const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+      article.avatar = article.avatar ? common.staticPrefix + article.avatar.split(common.publicDir.slice(1))[1] : ''
       return article
     } catch (error) {
       throw error
@@ -225,10 +227,10 @@ export class ArticleService {
     try {
       const result = await paginate<Article>(this.articlesRepository, options, {
         where: { ...filter },
-        relations: ['column'],
+        relations: ['album'],
         select: {
           id: true,
-          columnId: true,
+          albumId: true,
           cover: true,
           title: true,
           abbrev: true,

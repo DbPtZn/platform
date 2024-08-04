@@ -6,13 +6,13 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { databaseConfig, jwtConfig, commonConfig } from './config'
 import { AuthcodeModule } from './authcode/authcode.module'
-import { ColumnModule } from './column/column.module'
 import { UploadfileModule } from './uploadfile/uploadfile.module'
 import { UserModule } from './user/user.module'
 import { VarticleModule } from './varticle/varticle.module'
 import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from './logger/logger.module'
 import { ReceiverModule } from './receiver/receiver.module'
+import { AlbumModule } from './album/album.module';
 
 @Module({
   imports: [
@@ -44,13 +44,13 @@ import { ReceiverModule } from './receiver/receiver.module'
       }
     }),
     AuthcodeModule,
-    ColumnModule,
     UploadfileModule,
     UserModule,
     VarticleModule,
     AuthModule,
     LoggerModule,
-    ReceiverModule
+    ReceiverModule,
+    AlbumModule
   ],
   controllers: [AppController],
   providers: [AppService]

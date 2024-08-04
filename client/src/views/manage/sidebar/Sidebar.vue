@@ -1,21 +1,21 @@
 <script lang="ts" setup>
 import { NButton, NInput, useDialog, useMessage, useThemeVars, type DropdownOption } from 'naive-ui'
-import CreateColumnForm from './private/CreateColumnForm.vue'
+import CreateAlbumForm from './private/CreateAlbumForm.vue'
 import { computed, h, onMounted, ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import { VueDraggable, type SortableEvent } from 'vue-draggable-plus'
 import useStore from '@/store'
-import ColumnItem from './private/ColumnItem.vue'
-import type { Column } from '@/types'
+import AlbumItem from './private/AlbumItem.vue'
 import { useRouter } from 'vue-router'
+import { Album } from '@/types'
 const themeVars = useThemeVars()
 const message = useMessage()
 const dialog = useDialog()
 const router = useRouter()
-const { columnListStore, columnStore, userStore } = useStore('manage')
+const { albumListStore, albumStore, userStore } = useStore('manage')
 onMounted(() => {
   // 获取数据
-  columnListStore.get()
+  albumListStore.get()
 })
 
 /** 折叠面板 */
@@ -26,7 +26,7 @@ function handleExpandedNamesChange(args: Array<any>) {
 /** 显示未分配管理 */
 // function handleUnfiledShow() {}
 /** 专栏相关方法 */
-const columnMethods = {
+const albumMethods = {
   /** 添加专栏按钮 */
   handleAddClick(ev: PointerEvent) {
     ev.preventDefault()
@@ -35,10 +35,10 @@ const columnMethods = {
       title: '新建专栏',
       icon: () => h(Icon, { icon: 'material-symbols:create-new-folder-outline-rounded', style: { marginBottom: '8px' } }),
       content: () =>
-        h(CreateColumnForm, {
+        h(CreateAlbumForm, {
           onSubmit(res) {
             // console.log(res)
-            // columnListStore.create(res)
+            albumListStore.create(res)
             dialog.destroyAll()
           }
         })
@@ -84,7 +84,7 @@ const columnMethods = {
           onClick: () => {
             const newname = ref(collection.name)
             dialog.create({
-              icon: () => h(Icon, { icon: 'DriveFileRenameOutlineFilled', size: '24px' }),
+              icon: () => h(Icon, { icon: 'DriveFileRenameOutlineFilled', height: '24px' }),
               title: '文件夹重命名',
               content: () =>
                 h(NInput, {
@@ -148,19 +148,19 @@ const dropMethods = {
   handleDragOver() {},
   handleDragLeave() {}
 }
-const data = computed(() => columnListStore.data.sort((a, b) => {
-  const sequence = userStore.columnSequence
+const data = computed(() => albumListStore.data.sort((a, b) => {
+  const sequence = userStore.albumSequence
   return sequence!.indexOf(a.id) - sequence!.indexOf(b.id)
 }))
 function handleMove(event: SortableEvent) {
   const oldIndex = event.oldIndex
   const newIndex = event.newIndex
-  const columnId = event.item.id
-  if(oldIndex === undefined || newIndex === undefined || columnId === undefined) return
-  userStore.updateColumnSequence(oldIndex, newIndex, columnId)
+  const albumId = event.item.id
+  if(oldIndex === undefined || newIndex === undefined || albumId === undefined) return
+  userStore.updateColumnSequence(oldIndex, newIndex, albumId)
 }
-function handleColumnClick(column: Column) {
-  columnStore.fetch(column.id)
+function handleColumnClick(album: Album) {
+  albumStore.fetchAndSet(album.id)
 }
 </script>
 <template>
@@ -170,7 +170,7 @@ function handleColumnClick(column: Column) {
           <router-link class="collapse-item" to="/manage/auth">
             <n-button class="collapse-item-btn" size="large" quaternary block>
                 <n-space align="center">
-                  <Icon icon="hugeicons:authorized" :size="'24'" />
+                  <Icon icon="hugeicons:authorized" :height="24" />
                   <span>授权管理</span>
                 </n-space>
             </n-button>
@@ -196,7 +196,7 @@ function handleColumnClick(column: Column) {
               @drop="dropMethods.handleDrop($event, '', false)"
             >
               <n-space align="center">
-                <Icon icon="material-symbols-light:folder-data-outline-rounded" :size="'24'" />
+                <Icon icon="material-symbols-light:folder-data-outline-rounded" :height="24" />
                 <span>稿件管理</span>
               </n-space>
             </n-button>
@@ -205,7 +205,7 @@ function handleColumnClick(column: Column) {
         <!-- 折叠面板项 -->
         <n-collapse class="collapse-wrapper" :expanded-names="expandedNames" @update:expanded-names="handleExpandedNamesChange">
           <template #arrow>
-            <Icon icon="material-symbols:arrow-right-rounded"  :size="'24'"/>
+            <Icon icon="material-symbols:arrow-right-rounded"  :height="24"/>
           </template>
           <!-- 作品专栏 -->
           <n-collapse-item class="collapse-item" name="1">
@@ -213,10 +213,10 @@ function handleColumnClick(column: Column) {
               <n-button class="collapse-item-btn" text size="large">作品专栏</n-button>
             </template>
             <template #header-extra>
-              <Icon icon="material-symbols:add-rounded"  :size="'24'" @click="columnMethods.handleAddClick" />
+              <Icon icon="material-symbols:add-rounded"  :height="'24'" @click="albumMethods.handleAddClick" />
             </template>
             <VueDraggable class="draggable" handle=".move" v-model="data" :itemKey="'id'" @end="handleMove($event)">
-              <ColumnItem v-for="item in data" :key="item.id" :id="item.id" :item="item" @click="handleColumnClick(item)" />
+              <AlbumItem v-for="item in data" :key="item.id" :id="item.id" :item="item" @click="handleColumnClick(item)" />
             </VueDraggable>
           </n-collapse-item>
           <!-- 轮播管理 -->

@@ -8,24 +8,20 @@ import useStore from '@/store'
 import dayjs from 'dayjs'
 import '@textbus/editor/bundles/textbus.min.css'
 import { useParser } from './hooks/useParser'
-// import type { AllotArticleDto, ParseArticleDto } from '@/dto'
 import { RemovedEnum } from '@/enums'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 type Model = Submission
-const { userStore, submissionStore, columnListStore } = useStore('manage')
+const { userStore, submissionStore, albumListStore } = useStore('manage')
 const message = useMessage()
 const dialog = useDialog()
 const themeVars = useThemeVars()
 const router = useRouter()
-// const user = ref<UserType>()
-const id = computed(() => router.currentRoute.value.query.id as string)
-const page = computed(() => Number(router.currentRoute.value.query.page))
+// const id = computed(() => router.currentRoute.value.query.id as string)
+// const page = computed(() => Number(router.currentRoute.value.query.page))
 // const docs = computed<Submission[]>(() => submissionStore.items)
 onMounted(() => {
-  // 考虑在离开页面的时候在 store 保存当前的状态(分页、id)
-  // 返回稿件管理页面时恢复状态
-  console.log(submissionStore.items.length)
+  // 初始载入时，自动加载数据
   if(submissionStore.items.length === 0) {
     submissionStore.fetchAndSet({
       filter: { removed: RemovedEnum.NEVER },
@@ -34,21 +30,22 @@ onMounted(() => {
     })
   }
 })
-onUnmounted(() => {
-  console.log('离开')
-  // submissionStore.$reset()
-})
+// onUnmounted(() => {
+//   console.log('离开')
+// })
+/** 渲染图标 */
 const renderIcon = (name: string) => {
   return h(Icon, { icon: name, height: 'auto' })
 }
+/** 解析 */
 const handleParse = (row: Model) => {
-  submissionStore.getUnparsedFile<ParsedArticleFile>(row.id).then(async res => {
-    console.log(res)
+  submissionStore.getUnparsedFile(row.id).then(async res => {
+    // console.log(res)
     const data = res.data
     try {
       const parser = useParser()
       const result = await parser.parseContent(data.content)
-      console.log(result)
+      // console.log(result)
       submissionStore.parse({
         id: row.id,
         content: result.content,
@@ -71,37 +68,6 @@ const handleParse = (row: Model) => {
       console.log(error)
     }
   })
-  // $fetch('/api/manage/parse/' + row.id).then(async (res: any) => {
-  //   try {
-  //     const parser = useParser()
-  //     const result = await parser.parseContent(res.content)
-  //     const dto: ParseArticleDto = {
-  //       id: row.id,
-  //       content: result.content,
-  //       cover: result.cover.split(window.location.host)[1],
-  //       duration: res.duration, // 音频时长
-  //       promoterSequence: res.promoterSequence, // 启动子序列
-  //       keyframeSequence: res.keyframeSequence, // 关键帧序列
-  //       subtitleSequence: res.subtitleSequence, // 字幕序列
-  //       subtitleKeyframeSequence: res.subtitleKeyframeSequence // 字幕关键帧序列
-  //     }
-  //     $fetch('/api/manage/article/parse', {
-  //       method: 'POST',
-  //       body: dto
-  //     })
-  //       .then(() => {
-  //         message.success('解析成功')
-  //         row.abbrev = result.content.replace(/<[^>]+>/g, '').slice(0, 100)
-  //         row.isParsed = true
-  //       })
-  //       .catch(error => {
-  //         console.log(error)
-  //         message.error('解析失败,项目文件可能损坏或不符合稿件规范！')
-  //       })
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // })
 }
 
 const handleOpen = (row: Model) => {
@@ -120,14 +86,14 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
     },
     {
       title: '专栏',
-      key: 'column',
+      key: 'album',
       resizable: true,
       width: '8%',
       ellipsis: {
         tooltip: true
       },
       render(row) {
-        return row.column?.name
+        return row.album?.name
       }
     },
     {
@@ -250,39 +216,41 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                   size: 'small',
                   onClick: () => {
                     if(row.isParsed) {
-                      const opitons = columnListStore.data.map(item => {
+                      const opitons = albumListStore.data.map(item => {
                         return {
                           key: item.id,
                           label: item.name,
                           value: item.id
                         }
                       })
-                      const columnVal = ref(row.column?.id)
+                      const albumVal = ref(row.album?.id)
                       dialog.create({
                         title: '选择一个专栏',
                         content: () => h(NSelect, {
-                          value: columnVal.value,
+                          value: albumVal.value,
                           options: opitons,
                           onUpdateValue: (value) => {
-                            columnVal.value = value
+                            albumVal.value = value
                           }
                         }),
                         icon: () => renderIcon('material-symbols-light:folder-data-rounded'),
                         positiveText: '确定',
                         negativeText: '取消',
                         onPositiveClick: () => {
-                          // const dto: AllotArticleDto = {
-                          //   articleId: row.id,
-                          //   columnId: columnVal.value
-                          // }
+                          albumVal.value && submissionStore.allot({
+                            articleId: row.id,
+                            albumId: albumVal.value
+                          }).then(() => {
+                            message.success('专栏分配成功')
+                          })
                           // $fetch(`/api/manage/article/allot`, {
                           //   method: 'POST',
                           //   body: dto
                           // }).then(() => {
                           //   const index = docs.value.findIndex(item => item.id === row.id)
-                          //   const column = columnListStore.data.find(item => item.id === columnVal.value)
-                          //   if(!column) return
-                          //   docs.value[index].column = column
+                          //   const album = albumListStore.data.find(item => item.id === albumVal.value)
+                          //   if(!album) return
+                          //   docs.value[index].album = album
                           // })
                         },
                         onNegativeClick: () => {
@@ -322,13 +290,13 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
 }
 
 /** 展示列 */
-const cities = ref(['type', 'title', 'abbrev', 'authcode', 'column', 'msg', 'author', 'isParsed', 'updateAt', 'createAt', 'actions'])
+const cities = ref(['type', 'title', 'abbrev', 'authcode', 'album', 'msg', 'author', 'isParsed', 'updateAt', 'createAt', 'actions'])
 const columnSelect = ref(false)
 const columns = computed(() => createColumns({ play(row) {} }).filter((c: any) => cities.value.includes(c.key)))
-// console.log(columns)
+// console.log(albums)
 
 /** 排序 */
-// const columnsRef = ref(columns)
+
 function handleSorterChange(sorter: any) {
   columns.value.forEach((column: any) => {
     /** column.sortOrder !== undefined means it is uncontrolled */
@@ -461,7 +429,7 @@ function handlePageChange(page: number) {
           <n-checkbox-group v-model:value="cities">
             <n-space item-style="display: flex;">
               <n-checkbox value="type" label="类型" />
-              <n-checkbox value="column" label="专栏" />
+              <n-checkbox value="album" label="专栏" />
               <n-checkbox value="title" label="标题" />
               <n-checkbox value="abbrev" label="内容" />
               <n-checkbox value="authcode" label="授权来源" />

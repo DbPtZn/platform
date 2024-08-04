@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { HomeView } from '@/views'
+// import { Home } from '@/views'
 </script>
 
 <template>
   <div class="home-page">
-    <HomeView />
+    <!-- <Home /> -->
   </div>
 </template>
 

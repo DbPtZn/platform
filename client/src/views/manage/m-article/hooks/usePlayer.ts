@@ -1,10 +1,53 @@
 /** 导出编辑器配置 */
 // import type { EditorOptions } from '@textbus/editor'
 
-import type { Injector } from '@textbus/core'
-import type { Editor, EditorOptions } from '@textbus/editor'
-import type { CaretLimit } from '@textbus/platform-browser'
-import type { CourseData } from '@/editor'
+import { fromEvent, type Injector } from '@textbus/core'
+import {
+  LinkJumpTipPlugin,
+  defaultComponentLoaders,
+  defaultComponents,
+  defaultFormatLoaders,
+  defaultFormatters,
+  type Editor,
+  type EditorOptions,
+  createEditor
+} from '@textbus/editor'
+import { Input, type CaretLimit } from '@textbus/platform-browser'
+import {
+  rootPlayerComponent,
+  type CourseData,
+  rootPlayerComponentLoader,
+  colorFormatLoader,
+  colorFormatter,
+  textBackgroundColorFormatLoader,
+  textBackgroundColorFormatter,
+  AnimeEventService,
+  AnimeProvider,
+  DialogProvider,
+  OutlinePlugin,
+  OutlineService,
+  Player,
+  PlayerContextMenuPlugin,
+  RootEventService,
+  Structurer,
+  ThemeProvider,
+  animeIgnoreComponent,
+  animeIgnoreComponentLoader,
+  animePlayerComponent,
+  animePlayerComponentLoader,
+  animePlayerFormatLoader,
+  animePlayerFormatter,
+  forwardTool,
+  replayTool,
+  rewindTool,
+  speedDownTool,
+  speedUpTool,
+  startTool,
+  stopTool,
+  volumeDownTool,
+  volumeUpTool,
+  Controller,
+} from '@/editor'
 import type { Article, PublicArticleType } from '@/types'
 import { Ref, watch } from 'vue'
 import useStore from '@/store'
@@ -18,45 +61,6 @@ async function getConfig(args: {
   content?: string
 }) {
   const { rootRef, editorRef, scrollerRef, outlineRef, controllerRef, content } = args
-  // console.log(outlineRef)
-  const { defaultComponentLoaders, defaultComponents, defaultFormatLoaders, defaultFormatters, LinkJumpTipPlugin } = await import('@textbus/editor')
-  const { fromEvent } = await import('@textbus/core')
-  const { Input } = await import('@textbus/platform-browser')
-  const {
-    colorFormatter,
-    textBackgroundColorFormatLoader,
-    colorFormatLoader,
-    textBackgroundColorFormatter,
-    animeIgnoreComponentLoader,
-    animePlayerComponent,
-    animeIgnoreComponent,
-    animePlayerComponentLoader,
-    animePlayerFormatter,
-    animePlayerFormatLoader,
-    rootPlayerComponent,
-    rootPlayerComponentLoader,
-    speedDownTool,
-    rewindTool,
-    startTool,
-    forwardTool,
-    speedUpTool,
-    replayTool,
-    stopTool,
-    volumeUpTool,
-    volumeDownTool,
-    Controller,
-    Player,
-    OutlineService,
-    DialogProvider,
-    AnimeProvider,
-    RootEventService,
-    AnimeEventService,
-    Structurer,
-    ThemeProvider,
-    PlayerContextMenuPlugin,
-    OutlinePlugin
-  } = await import('@/editor')
-  // const { Injector } = await import('@textbus/core')
   const config: EditorOptions = {
     theme: 'darkline',
     autoFocus: true,
@@ -132,17 +136,11 @@ export function usePlayer(args: {
   outlineRef?: Ref<HTMLElement>
 }) {
   const { data, rootRef, editorRef, scrollerRef, outlineRef, controllerRef } = args
-  // const { debounceTime } = await import('@textbus/core')
   let editor: Editor
   return new Promise<Editor>(async (resolve, reject) => {
-    // console.log('create editor')
-    const { createEditor } = await import('@textbus/editor')
-    const { Player, OutlineService, DialogProvider, AnimeProvider, Structurer, ThemeProvider, RootEventService, AnimeEventService } = await import(
-      '@/editor'
-    )
     const courseData: CourseData = {
       audio: data.audio,
-      duration: data.detail?.duration || 0,
+      duration: data.duration || 0,
       promoterSequence: data.promoterSequence,
       keyframeSequence: data.keyframeSequence,
       subtitleSequence: data.subtitleSequence,
