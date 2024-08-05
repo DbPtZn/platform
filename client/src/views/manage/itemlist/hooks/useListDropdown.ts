@@ -28,7 +28,7 @@ export function useListDropDown () {
       // 分配
       {
         label: '分配',
-        show: !target.columnId,
+        show: !target.albumId,
         key: 'distribution',
         props: {
           onClick: () => {
@@ -41,11 +41,11 @@ export function useListDropDown () {
                 //     return { id: item.id, label: item.name }
                 //   }),
                 //   submit: res => {
-                //     if (!res.columnId) return
+                //     if (!res.albumId) return
                 //     // productStore
                 //     //   .allocation({
                 //     //     id: target.id,
-                //     //     columnId: res.columnId,
+                //     //     albumId: res.albumId,
                 //     //     isPublish: target.isPublish
                 //     //   })
                 //     //   .then(res => {
@@ -60,8 +60,8 @@ export function useListDropDown () {
         }
       },
       {
-        label: `${target.isPublish ? '撤回' : '发布'}`,
-        show: !!target.columnId,
+        label: `${target.isPublished ? '撤回' : '发布'}`,
+        show: !!target.albumId,
         key: 'publish',
         props: {
           onClick: () => {
@@ -102,7 +102,7 @@ export function useListDropDown () {
                 if (newTitle.value === '') message.error('作品名称不能为空！')
                 if (newTitle.value && target.id) {
                   // productStore.updateTitle(target.id, newTitle.value).then(res => {
-                  //   if (target.columnId === collectionStore.id) {
+                  //   if (target.albumId === collectionStore.id) {
                   //     collectionStore.subfiles.some((item, index, arr) => {
                   //       if (item.id === target.id) {
                   //         arr[index].title = newTitle.value
@@ -122,7 +122,7 @@ export function useListDropDown () {
         label: '查看版本',
         key: 'version',
         disabled: true,
-        show: !!target.columnId,
+        show: !!target.albumId,
         props: {
           onClick: () => {
             //
@@ -132,7 +132,7 @@ export function useListDropDown () {
       {
         label: '移出合辑',
         key: 'moveout',
-        show: !!target.columnId,
+        show: !!target.albumId,
         props: {
           onClick: () => {
             // productStore.revoke(target.id).then(res => {
@@ -144,7 +144,7 @@ export function useListDropDown () {
       {
         label: '移动',
         key: 'move',
-        show: !!target.columnId,
+        show: !!target.albumId,
         props: {
           onClick: () => {
             dialog.create({
@@ -156,11 +156,11 @@ export function useListDropDown () {
                 //     return { id: item.id, label: item.name }
                 //   }),
                 //   submit: res => {
-                //     if (!res.columnId) return
+                //     if (!res.albumId) return
                 //     productStore
                 //       .allocation({
                 //         id: target.id,
-                //         columnId: res.columnId,
+                //         albumId: res.albumId,
                 //         isPublish: target.isPublish
                 //       })
                 //       .then(res => {
@@ -180,7 +180,7 @@ export function useListDropDown () {
         props: {
           onClick: () => {
             // productStore.remove(target.id).then(res => {
-            //   if(target.columnId === collectionStore.id) {
+            //   if(target.albumId === collectionStore.id) {
             //     collectionStore.removeSubfileById(target.id)
             //   }
             // })

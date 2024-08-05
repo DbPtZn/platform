@@ -49,7 +49,7 @@ export class UserService {
         nickname,
         encryptedPassword,
         receiverConfig,
-        columnSequence: [],
+        albumSequence: [],
         info,
         UID
       }

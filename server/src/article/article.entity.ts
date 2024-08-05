@@ -46,11 +46,13 @@ export class Article {
     default: 'other'
   })
   type: 'note' | 'course' | 'other'
+
   @Column({
     type: 'boolean',
     default: false
   })
   isParsed: boolean
+
   @Column({
     type: 'varchar',
     default: ''
@@ -130,7 +132,13 @@ export class Article {
     type: 'boolean',
     default: false
   })
-  isPublish: boolean
+  isPublished: boolean
+
+  @Column({
+    type: 'boolean',
+    default: true
+  })
+  isDisplayed: boolean // 是否展示（是否在博客编辑主页进行展示，允许某些公开的文章，可以不展示）
 
   @Column({
     type: 'varchar',
@@ -205,7 +213,8 @@ export class Article {
   createDate() {
     this.createAt = new Date()
     this.updateAt = new Date()
-    this.isPublish = false
+    this.isPublished = false
+    this.isDisplayed = true
   }
 
   /** 实体更新时自动更新时间 */

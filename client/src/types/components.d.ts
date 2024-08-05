@@ -7,7 +7,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    HelloWorld: typeof import('./../components/HelloWorld.vue')['default']
     Icon: typeof import('./../components/Icon.vue')['default']
     NAutoComplete: typeof import('naive-ui')['NAutoComplete']
     NAvatar: typeof import('naive-ui')['NAvatar']
@@ -34,6 +33,7 @@ declare module 'vue' {
     NPageHeader: typeof import('naive-ui')['NPageHeader']
     NPagination: typeof import('naive-ui')['NPagination']
     NPopselect: typeof import('naive-ui')['NPopselect']
+    NResult: typeof import('naive-ui')['NResult']
     NSelect: typeof import('naive-ui')['NSelect']
     NSpace: typeof import('naive-ui')['NSpace']
     NSwitch: typeof import('naive-ui')['NSwitch']

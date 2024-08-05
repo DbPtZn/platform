@@ -4,16 +4,18 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import blogRoutes from './blog'
 import managerRoutes from './manage'
 import platformRoutes from './platform'
+import errorRoutes from './error'
 // import useStore from '@/store'
 // import errorRoutes from './error'
 const routes: Array<RouteRecordRaw> = [
-  {
-    path: '/',
-    redirect: { name: RouteNameEnum.BLOG },
-  },
+  // {
+  //   path: '/',
+  //   redirect: { name: RouteNameEnum },
+  // },
   ...managerRoutes,
   ...blogRoutes,
-  ...platformRoutes
+  ...platformRoutes,
+  ...errorRoutes
 ]
 
 const router = createRouter({

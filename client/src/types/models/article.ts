@@ -25,7 +25,8 @@ export interface Article {
   subtitleSequence: string[]
   subtitleKeyframeSequence: number[]
   tags: string[]
-  isPublish: boolean
+  isPublished: boolean
+  isDisplayed: boolean
   removed: RemovedEnum
   penname: string
   email: string
@@ -56,7 +57,8 @@ export type Submission = Pick<
   | 'fromEditionId'
   | 'albumId'
   | 'isParsed'
-  | 'isPublish'
+  | 'isPublished'
+  | 'isDisplayed'
   | 'title'
   | 'msg'
   | 'editorVersion'
@@ -108,7 +110,7 @@ export type Subfile = Pick<
   | 'authcodeId'
   | 'albumId'
   | 'isParsed'
-  | 'isPublish'
+  | 'isPublished'
   | 'title'
   | 'msg'
   | 'editorVersion'
@@ -167,7 +169,7 @@ export type ArticleListItem = Omit<
 //   | 'fromEditionId'
 //   | 'albumId'
 //   | 'isParsed'
-//   | 'isPublish'
+//   | 'isPublished'
 //   | 'title'
 //   | 'msg'
 //   | 'editorVersion'
@@ -208,7 +210,7 @@ export type ArticleListItem = Omit<
 // fromEditionId: '',
 // authcodeId: '',
 // isParsed: boolean,
-// isPublish: boolean,
+// isPublished: boolean,
 // title: '',
 // msg: '',
 // editorVersion: '',

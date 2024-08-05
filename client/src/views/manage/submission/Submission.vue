@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { NButton, NIcon, NSelect, NSpace, useDialog, useMessage, useThemeVars } from 'naive-ui'
-import type { DataTableColumns, PaginationInfo } from 'naive-ui'
+import type { DataTableColumns, DropdownOption, PaginationInfo } from 'naive-ui'
 import _ from 'lodash'
 import { onMounted, createApp, computed, ref, onUnmounted, h, nextTick } from 'vue'
 import type { ParsedArticleFile, Submission } from '@/types'
@@ -22,11 +22,11 @@ const router = useRouter()
 // const docs = computed<Submission[]>(() => submissionStore.items)
 onMounted(() => {
   // 初始载入时，自动加载数据
-  if(submissionStore.items.length === 0) {
+  if (submissionStore.items.length === 0) {
     submissionStore.fetchAndSet({
       filter: { removed: RemovedEnum.NEVER },
-      limit: 2,
-      page:  1
+      limit: 10,
+      page: 1
     })
   }
 })
@@ -46,15 +46,16 @@ const handleParse = (row: Model) => {
       const parser = useParser()
       const result = await parser.parseContent(data.content)
       // console.log(result)
-      submissionStore.parse({
-        id: row.id,
-        content: result.content,
-        cover: result.cover.split(window.location.host)[1],
-        promoterSequence: data.promoterSequence, // 启动子序列
-        keyframeSequence: data.keyframeSequence, // 关键帧序列
-        subtitleSequence: data.subtitleSequence, // 字幕序列
-        subtitleKeyframeSequence: data.subtitleKeyframeSequence // 字幕关键帧序列
-      })
+      submissionStore
+        .parse({
+          id: row.id,
+          content: result.content,
+          cover: result.cover.split(window.location.host)[1],
+          promoterSequence: data.promoterSequence, // 启动子序列
+          keyframeSequence: data.keyframeSequence, // 关键帧序列
+          subtitleSequence: data.subtitleSequence, // 字幕序列
+          subtitleKeyframeSequence: data.subtitleKeyframeSequence // 字幕关键帧序列
+        })
         .then(() => {
           message.success('解析成功')
           row.abbrev = result.content.replace(/<[^>]+>/g, '').slice(0, 100)
@@ -69,10 +70,34 @@ const handleParse = (row: Model) => {
     }
   })
 }
-
 const handleOpen = (row: Model) => {
   message.success(row.id)
   router.push('/manage/article/' + row.id)
+}
+const handlePublish = (row: Model, isPublished: boolean) => {
+  // submissionStore.publish({
+  //   id: row.id,
+  //   isPublished: isPublished
+  // })
+}
+const handleDisplay = (row: Model, isDisplayed: boolean) => {
+  // submissionStore.display({
+  //   id: row.id,
+  //   isDisplayed: isDisplayed
+  // })
+}
+const handleRemove = (row: Model) => {
+  dialog.warning({
+    title: '删除稿件',
+    content: '是否删除稿件',
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      // submissionStore.remove({
+      //   id: row.id
+      // })
+    }
+  })
 }
 
 const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColumns<Model> => {
@@ -151,8 +176,22 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       title: '解析状态',
       key: 'isParsed',
       resizable: true,
-      width: '10%',
+      width: '6%',
       render: row => renderIcon(row.isParsed ? 'mdi:email-open' : 'material-symbols-light:mail-lock')
+    },
+    {
+      title: '是否公开',
+      key: 'isPublished',
+      resizable: true,
+      width: '6%',
+      render: row => renderIcon(row.isPublished ? 'material-symbols:share' : 'material-symbols:share-off')
+    },
+    {
+      title: '是否展示',
+      key: 'isDisplayed',
+      resizable: true,
+      width: '6%',
+      render: row => renderIcon(row.isDisplayed ? 'material-symbols:visibility-rounded' : 'material-symbols:visibility-off')
     },
     {
       title: '更新时间',
@@ -215,7 +254,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                   tertiary: true,
                   size: 'small',
                   onClick: () => {
-                    if(row.isParsed) {
+                    if (row.isParsed) {
                       const opitons = albumListStore.data.map(item => {
                         return {
                           key: item.id,
@@ -226,23 +265,27 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                       const albumVal = ref(row.album?.id)
                       dialog.create({
                         title: '选择一个专栏',
-                        content: () => h(NSelect, {
-                          value: albumVal.value,
-                          options: opitons,
-                          onUpdateValue: (value) => {
-                            albumVal.value = value
-                          }
-                        }),
+                        content: () =>
+                          h(NSelect, {
+                            value: albumVal.value,
+                            options: opitons,
+                            onUpdateValue: value => {
+                              albumVal.value = value
+                            }
+                          }),
                         icon: () => renderIcon('material-symbols-light:folder-data-rounded'),
                         positiveText: '确定',
                         negativeText: '取消',
                         onPositiveClick: () => {
-                          albumVal.value && submissionStore.allot({
-                            articleId: row.id,
-                            albumId: albumVal.value
-                          }).then(() => {
-                            message.success('专栏分配成功')
-                          })
+                          albumVal.value &&
+                            submissionStore
+                              .allot({
+                                articleId: row.id,
+                                albumId: albumVal.value
+                              })
+                              .then(() => {
+                                message.success('专栏分配成功')
+                              })
                           // $fetch(`/api/manage/article/allot`, {
                           //   method: 'POST',
                           //   body: dto
@@ -280,7 +323,37 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                   }
                 },
                 { default: () => (row.isParsed ? '分配' : '拒稿') }
-              )
+              ),
+              row.isParsed &&
+                h(
+                  NButton,
+                  {
+                    strong: true,
+                    tertiary: true,
+                    size: 'small',
+                    onClick: (e: MouseEvent) => {
+                      targetRow.value = row
+                      e.preventDefault()
+                      e.stopPropagation()
+                      showDropdownRef.value = false
+                      let target = e.target as HTMLElement
+                      if(target.tagName !== 'BUTTON') {
+                        target = target.parentElement as HTMLElement
+                      }
+                      const rect = target.getBoundingClientRect()
+                      nextTick().then(() => {
+                        showDropdownRef.value = true
+                        xRef.value = rect.x
+                        yRef.value = rect.y + rect.height
+                      })
+                    }
+                  },
+                  {
+                    default: () => {
+                      return '更多'
+                    }
+                  }
+                )
             ]
           }
         )
@@ -290,7 +363,21 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
 }
 
 /** 展示列 */
-const cities = ref(['type', 'title', 'abbrev', 'authcode', 'album', 'msg', 'author', 'isParsed', 'updateAt', 'createAt', 'actions'])
+const cities = ref([
+  'type',
+  'title',
+  'abbrev',
+  'authcode',
+  'album',
+  'msg',
+  'author',
+  'isParsed',
+  'isPublished',
+  'isDisplayed',
+  'updateAt',
+  'createAt',
+  'actions'
+])
 const columnSelect = ref(false)
 const columns = computed(() => createColumns({ play(row) {} }).filter((c: any) => cities.value.includes(c.key)))
 // console.log(albums)
@@ -337,42 +424,103 @@ const rowProps = (row: Model) => {
     }
   }
 }
-// const options = ref<DropdownOption[]>([
-//   {
-//     label: () => (editData.value?.id ? '保存' : '编辑'),
-//     key: 'edit',
-//     props: {
-//       onClick: () => {
-//         // targetRow.value && handleParse(targetRow.value)
-//       }
-//     }
-//   },
-//   {
-//     label: '移除',
-//     key: 'delete',
-//     props: {
-//       onClick: () => {
-//         dialog.create({
-//           title: '是否彻底删除？',
-//           icon: () => renderIcon('material-symbols:do-not-touch-sharp'),
-//           positiveText: '确定',
-//           negativeText: '取消',
-//           onPositiveClick: () => {
-//             // targetRow.value && $fetch(`/api/manage/authcode/delete/${targetRow.value?.id}`, {
-//             //   method: 'delete'
-//             // }).then(() => {
-//             //   const index = data.value.findIndex(row => row.id === targetRow.value?.id)
-//             //   data.value.splice(index, 1)
-//             // })
-//           },
-//           onNegativeClick: () => {
-//             message.error('取消')
-//           }
-//         })
-//       }
-//     }
-//   }
-// ])
+
+const generateOptions = (row: Model | null): DropdownOption[] => {
+  if (!row) return []
+  return [
+    {
+      label: () => (row.isParsed ? '打开' : '解析'),
+      key: 'parseAndOpen',
+      props: {
+        onClick: () => {
+          // targetRow.value && handleParse(targetRow.value)
+        }
+      }
+    },
+    {
+      label: '分配',
+      key: 'allot',
+      show: row.isParsed,
+      props: {
+        onClick: () => {
+          // targetRow.value && handleParse(targetRow.value)
+        }
+      }
+    },
+    {
+      label: () => (row.isPublished ? '取消公开' : '公开'),
+      key: 'publish',
+      show: row.isParsed,
+      props: {
+        onClick: () => {
+          // targetRow.value && handleParse(targetRow.value)
+        }
+      }
+    },
+    {
+      label: () => (row.isPublished ? '取消展示' : '展示'),
+      key: 'display',
+      show: row.isParsed,
+      props: {
+        onClick: () => {
+          // targetRow.value && handleParse(targetRow.value)
+        }
+      }
+    },
+    {
+      label: '拒稿',
+      show: !row.isParsed,
+      key: 'Refusal',
+      props: {
+        onClick: () => {
+          dialog.create({
+            title: '是否彻底删除？',
+            icon: () => renderIcon('material-symbols:do-not-touch-sharp'),
+            positiveText: '确定',
+            negativeText: '取消',
+            onPositiveClick: () => {
+              // targetRow.value && $fetch(`/api/manage/authcode/delete/${targetRow.value?.id}`, {
+              //   method: 'delete'
+              // }).then(() => {
+              //   const index = data.value.findIndex(row => row.id === targetRow.value?.id)
+              //   data.value.splice(index, 1)
+              // })
+            },
+            onNegativeClick: () => {
+              message.error('取消')
+            }
+          })
+        }
+      }
+    },
+    {
+      label: '移除',
+      show: row.isParsed,
+      key: 'delete',
+      props: {
+        onClick: () => {
+          dialog.create({
+            title: '是否彻底删除？',
+            icon: () => renderIcon('material-symbols:do-not-touch-sharp'),
+            positiveText: '确定',
+            negativeText: '取消',
+            onPositiveClick: () => {
+              // targetRow.value && $fetch(`/api/manage/authcode/delete/${targetRow.value?.id}`, {
+              //   method: 'delete'
+              // }).then(() => {
+              //   const index = data.value.findIndex(row => row.id === targetRow.value?.id)
+              //   data.value.splice(index, 1)
+              // })
+            },
+            onNegativeClick: () => {
+              message.error('取消')
+            }
+          })
+        }
+      }
+    }
+  ]
+}
 
 const showSelectOption = ref(submissionStore.isParsed)
 const showSelectOptions = [
@@ -392,22 +540,12 @@ function handleShowSelectOptionUpdate(value) {
 
 /** 翻页 */
 function handlePageChange(page: number) {
-  console.log('page change' + page)
-  // router.push({
-  //   path: router.currentRoute.value.path,
-  //   query: {
-  //     id: id.value,
-  //     page: page,
-  //   }
-  // })
-  
   submissionStore.fetchAndSet({
     filter: { removed: RemovedEnum.NEVER },
-    limit: 2,
+    limit: 10,
     page: page || 1
   })
 }
-
 </script>
 
 <template>
@@ -415,32 +553,28 @@ function handlePageChange(page: number) {
     <div class="header">
       <div class="group">
         <n-flex>
-          <!-- 权限设置 -->
-          <!-- <n-popselect v-model:value="userStore.receiverConfig.status" :options="status" @update:value="handleStatusUpdate">
-            <n-button secondary>
-              {{ status[userStore.receiverConfig.status || 0].label }}
-            </n-button>
-          </n-popselect> -->
           <!-- 显示筛选 -->
           <n-button secondary @click="columnSelect = !columnSelect"> 列可见 </n-button>
         </n-flex>
       </div>
       <div class="group" v-show="columnSelect">
-          <n-checkbox-group v-model:value="cities">
-            <n-space item-style="display: flex;">
-              <n-checkbox value="type" label="类型" />
-              <n-checkbox value="album" label="专栏" />
-              <n-checkbox value="title" label="标题" />
-              <n-checkbox value="abbrev" label="内容" />
-              <n-checkbox value="authcode" label="授权来源" />
-              <n-checkbox value="author" label="作者" />
-              <n-checkbox value="msg" label="稿件备注" />
-              <n-checkbox value="isParsed" label="解析状态" />
-              <n-checkbox value="updateAt" label="更新时间" />
-              <n-checkbox value="createAt" label="创建时间" />
-              <n-checkbox value="actions" label="操作" />
-            </n-space>
-          </n-checkbox-group>
+        <n-checkbox-group v-model:value="cities">
+          <n-space item-style="display: flex;">
+            <n-checkbox value="type" label="类型" />
+            <n-checkbox value="album" label="专栏" />
+            <n-checkbox value="title" label="标题" />
+            <n-checkbox value="abbrev" label="内容" />
+            <n-checkbox value="authcode" label="授权来源" />
+            <n-checkbox value="author" label="作者" />
+            <n-checkbox value="msg" label="稿件备注" />
+            <n-checkbox value="isParsed" label="解析状态" />
+            <n-checkbox value="isPublished" label="是否公开" />
+            <n-checkbox value="isDisplayed" label="是否展示" />
+            <n-checkbox value="updateAt" label="更新时间" />
+            <n-checkbox value="createAt" label="创建时间" />
+            <n-checkbox value="actions" label="操作" />
+          </n-space>
+        </n-checkbox-group>
       </div>
       <div class="group">
         <n-select
@@ -451,30 +585,20 @@ function handlePageChange(page: number) {
         />
       </div>
     </div>
-    <n-data-table
-      :columns="columns"
-      :data="submissionStore.items"
-      :bordered="false"
-      :row-props="rowProps"
-      @update:sorter="handleSorterChange"
-    />
+    <n-data-table :columns="columns" :data="submissionStore.items" :bordered="false" :row-props="rowProps" @update:sorter="handleSorterChange" />
     <div class="footer">
-      <n-pagination 
-        v-model:page="submissionStore.meta.currentPage"
-        :page-count="submissionStore.getTotalPages"
-        @update:page="handlePageChange"
-      />
+      <n-pagination v-model:page="submissionStore.meta.currentPage" :page-count="submissionStore.getTotalPages" @update:page="handlePageChange" />
     </div>
-    <!-- <n-dropdown
+    <n-dropdown
       placement="bottom-start"
       trigger="manual"
       :x="xRef"
       :y="yRef"
-      :options="options"
+      :options="generateOptions(targetRow)"
       :show="showDropdownRef"
       :on-clickoutside="handleClickoutside"
       @select="handleSelect"
-    /> -->
+    />
   </div>
 </template>
 

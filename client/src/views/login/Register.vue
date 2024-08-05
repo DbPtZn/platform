@@ -15,9 +15,9 @@ const themeVars = useThemeVars()
 const { userStore } = useStore('manage')
 /** 表单数据 */
 const model = ref<ModelType>({
-  nickname: 'dbx',
-  account: '261849747@qq.com',
-  password: 'dbx5201314'
+  nickname: '',
+  account: import.meta.env.VITE_ACCOUNT || '',
+  password: import.meta.env.VITE_PASSWORD || ''
 })
 /** 表单规则 */
 const rules: FormRules = {

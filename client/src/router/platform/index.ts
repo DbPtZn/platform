@@ -7,7 +7,7 @@ const platformRoutes: Array<RouteRecordRaw> = [
     name: RouteNameEnum.PLATFORM,
     path: RoutePathEnum.PLATFORM,
     component: () => import(/* webpackChunkName: "about" */ '@/views/platform/home/Home.vue'),
-  },
+  }
 ]
 
 export default platformRoutes

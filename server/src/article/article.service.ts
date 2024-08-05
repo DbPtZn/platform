@@ -152,6 +152,8 @@ export class ArticleService {
           'fromEditionId',
           'albumId',
           'isParsed',
+          'isPublished',
+          'isDisplayed',
           'title',
           'msg',
           'editorVersion',
@@ -212,7 +214,13 @@ export class ArticleService {
           msg: false,
           removed: false
         },
-        relations: ['user']
+        relations: {
+          user: {
+            UID: true as never,
+            nickname: true as never,
+            avatar: true as never,
+          }
+        }
       })
       if (!article) throw new Error('文章不存在！')
       const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
@@ -227,7 +235,7 @@ export class ArticleService {
     return this.articlesRepository.delete({ id, userId })
   }
 
-  async findAll(options: IPaginationOptions, filter: Partial<ArticleFilter>) {
+  async findAllToBlog(options: IPaginationOptions, filter: Partial<ArticleFilter>) {
     // console.log(filter)
     try {
       const result = await paginate<Article>(this.articlesRepository, options, {
@@ -259,10 +267,20 @@ export class ArticleService {
     }
   }
 
-  findOneToBlog(id: string) {
-    return this.articlesRepository.findOne({
-      where: { id },
-      relations: ['user']
-    })
+  async findOneToBlog(id: string) {
+    try {
+      const article = await this.articlesRepository
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.user', 'user')
+      .select(['article', 'user.UID', 'user.nickname', 'user.avatar'])
+      .where('article.id = :id', { id })
+      .getOne()
+      // console.log(article.user)
+      // console.log(article)
+      return article
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
   }
 }

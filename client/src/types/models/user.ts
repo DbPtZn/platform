@@ -4,7 +4,7 @@ export interface User {
   id: string
   UID: string
   account: string
-  encryptedPassword: string
+  // encryptedPassword: string
   nickname: string
   avatar: string
   desc: string

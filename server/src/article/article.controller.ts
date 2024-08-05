@@ -103,7 +103,7 @@ export class ArticleController {
     // console.log(limit)
     // console.log(filter)
     try {
-      const result = await this.articleService.findAll(
+      const result = await this.articleService.findAllToBlog(
         {
           page,
           limit,
@@ -121,11 +121,16 @@ export class ArticleController {
   @Get('/blog/:id')
   async getBlogArticle(@Param('id') id: string, @Req() req, @Res() res) {
     try {
+      // console.log(id)
       const result = await this.articleService.findOneToBlog(id)
+      if(!result.isPublished) {
+        return res.status(307).send({ examining: true, msg: '正在审核中...' })
+      }
       const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
       if(result.audio) {
         result.audio = common.staticPrefix + result.audio.split(common.publicDir.slice(1))[1]
       }
+      // console.log(result.user)
       res.send(result)
     } catch (error) {
       res.status(400).send(error.message)

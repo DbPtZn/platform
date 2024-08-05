@@ -20,7 +20,7 @@ const managerRoutes: Array<RouteRecordRaw> = [
       },
       {
         path: 'article/:id',
-        name: 'article',
+        name: 'marticle',
         component: () => import(/* webpackChunkName: "about" */ '@/views/manage/m-article/MArticle.vue')
       },
       {

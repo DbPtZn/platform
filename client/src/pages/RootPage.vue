@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import useStore from '@/store'
 import { Provider } from '@/components'
+import { computed } from 'vue'
 const { settingStore } = useStore()
+const bgcolor = computed(() => settingStore.theme === 'dark' ? '#000' : '#fff')
 </script>
 <template>
   <Provider>
-    <div class="root" :data-theme="[settingStore.theme ? 'dark-theme' : 'light-theme']">
+    <div class="root" :data-theme="[settingStore.theme === 'dark' ? 'dark-theme' : 'light-theme']">
       <router-view />
     </div>
   </Provider>
@@ -15,5 +17,6 @@ const { settingStore } = useStore()
 .root {
   width: 100%;
   height: 100%;
+  background-color: v-bind('bgcolor');
 }
 </style>

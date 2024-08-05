@@ -20,6 +20,7 @@ const { theme } = settingStore
 const router = useRouter()
 const message = useMessage()
 const id = computed(() => router.currentRoute.value.params.id as string)
+const isExamining = ref(false)
 const scrollerRef = ref()
 const controllerRef = ref()
 const editorRef = ref()
@@ -49,7 +50,8 @@ const state = ref<PublicArticleType>({
   subtitleSequence: [],
   subtitleKeyframeSequence: [],
   tags: [],
-  isPublish: false,
+  isPublished: false,
+  isDisplayed: false,
   penname: '',
   avatar: '',
   email: '',
@@ -74,7 +76,6 @@ const state = ref<PublicArticleType>({
 })
 
 let player: Editor
-let pck: typeof import('@/editor')
 const subs: Array<Subscription> = []
 let headings: NodeListOf<HTMLElement>
 const outlineData: { tagName: string; text: string; offsetTop: number }[] = []
@@ -99,7 +100,7 @@ onMounted(() => {
           const controller = player.get(Player)
           subs.push(
             controller.onStateUpdate.subscribe(() => {
-              console.log('playing')
+              // console.log('playing')
               isPlaying.value = controller.isPlaying
               if (controller.isPlaying) {
                 navRef.value.setNavVisible(false)
@@ -119,9 +120,18 @@ onMounted(() => {
           )
         })
         .catch(err => {
-          message.error('获取文章失败!')
+          console.log(err)
+          message.error('加载文章失败!')
           // navigateTo('/')
         })
+    }).catch(err => {
+      // console.log(err)
+      if(err.response.status === 307 || err.response?.data?.examining) {
+        message.info('文章正在审核中...')
+        isExamining.value = true
+        return 
+      }
+      message.error('获取文章失败!')
     })
   }
   /** 监听 scroll 事件，设置目录焦点 */
@@ -135,7 +145,7 @@ onMounted(() => {
 /** 销毁 */
 onUnmounted(() => {
   try {
-    console.log('销毁依赖')
+    // console.log('销毁依赖')
     subs.forEach(sub => sub.unsubscribe())
     player.get(Player).destory()
     player.get(OutlineService).destory()
@@ -146,7 +156,7 @@ onUnmounted(() => {
     player.get(RootEventService).destory()
     player.get(AnimeEventService).destory()
     player.destroy()
-    console.log('编辑器是否已经销毁：' + player.destroyed)
+    // console.log('编辑器是否已经销毁：' + player.destroyed)
   } catch (error) {
     console.log(error)
     console.error('编辑器销毁失败！')
@@ -203,7 +213,7 @@ const isMenuVisible = ref(true)
 let timer: NodeJS.Timeout
 function handleMouseDown() {
   timer = setTimeout(() => {
-    console.log('mousedown')
+    // console.log('mousedown')
     isMenuVisible.value = true
     clearTimeout(timer)
   }, 1000)
@@ -342,8 +352,33 @@ function handleShowMenu(value: boolean) {
       </div>
     </n-drawer-content>
   </n-drawer>
+  <div v-if="isExamining" class="examining">
+    <n-result
+      status="info"
+      title="正在审核中..."
+      description="审核通过后才能访问该文章"
+    >
+      <template #footer>
+        <n-button @click="() => router.go(0)">
+          刷新
+        </n-button>
+      </template>
+    </n-result>
+  </div>
 </template>
 <style scoped lang="scss">
+.examining {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: v-bind('themeVars.cardColor');
+  padding-top: 10%;
+}
 .mo-controller {
   z-index: 1;
   opacity: 0.6;
@@ -373,7 +408,7 @@ function handleShowMenu(value: boolean) {
 
 .article {
   width: 100%;
-  // height: 100%;
+  min-height: 100%;
   height: fit-content;
   display: flex;
   justify-content: center;

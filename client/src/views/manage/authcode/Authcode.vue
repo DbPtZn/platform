@@ -20,7 +20,7 @@ const message = useMessage()
 const dialog = useDialog()
 const themeVars = useThemeVars()
 const data = ref<AuthCode[]>([])
-
+const uid = computed(() => userStore.UID)
 /** 载入数据 */
 onMounted(() => {
   manageApi.authcode.getAll<AuthCode[]>().then(res => {
@@ -29,12 +29,13 @@ onMounted(() => {
   })
 })
 
-let editData = ref<Model | null>(null)
+const editData = ref<Model | null>(null) // 编辑时
 const renderIcon = (component: string) => {
   if (typeof component === 'string') {
     return h(Icon, { icon: component })
   }
 }
+
 const handleEdit = (row: Model) => {
   if (editData.value && editData.value.id !== row.id) {
     message.error('请先保存上一个编辑项')
@@ -232,7 +233,34 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                   }
                 },
                 { default: () => '移除' }
-              )
+              ),
+              h(
+                NButton,
+                {
+                  strong: true,
+                  tertiary: true,
+                  size: 'small',
+                  disabled: editData.value?.id === row.id,
+                  style: { display: editData.value?.id === row.id ? 'none' : 'block' },
+                  onClick: async () => {
+                    try {
+                      const text = `
+                        投稿地址：${import.meta.env.VITE_BASE_URL}/receiver/${uid.value}/${row.code}；
+                        授权码：${row.code}
+                      `
+                      await navigator.clipboard.writeText(text)
+                      message.success('复制成功！' + text)
+                    } catch (err) {
+                      console.error('Failed to copy: ', err)
+                    }
+                  }
+                },
+                {
+                  default: () => {
+                    return '复制'
+                  }
+                }
+              ),
               // TODO 查询通过该授权投稿的作品
             ]
           }

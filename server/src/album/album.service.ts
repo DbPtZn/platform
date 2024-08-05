@@ -38,7 +38,11 @@ export class AlbumService {
       let newalbum: Album
       try {
         newalbum = await queryRunner.manager.save(album)
-        user.albumSequence.unshift(newalbum.id)
+        if(user.albumSequence) {
+          user.albumSequence.push(newalbum.id)
+        } else {
+          user.albumSequence = [newalbum.id]
+        }
         await queryRunner.manager.save(user)
         await queryRunner.commitTransaction()
       } catch (error) {
@@ -78,7 +82,7 @@ export class AlbumService {
           'abbrev',
           'cover',
           'isParsed',
-          'isPublish',
+          'isPublished',
           'author',
           'detail'
         ]
@@ -101,7 +105,7 @@ export class AlbumService {
             abbrev: article.abbrev,
             cover: article.cover,
             isParsed: article.isParsed,
-            isPublish: article.isPublish,
+            isPublish: article.isPublished,
             author: article.author,
             detail: article.detail
           }

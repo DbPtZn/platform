@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import useStore from '@/store'
-import { useThemeVars } from 'naive-ui'
+import { DropdownOption, useThemeVars } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const themeVars = useThemeVars()
 const { settingStore } = useStore('common')
+const { userStore } = useStore('manage')
 const { theme } = settingStore
 const { t } = useI18n()
 function handleThemeUpdate(value: boolean) {
@@ -15,19 +16,38 @@ function handleDblClick() {
   console.log('dbclick')
   router.push({ path: `/manage` })
 }
-const options = [
+function handleError(ev: Event) {
+  
+}
+const options: DropdownOption[] = [
   {
-    label: '预览',
-    key: '1'
+    label: '统计',
+    key: 'count',
+    props: {
+      onClick: () => {
+        //
+      }
+    }
   },
   {
-    label: '预览',
-    key: '2'
+    label: '配置',
+    key: 'setting',
+    props: {
+      onClick: () => {
+        //
+      }
+    }
   },
   {
-    label: '预览',
-    key: '3'
-  }
+    label: '登出',
+    key: 'logout',
+    props: {
+      onClick: () => {
+        sessionStorage.removeItem('managerToken')
+        router.push({ path: `/login` })
+      }
+    }
+  },
 ]
 function handleBack() {
   //
@@ -46,9 +66,14 @@ function handleBack() {
         </template>
         <template #extra>
           <n-space>
-            <n-button>预览</n-button>
-            <n-dropdown :options="options" placement="bottom-start" :to="false">
-              <n-button :bordered="false" style="padding: 0 4px;font-size: 24px;line-height: 24px;"> ··· </n-button>
+            <n-dropdown :options="options" placement="bottom-end">
+              <n-avatar
+                class="avatar"
+                :bordered="false"
+                @error="handleError"
+                :src="userStore.avatar"
+              />
+              <!-- <n-button :bordered="false" style="padding: 0 4px;font-size: 24px;line-height: 24px;"> ··· </n-button> -->
             </n-dropdown>
           </n-space>
         </template>
@@ -58,6 +83,9 @@ function handleBack() {
 </template>
 
 <style scoped lang="scss">
+.avatar {
+  cursor: pointer;
+}
 .nav {
   position: relative;
   display: flex;

@@ -14,8 +14,8 @@ const themeVars = useThemeVars()
 const { userStore } = useStore('manage')
 const formRef = ref()
 const model = ref<ModelType>({
-  account: '261849747@qq.com',
-  password: 'dbx5201314',
+  account: import.meta.env.VITE_ACCOUNT || '',
+  password: import.meta.env.VITE_PASSWORD || ''
 })
 const rules: FormRules = {
   account: [
