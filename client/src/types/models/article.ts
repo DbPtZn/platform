@@ -99,20 +99,6 @@ export type ParsedArticleFile = Pick<
   | 'subtitleKeyframeSequence'
 >
 
-// export interface SubmissionState {
-//   docs: Submission[],
-//   totalDocs: number,
-//   limit: number,
-//   totalPages: number,
-//   page: number,
-//   pagingCounter: number,
-//   hasPrevPage: boolean,
-//   hasNextPage: boolean,
-//   prevPage: number | null,
-//   nextPage: number | null,
-//   isParsed: 'true' | 'false' | 'all'
-// }
-
 export type Subfile = Pick<
   Article,
   | 'id'
@@ -132,6 +118,19 @@ export type Subfile = Pick<
   | 'createAt'
   | 'updateAt'
 >
+
+export interface ArticleList {
+  items: ArticleListItem[],
+  meta: {
+    totalItems: number,
+    itemCount: number,
+    itemsPerPage: number,
+    totalPages: number,
+    currentPage: number
+  },
+  links: undefined
+  isParsed: 'true' | 'false' | 'all'
+}
 
 // export type ArticleCard = Omit<
 //   ArticleSchema,

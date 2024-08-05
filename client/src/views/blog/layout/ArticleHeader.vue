@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import MenuIcon from '../components/MenuIcon.vue'
+import MenuIcon from './MenuIcon.vue'
 import { Subscription, fromEvent } from '@tanbo/stream'
 import 'animate.css'
 import type { ArticleUserInfo } from '@/types'
@@ -12,7 +12,6 @@ const router = useRouter()
 const route = useRoute()
 const themeVars = useThemeVars()
 const { settingStore } = useStore('common')
-const { theme } = settingStore
 const { t } = useI18n()
 const props = defineProps<{
   user: ArticleUserInfo
@@ -35,6 +34,7 @@ function handleNavClick(to: string) {
 
 function handleThemeUpdate() {
   // theme.dark = !theme.dark
+  settingStore.theme = settingStore.theme === 'dark' ? 'light' : 'dark'
 }
 const isOutlineShow = ref(true)
 function handleOutlineVisible() {
@@ -42,7 +42,7 @@ function handleOutlineVisible() {
   emits('outlineVisible', isOutlineShow.value)
 }
 const themeIconVar = computed(() => {
-  return theme === 'dark' ? 'material-symbols:dark-mode' : 'material-symbols:light-mode'
+  return settingStore.theme === 'dark' ? 'material-symbols:dark-mode' : 'material-symbols:light-mode'
 })
 const subs: Subscription[] = []
 const visible = ref(false)
@@ -82,12 +82,12 @@ function handleMoreClick() {
   <div :class="['nav', visible && 'visible']">
     <div class="nav-container">
       <div class="left">
-        <nuxt-link :to="`/${user.UID}`">
+        <router-link :to="`/${user.UID}`">
           <div class="title">
             <img class="tapenote-icon logo" :src="user.avatar" alt="" @error="handleError" />
             <span class="tapenote-name" :to="`/${user.UID}`">{{ user.nickname }}</span>
           </div>
-        </nuxt-link>
+        </router-link>
       </div>
       <div class="right">
         <div class="tools"></div>

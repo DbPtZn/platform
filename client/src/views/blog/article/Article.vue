@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// import { useMessage, useThemeVars } from 'naive-ui'
 import UserAvatar from './icons/UserAvatar.vue'
 import type { PublicArticleType } from '@/types'
 import dayjs from 'dayjs'
@@ -11,14 +10,16 @@ import { fromEvent, type Subscription } from '@tanbo/stream'
 import { useMessage, useThemeVars } from 'naive-ui'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import useStore from '@/store'
+import { useRouter } from 'vue-router'
+import { blogApi } from '@/api'
+import ArticleHeader from '../layout/ArticleHeader.vue'
+import { AnimeEventService, AnimeProvider, DialogProvider, OutlineService, Player, RootEventService, Structurer, ThemeProvider } from '@/editor'
 const themeVars = useThemeVars()
-const props = defineProps<{
-  id: string
-}>()
 const { settingStore } = useStore('common')
 const { theme } = settingStore
+const router = useRouter()
 const message = useMessage()
-// const appConfig = useAppConfig()
+const id = computed(() => router.currentRoute.value.params.id as string)
 const scrollerRef = ref()
 const controllerRef = ref()
 const editorRef = ref()
@@ -49,15 +50,15 @@ const state = ref<PublicArticleType>({
   subtitleKeyframeSequence: [],
   tags: [],
   isPublish: false,
+  penname: '',
+  avatar: '',
+  email: '',
   author: {
-    penname: '',
-    avatar: '',
-    email: '',
     blog: ''
   },
+  wordage: 0,
+  duration: 0,
   detail: {
-    wordage: 0,
-    duration: 0,
     fileSize: 0
   },
   meta: {
@@ -67,11 +68,9 @@ const state = ref<PublicArticleType>({
     comments: 0
   },
   id: '',
-  columnId: '',
+  albumId: '',
   createAt: '',
-  updateAt: '',
-  penname: '',
-  email: ''
+  updateAt: ''
 })
 
 let player: Editor
@@ -80,50 +79,51 @@ const subs: Array<Subscription> = []
 let headings: NodeListOf<HTMLElement>
 const outlineData: { tagName: string; text: string; offsetTop: number }[] = []
 const activeIndex = ref(0)
-onMounted(async () => {
+onMounted(() => {
   scrollerRef.value = document.body
-  pck = await import('@/editor')
-  // $fetch<PublicArticleType>(`/api/article/${props.id}`)
-  //   .then(res => {
-  //     state.value = res
-  //     usePlayer({
-  //       rootRef,
-  //       editorRef,
-  //       scrollerRef,
-  //       controllerRef,
-  //       outlineRef,
-  //       data: state.value
-  //     }).then(res => {
-  //       player = res
-  //       // console.log(player)
-  //       const controller = player.get(pck.Player)
-  //       subs.push(
-  //         controller.onStateUpdate.subscribe(() => {
-  //           console.log('playing')
-  //           isPlaying.value = controller.isPlaying
-  //           if (controller.isPlaying) {
-  //             navRef.value.setNavVisible(false)
-  //           }
-  //         }),
-  //         /** 编辑器准备完成后，获取目录信息，生成目录数据 */
-  //         player.onReady.subscribe(() => {
-  //           headings = editorRef.value.querySelectorAll('h1, h2, h3, h4, h5, h6')
-  //           headings.forEach(heading => {
-  //             outlineData.push({
-  //               tagName: heading.tagName.toLocaleLowerCase(),
-  //               text: heading.textContent || '',
-  //               offsetTop: heading.offsetTop
-  //             })
-  //           })
-  //         })
-  //       )
-  //     })
-  //   })
-  //   .catch(err => {
-  //     message.error('获取文章失败!')
-  //     navigateTo('/')
-  //   })
-
+  if (id.value) {
+    blogApi.article.get<PublicArticleType>(id.value).then(res => {
+      res.data.audio = res.config.baseURL + res.data.audio
+      state.value = res.data
+      usePlayer({
+        rootRef,
+        editorRef,
+        scrollerRef,
+        controllerRef,
+        outlineRef,
+        data: state.value
+      })
+        .then(res => {
+          player = res
+          // console.log(player)
+          const controller = player.get(Player)
+          subs.push(
+            controller.onStateUpdate.subscribe(() => {
+              console.log('playing')
+              isPlaying.value = controller.isPlaying
+              if (controller.isPlaying) {
+                navRef.value.setNavVisible(false)
+              }
+            }),
+            /** 编辑器准备完成后，获取目录信息，生成目录数据 */
+            player.onReady.subscribe(() => {
+              headings = editorRef.value.querySelectorAll('h1, h2, h3, h4, h5, h6')
+              headings.forEach(heading => {
+                outlineData.push({
+                  tagName: heading.tagName.toLocaleLowerCase(),
+                  text: heading.textContent || '',
+                  offsetTop: heading.offsetTop
+                })
+              })
+            })
+          )
+        })
+        .catch(err => {
+          message.error('获取文章失败!')
+          // navigateTo('/')
+        })
+    })
+  }
   /** 监听 scroll 事件，设置目录焦点 */
   subs.push(
     fromEvent(document.body, 'scroll').subscribe(() => {
@@ -137,14 +137,14 @@ onUnmounted(() => {
   try {
     console.log('销毁依赖')
     subs.forEach(sub => sub.unsubscribe())
-    player.get(pck.Player).destory()
-    player.get(pck.OutlineService).destory()
-    player.get(pck.DialogProvider).destory()
-    player.get(pck.AnimeProvider).destory()
-    player.get(pck.Structurer).destory()
-    player.get(pck.ThemeProvider).destory()
-    player.get(pck.RootEventService).destory()
-    player.get(pck.AnimeEventService).destory()
+    player.get(Player).destory()
+    player.get(OutlineService).destory()
+    player.get(DialogProvider).destory()
+    player.get(AnimeProvider).destory()
+    player.get(Structurer).destory()
+    player.get(ThemeProvider).destory()
+    player.get(RootEventService).destory()
+    player.get(AnimeEventService).destory()
     player.destroy()
     console.log('编辑器是否已经销毁：' + player.destroyed)
   } catch (error) {
@@ -176,7 +176,7 @@ function handleScrollTo(offsetTop: number) {
 const isPlaying = ref(false)
 const floatBtnIcon = computed(() => (isPlaying.value ? 'material-symbols:pause-rounded' : 'material-symbols:play-arrow-rounded'))
 function handleFloatBtnClick() {
-  const controller = player.get(pck.Player)
+  const controller = player.get(Player)
   if (!controller.isPlaying && !controller.isPause) {
     controller.start()
     isPlaying.value = true
@@ -231,7 +231,7 @@ function handleShowMenu(value: boolean) {
           <!-- @click="handleBloggerClick(state.UID)" -->
           <div class="author">
             <Icon name="clarity:avatar-solid" size="20px" />
-            <span>{{ state.author.penname }}</span>
+            <span>{{ state.penname }}</span>
           </div>
           <div class="time">
             <Icon name="material-symbols:calendar-clock" size="20px" />
@@ -239,14 +239,14 @@ function handleShowMenu(value: boolean) {
           </div>
           <div class="wordage">
             <Icon name="ant-design:field-number-outlined" size="24px" />
-            <span>{{ state.detail.wordage }}</span>
+            <span>{{ state.wordage }}</span>
           </div>
-          <div v-if="state.detail.duration" class="duration">
+          <div v-if="state.duration" class="duration">
             <Icon name="material-symbols:alarm" size="20px" />
             <span>{{
               dayjs()
-                .minute(Math.floor(state.detail.duration / 60))
-                .second(state.detail.duration % 60)
+                .minute(Math.floor(state.duration / 60))
+                .second(state.duration % 60)
                 .format('mm:ss')
             }}</span>
           </div>
@@ -373,7 +373,8 @@ function handleShowMenu(value: boolean) {
 
 .article {
   width: 100%;
-  height: 100%;
+  // height: 100%;
+  height: fit-content;
   display: flex;
   justify-content: center;
   color: v-bind('themeVars.textColor1');

@@ -52,27 +52,10 @@ export class ArticleController {
         req.user.id
       )
       // console.log(result)
-      res.send(result)
+      res.status(200).send(result)
     } catch (error) {
       res.status(400).send(error.message)
     }
-  }
-
-  @Post('all')
-  async getAllArticle(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
-    @Body() filter: Partial<ArticleFilter>
-  ): Promise<Pagination<Article>> {
-    const result = await this.articleService.getAll(
-      {
-        page,
-        limit,
-        route: '/all'
-      },
-      filter
-    )
-    return result
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -129,6 +112,20 @@ export class ArticleController {
         filter
       )
       // console.log(result)
+      res.status(200).send(result)
+    } catch (error) {
+      res.status(400).send(error.message)
+    }
+  }
+
+  @Get('/blog/:id')
+  async getBlogArticle(@Param('id') id: string, @Req() req, @Res() res) {
+    try {
+      const result = await this.articleService.findOneToBlog(id)
+      const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+      if(result.audio) {
+        result.audio = common.staticPrefix + result.audio.split(common.publicDir.slice(1))[1]
+      }
       res.send(result)
     } catch (error) {
       res.status(400).send(error.message)

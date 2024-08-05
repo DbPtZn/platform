@@ -23,6 +23,6 @@ export const article = {
     return axios.post<T>(`/article/blog/list?page=${dto.page}&limit=${dto.limit}`, dto.filter)
   },
   get<T>(id: string) {
-    return axios.get<T>(`/article/${id}`)
+    return axios.get<T>(`/article/blog/${id}`)
   },
 }

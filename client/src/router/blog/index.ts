@@ -31,6 +31,11 @@ const blogRoutes: Array<RouteRecordRaw> = [
     // 考虑博客页不添加 blogger 作为头部，仅使用 UID
     // 作品页不添加UID
   },
+  {
+    name: RouteNameEnum.ARTICLE,
+    path: '/article/:id',
+    component: () => import(/* webpackChunkName: "about" */ '@/views/blog/article/Article.vue'),
+  }
 ]
 
 export default blogRoutes

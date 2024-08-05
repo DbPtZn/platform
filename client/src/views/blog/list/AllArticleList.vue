@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useThemeVars } from 'naive-ui'
 import ItemCard from './private/ItemCard.vue'
-import { ArticleListItem } from '@/types'
+import { ArticleList, ArticleListItem } from '@/types'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { onMounted } from 'vue'
@@ -14,19 +14,20 @@ function handleClick(item: ArticleListItem) {
   router.push(`/article/${item.id}`)
 }
 onMounted(() => {
-  blogApi.article.getList<ArticleListItem[]>({
+  blogApi.article.getList<ArticleList>({
     page: 1,
     limit: 10,
     filter: {}
   }).then(res => {
     console.log(res)
-    articles.value = res.data
+    articles.value = res.data.items
+    console.log(articles.value)
   })
 })
 </script>
 
 <template>
-  <div class="default">
+  <div class="list">
     <ItemCard
       v-for="item in articles"
       :key="item.id"
@@ -44,4 +45,19 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.list {
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .list {
+    max-width: 1024px;
+  }
+}
+@include Desktop {
+  .list {
+    max-width: 1024px;
+  }
+}
+</style>
