@@ -17,6 +17,9 @@ export interface User {
     autoParse: boolean
     sizeLimit: number
   }
+  config: {
+    autoDisplay: boolean
+  },
   albumSequence: string[]
   createAt: string
   updateAt: string

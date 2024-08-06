@@ -3,7 +3,7 @@ import {  useThemeVars } from 'naive-ui'
 import { defineComponent, h, ref } from 'vue'
 // import { DragIndicatorFilled, MenuBookRound, BookRound, BookOutlined } from '@vicons/material'
 import useStore, { useManageStore } from '@/store'
-// import { Icon } from '#components'
+import { Icon } from '@iconify/vue'
 type Column = ReturnType<typeof useManageStore>['albumListStore']['data'][0]
 defineProps<{
   item: Column
@@ -13,17 +13,17 @@ const themeVar = useThemeVars()
 <template>
   <n-button class="column-item" quaternary>
     <div class="prefix move">
-      <!-- <n-icon :component="DragIndicatorFilled" :size="24" /> -->
+      <Icon icon="material-symbols:drag-indicator" height="24" />
     </div>
     <div class="icon">
-      <!-- <n-icon :component="item.isPublish ? MenuBookRound : BookOutlined" :size="24" /> -->
+      <Icon :icon="item.isPublish ? 'material-symbols:menu-book' : 'material-symbols:book-2'" :height="24" />
     </div>
     <div class="label">
       <div class="txt">{{ item.name }}</div>
     </div>
     <div class="menu">
       <n-button text type="tertiary" @click.stop.prevent=";">
-        <Icon class="menu-icon" name="ic:round-more-horiz" size="24px" />
+        <Icon class="menu-icon" icon="ic:round-more-horiz" height="24px" />
       </n-button>
     </div>
   </n-button>

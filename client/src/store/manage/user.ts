@@ -21,6 +21,9 @@ export const useUserStore = defineStore('userStore', {
         autoParse: false,
         sizeLimit: 0
       },
+      config: {
+        autoDisplay: false
+      },
       albumSequence: [],
       createAt: '',
       updateAt: ''
@@ -58,17 +61,17 @@ export const useUserStore = defineStore('userStore', {
       this.fetch().then(res => {
         const data = res.data
         if (data) {
+          console.log(data)
           this.set(data)
         }
       })
     },
-    updateColumnSequence(oldIndex: number, newIndex: number, columnId: string) {
-      // this.columnSequence.splice(oldIndex, 1)
-      // this.columnSequence.splice(newIndex, 0, columnId)
-      // return $fetch('/api/user/updateColumnSequence', {
-      //   method: 'POST',
-      //   body: { sequence: this.columnSequence }
-      // })
+    updateAlbumSequence(oldIndex: number, newIndex: number, columnId: string) {
+      this.albumSequence.splice(oldIndex, 1)
+      this.albumSequence.splice(newIndex, 0, columnId)
+      return manageApi.user.updateAlbumSequence({
+        sequence: this.albumSequence
+      })
     },
     updateReceiverStatus(status: 0 | 1 | 2) {
       return manageApi.user.updateReceiverStatus(status).then(res => {
@@ -76,7 +79,22 @@ export const useUserStore = defineStore('userStore', {
           this.receiverConfig.status = status
         }
       })
-    }
+    },
+    updatePassword(params: Parameters<typeof manageApi.user.updatePassword>[0]) {
+      return manageApi.user.updatePassword(params)
+    },
+    update(params: Parameters<typeof manageApi.user.update>[0]) {
+      return manageApi.user.update(params).then(res => {
+        this.avatar = params.avatar
+        this.nickname = params.nickname
+        this.desc = params.desc
+      })
+    },
+    updateConfig(params: Parameters<typeof manageApi.user.updateConfig>[0]) {
+      return manageApi.user.updateConfig(params).then(res => {
+        this.config.autoDisplay = params.autoDisplay
+      })
+    },
   },
   getters: {}
 })

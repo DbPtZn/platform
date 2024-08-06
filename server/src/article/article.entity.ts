@@ -78,6 +78,12 @@ export class Article {
   title: string
 
   @Column({
+    type: 'varchar',
+    default: '',
+  })
+  unparsedFile: string // 未解析文件
+
+  @Column({
     type: 'text',
   })
   content: string

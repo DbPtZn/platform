@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from './logger/logger.module'
 import { ReceiverModule } from './receiver/receiver.module'
 import { AlbumModule } from './album/album.module';
+import { SubmissionModule } from './submission/submission.module';
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import { AlbumModule } from './album/album.module';
     AuthModule,
     LoggerModule,
     ReceiverModule,
-    AlbumModule
+    AlbumModule,
+    SubmissionModule
   ],
   controllers: [AppController],
   providers: [AppService]

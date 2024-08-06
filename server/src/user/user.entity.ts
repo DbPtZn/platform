@@ -11,6 +11,10 @@ export type ReceiverConfig = {
   sizeLimit: number
 }
 
+export class UserConfig  {
+  autoDisplay: boolean // 是否自动将公开项目设置为展示状态
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid') id: string
@@ -80,6 +84,12 @@ export class User {
     nullable: true
   })
   receiverConfig: ReceiverConfig
+
+  @Column({
+    type: 'simple-json',
+    nullable: true
+  })
+  config: UserConfig
 
   @Column({
     type: 'simple-array',

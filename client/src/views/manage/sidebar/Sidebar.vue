@@ -157,9 +157,9 @@ function handleMove(event: SortableEvent) {
   const newIndex = event.newIndex
   const albumId = event.item.id
   if(oldIndex === undefined || newIndex === undefined || albumId === undefined) return
-  userStore.updateColumnSequence(oldIndex, newIndex, albumId)
+  userStore.updateAlbumSequence(oldIndex, newIndex, albumId)
 }
-function handleColumnClick(album: Album) {
+function handleAlbumClick(album: Album) {
   albumStore.fetchAndSet(album.id)
 }
 </script>
@@ -213,10 +213,10 @@ function handleColumnClick(album: Album) {
               <n-button class="collapse-item-btn" text size="large">作品专栏</n-button>
             </template>
             <template #header-extra>
-              <Icon icon="material-symbols:add-rounded"  :height="'24'" @click="albumMethods.handleAddClick" />
+              <Icon class="collapse-item-icon" icon="material-symbols:add-rounded"  :height="'24'" @click="albumMethods.handleAddClick" />
             </template>
             <VueDraggable class="draggable" handle=".move" v-model="data" :itemKey="'id'" @end="handleMove($event)">
-              <AlbumItem v-for="item in data" :key="item.id" :id="item.id" :item="item" @click="handleColumnClick(item)" />
+              <AlbumItem v-for="item in data" :key="item.id" :id="item.id" :item="item" @click="handleAlbumClick(item)" />
             </VueDraggable>
           </n-collapse-item>
           <!-- 轮播管理 -->
@@ -253,6 +253,7 @@ function handleColumnClick(album: Album) {
   width: 100%;
   height: 100%;
   margin: 0;
+  padding: 10px 6px;
   overflow: hidden;
   box-sizing: border-box;
   border-right: 1px solid v-bind('themeVars.dividerColor');

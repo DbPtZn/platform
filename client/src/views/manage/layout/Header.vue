@@ -1,13 +1,16 @@
 <script lang="ts" setup>
 import useStore from '@/store'
-import { DropdownOption, useThemeVars } from 'naive-ui'
+import { DropdownOption, NMessageProvider, useDialog, useThemeVars } from 'naive-ui'
+import { h } from 'vue';
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { Icon } from '@iconify/vue'
+import Admin from '../admin/Admin.vue'
 const router = useRouter()
 const themeVars = useThemeVars()
 const { settingStore } = useStore('common')
 const { userStore } = useStore('manage')
-const { theme } = settingStore
+const dialog = useDialog()
 const { t } = useI18n()
 function handleThemeUpdate(value: boolean) {
   settingStore.theme = value ? 'dark' : 'light'
@@ -23,6 +26,7 @@ const options: DropdownOption[] = [
   {
     label: '统计',
     key: 'count',
+    disabled: true,
     props: {
       onClick: () => {
         //
@@ -34,7 +38,14 @@ const options: DropdownOption[] = [
     key: 'setting',
     props: {
       onClick: () => {
-        //
+        dialog.create({
+          icon: () => h(Icon, { icon: 'material-symbols:settings-outline', height: '24px' }),
+          title: '管理设置',
+          style: 'width: 600px;minHeight: 600px;',
+          content: () => h(NMessageProvider, {}, {
+            default: () => h(Admin)
+          })
+        })
       }
     }
   },

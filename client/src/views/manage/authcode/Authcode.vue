@@ -241,7 +241,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                   tertiary: true,
                   size: 'small',
                   disabled: editData.value?.id === row.id,
-                  style: { display: editData.value?.id === row.id ? 'none' : 'block' },
+                  style: { display: editData.value?.id === row.id ? 'none' : 'block', marginLeft: '10px' },
                   onClick: async () => {
                     try {
                       const text = `

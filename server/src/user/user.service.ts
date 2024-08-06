@@ -8,6 +8,9 @@ import path from 'path'
 import fs from 'fs'
 import { UpdateAlbumSequenceDto } from './dto/updateAlbumSequence.dto'
 import { ConfigService } from '@nestjs/config'
+import { UpdateConfigDto } from './dto/updateConfig.dto'
+import { UpdateUserPwdDto } from './dto/update-pwd.dto'
+import { UpdateInfoDto } from './dto/update-info.dto'
 @Injectable()
 export class UserService {
   constructor(
@@ -86,9 +89,9 @@ export class UserService {
       const user = await this.usersRepository.findOne({
         where: { id }
       })
-      const publicDir = this.configService.get('common.publicDir')
-      const prefix = this.configService.get('common.staticPrefix')
-      user.avatar = user.avatar ? prefix + user.avatar.split(publicDir)[1] : ''
+      // const publicDir = this.configService.get('common.publicDir')
+      // const prefix = this.configService.get('common.staticPrefix')
+      // user.avatar = user.avatar ? prefix + user.avatar.split(publicDir)[1] : ''
       return user
     } catch (error) {
       throw error
@@ -149,6 +152,48 @@ export class UserService {
     }
   }
 
+  async updateInfo(updateUserDto: UpdateInfoDto, id: string) {
+    // this.userLogger.log(`正在更新用户信息...`)
+    const { avatar, nickname, desc } = updateUserDto
+    const user = await this.findOneById(id)
+    // const filename = path.basename(avatar)
+    if (user) {
+      user.avatar = avatar
+      user.nickname = nickname
+      user.desc = desc
+      const newUser = await this.usersRepository.save(user)
+      // this.userLogger.log(`更新用户信息成功！`)
+      return { updateAt: newUser.updateAt }
+    } else {
+      // this.userLogger.log(`更新用户信息失败！`)
+      throw new Error('用户不存在！')
+    }
+  }
+
+  async updatePwd(updatePwdDto: UpdateUserPwdDto, id: string) {
+    try {
+      // this.userLogger.log(`正在更新用户密码...`)
+      const { newPwd, oldPwd } = updatePwdDto
+      const user = await this.findOneById(id)
+      // 用户旧密码是否正确
+      const valid = bcrypt.compareSync(oldPwd, user.encryptedPassword)
+      if (!valid) throw new Error('旧密码错误，修改密码失败')
+      // 新密码哈希加盐
+      const encryptedPassword = bcrypt.hashSync(newPwd)
+      if (user) {
+        user.encryptedPassword = encryptedPassword
+        const newUser = await this.usersRepository.save(user)
+        // this.userLogger.log(`更新用户密码成功！`)
+        return { updateAt: newUser.updateAt }
+      } else {
+        throw new Error('用户不存在！')
+      }
+    } catch (error) {
+      // this.userLogger.error(`更新用户密码失败！原因：${error.message} `)
+      throw error
+    }
+  }
+
   /** 更新接收器状态 */
   async updateReceiverConfig(status: 0 | 1 | 2, id: string) {
     try {
@@ -172,6 +217,17 @@ export class UserService {
       throw error
     }
   }
+
+  async updateConfig(dto: UpdateConfigDto, id: string) {
+    try {
+      // const { autoDisplay } = dto
+      const user = await this.usersRepository.findOneBy({ id })
+      user.config = dto
+      return this.usersRepository.save(user)
+    } catch (error) {
+    }
+  }
+
 }
 
 /** 生成随机字符串 */

@@ -433,7 +433,7 @@ const generateOptions = (row: Model | null): DropdownOption[] => {
       key: 'parseAndOpen',
       props: {
         onClick: () => {
-          // targetRow.value && handleParse(targetRow.value)
+          targetRow.value && handleParse(targetRow.value)
         }
       }
     },
