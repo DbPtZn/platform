@@ -16,11 +16,12 @@ import ArticleHeader from '../layout/ArticleHeader.vue'
 import { AnimeEventService, AnimeProvider, DialogProvider, OutlineService, Player, RootEventService, Structurer, ThemeProvider } from '@/editor'
 const themeVars = useThemeVars()
 const { settingStore } = useStore('common')
-const { theme } = settingStore
 const router = useRouter()
 const message = useMessage()
 const id = computed(() => router.currentRoute.value.params.id as string)
 const isExamining = ref(false)
+const isRefused = ref(false)
+const refuseMsg = ref('')
 const scrollerRef = ref()
 const controllerRef = ref()
 const editorRef = ref()
@@ -72,7 +73,9 @@ const state = ref<PublicArticleType>({
   id: '',
   albumId: '',
   createAt: '',
-  updateAt: ''
+  updateAt: '',
+  unparsedFile: '',
+  refuseMsg: ''
 })
 
 let player: Editor
@@ -83,56 +86,67 @@ const activeIndex = ref(0)
 onMounted(() => {
   scrollerRef.value = document.body
   if (id.value) {
-    blogApi.article.get<PublicArticleType>(id.value).then(res => {
-      res.data.audio = res.config.baseURL + res.data.audio
-      state.value = res.data
-      usePlayer({
-        rootRef,
-        editorRef,
-        scrollerRef,
-        controllerRef,
-        outlineRef,
-        data: state.value
-      })
-        .then(res => {
-          player = res
-          // console.log(player)
-          const controller = player.get(Player)
-          subs.push(
-            controller.onStateUpdate.subscribe(() => {
-              // console.log('playing')
-              isPlaying.value = controller.isPlaying
-              if (controller.isPlaying) {
-                navRef.value.setNavVisible(false)
-              }
-            }),
-            /** 编辑器准备完成后，获取目录信息，生成目录数据 */
-            player.onReady.subscribe(() => {
-              headings = editorRef.value.querySelectorAll('h1, h2, h3, h4, h5, h6')
-              headings.forEach(heading => {
-                outlineData.push({
-                  tagName: heading.tagName.toLocaleLowerCase(),
-                  text: heading.textContent || '',
-                  offsetTop: heading.offsetTop
+    blogApi.article
+      .get<PublicArticleType>(id.value)
+      .then(res => {
+        res.data.audio = res.config.baseURL + res.data.audio
+        state.value = res.data
+        usePlayer({
+          rootRef,
+          editorRef,
+          scrollerRef,
+          controllerRef,
+          outlineRef,
+          data: state.value
+        })
+          .then(res => {
+            player = res
+            // console.log(player)
+            const controller = player.get(Player)
+            subs.push(
+              controller.onStateUpdate.subscribe(() => {
+                // console.log('playing')
+                isPlaying.value = controller.isPlaying
+                if (controller.isPlaying) {
+                  navRef.value.setNavVisible(false)
+                }
+              }),
+              /** 编辑器准备完成后，获取目录信息，生成目录数据 */
+              player.onReady.subscribe(() => {
+                headings = editorRef.value.querySelectorAll('h1, h2, h3, h4, h5, h6')
+                headings.forEach(heading => {
+                  outlineData.push({
+                    tagName: heading.tagName.toLocaleLowerCase(),
+                    text: heading.textContent || '',
+                    offsetTop: heading.offsetTop
+                  })
                 })
               })
-            })
-          )
-        })
-        .catch(err => {
-          console.log(err)
-          message.error('加载文章失败!')
-          // navigateTo('/')
-        })
-    }).catch(err => {
-      // console.log(err)
-      if(err.response.status === 307 || err.response?.data?.examining) {
-        message.info('文章正在审核中...')
-        isExamining.value = true
-        return 
-      }
-      message.error('获取文章失败!')
-    })
+            )
+          })
+          .catch(err => {
+            console.log(err)
+            message.error('加载文章失败!')
+            // navigateTo('/')
+          })
+      })
+      .catch(err => {
+        // console.log(err)
+        if (err.response.status === 307) {
+          // console.log(err.response.data)
+          if(err.response?.data?.examining) {
+            message.info('文章正在审核中...')
+            isExamining.value = true
+            return
+          }
+          if(err.response?.data?.refused) {
+            isRefused.value = true
+            refuseMsg.value = err.response?.data?.refuseMsg || '未知'
+            return
+          }
+        }
+        message.error('获取文章失败!')
+      })
   }
   /** 监听 scroll 事件，设置目录焦点 */
   subs.push(
@@ -322,15 +336,20 @@ function handleShowMenu(value: boolean) {
   </n-float-button>
 
   <n-back-top class="back-top" :right="100" :to="rootRef" />
-  <n-drawer v-model:show="drawerActive" width="40%" placement="right" :to="rootRef">
+  <n-drawer v-model:show="drawerActive" width="50%" placement="right" :to="rootRef">
     <n-drawer-content title="Menu">
-      <div vertical>
+      <div>
         <n-flex>
           <span>主题 ：</span>
-          <n-switch class="theme-switch" @update:value="val => (theme = val ? 'dark' : 'light')" :value="theme" size="medium">
+          <n-switch
+            class="theme-switch"
+            @update:value="val => (val ? (settingStore.theme = 'dark') : (settingStore.theme = 'light'))"
+            :value="settingStore.theme === 'dark'"
+            size="medium"
+          >
             <template #icon>
-              <span v-if="theme === 'light'">☀</span>
-              <span v-if="theme === 'dark'">🌙</span>
+              <span v-if="settingStore.theme === 'light'">☀</span>
+              <span v-if="settingStore.theme === 'dark'">🌙</span>
             </template>
           </n-switch>
         </n-flex>
@@ -352,22 +371,28 @@ function handleShowMenu(value: boolean) {
       </div>
     </n-drawer-content>
   </n-drawer>
-  <div v-if="isExamining" class="examining">
-    <n-result
-      status="info"
-      title="正在审核中..."
-      description="审核通过后才能访问该文章"
-    >
+  <div v-if="isExamining" class="cover">
+    <n-result status="info" title="正在审核中..." description="审核通过后才能访问该文章">
       <template #footer>
-        <n-button @click="() => router.go(0)">
-          刷新
-        </n-button>
+        <n-flex align="center" justify="center">
+          <n-button @click="() => router.go(0)"> 刷新 </n-button>
+          <n-button @click="() => router.back()"> 返回 </n-button>
+        </n-flex>
+      </template>
+    </n-result>
+  </div>
+  <div v-if="isRefused" class="cover">
+    <n-result status="error" title="稿件已被拒收" :description="`${refuseMsg}`">
+      <template #footer>
+        <n-flex align="center" justify="center">
+          <n-button @click="() => router.back()"> 返回 </n-button>
+        </n-flex>
       </template>
     </n-result>
   </div>
 </template>
 <style scoped lang="scss">
-.examining {
+.cover {
   z-index: 1;
   position: absolute;
   width: 100%;

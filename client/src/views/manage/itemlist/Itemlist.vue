@@ -116,7 +116,7 @@ const { dropdownState, options, handleClickoutside, handleContextmenu, handleMor
           :key="item.id"
           :id="item.id"
           :type="item.type"
-          :is-publish="item.isPublish"
+          :is-publish="item.isPublished"
           :title="item.title"
           :abbrev="item.abbrev"
           :date="dayjs(item.updateAt).format('YYYY-MM-DD HH:mm:ss')"

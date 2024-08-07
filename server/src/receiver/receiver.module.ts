@@ -13,6 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { commonConfig } from 'src/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from 'src/user/user.entity'
+import { SubmissionModule } from 'src/submission/submission.module'
 const __rootdirname = process.cwd()
 @Module({
   imports: [
@@ -43,6 +44,7 @@ const __rootdirname = process.cwd()
       }
     }),
     ArticleModule,
+    SubmissionModule,
     UploadfileModule,
     AuthcodeModule
   ],

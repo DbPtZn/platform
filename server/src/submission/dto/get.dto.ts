@@ -1,6 +1,7 @@
-import { Article } from '../article.entity'
+import { Article } from "src/article/article.entity";
 
-export type ArticleTypeFilter = Pick<
+
+export type ArticleFilter = Pick<
   Article,
   'albumId' | 'type' | 'isParsed' | 'isPublished' | 'isDisplayed' | 'removed' | 'penname' | 'email'
 >

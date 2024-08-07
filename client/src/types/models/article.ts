@@ -18,6 +18,7 @@ export interface Article {
   cover: string
   title: string
   content: string
+  unparsedFile: string
   abbrev: string
   audio: string
   promoterSequence: string[]
@@ -27,6 +28,7 @@ export interface Article {
   tags: string[]
   isPublished: boolean
   isDisplayed: boolean
+  refuseMsg: string
   removed: RemovedEnum
   penname: string
   email: string

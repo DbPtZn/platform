@@ -60,6 +60,12 @@ export class Article {
   msg: string
 
   @Column({
+    type: 'text',
+    nullable: true
+  })
+  refuseMsg: string // 拒稿理由
+
+  @Column({
     type: 'varchar',
     default: ''
   })

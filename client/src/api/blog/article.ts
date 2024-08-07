@@ -20,9 +20,9 @@ export interface GetArticleListDto {
 
 export const article = {
   getList<T>(dto: GetArticleListDto) {
-    return axios.post<T>(`/article/blog/list?page=${dto.page}&limit=${dto.limit}`, dto.filter)
+    return axios.post<T>(`/article/list?page=${dto.page}&limit=${dto.limit}`, dto.filter)
   },
   get<T>(id: string) {
-    return axios.get<T>(`/article/blog/${id}`)
+    return axios.get<T>(`/article/${id}`)
   },
 }

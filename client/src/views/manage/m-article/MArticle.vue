@@ -63,13 +63,15 @@ const state = ref<Article>({
   msg: '',
   removed: RemovedEnum.NEVER,
   createAt: '',
-  updateAt: ''
+  updateAt: '',
+  unparsedFile: '',
+  refuseMsg: ''
 })
 
 let player: Editor
 onMounted(() => {
   console.log(id.value)
-  manageApi.article.get<Article>(id.value).then(res => {
+  manageApi.submission.get<Article>(id.value).then(res => {
     // console.log(res)
     res.data.audio = res.config.baseURL + res.data.audio
     // console.log(res.data.audio)
@@ -110,29 +112,29 @@ onUnmounted(() => {
 <template>
   <div class="product" ref="rootRef">
     <div class="product-wrapper" :bordered="false">
-        <div ref="scrollerRef" class="product-scroller">
-          <!-- 文章头部 -->
-          <div class="product-header">
-            <div class="product-header-item">作者：{{ state.penname }}</div>
-            <div class="product-header-item">时间：{{ dayjs(state.createAt).format('YYYY-MM-DD HH:mm:ss') }}</div>
-            <div class="product-header-item">字数：{{ state.wordage }}</div>
-            <div class="product-header-item" v-if="state.type === 'course' && state.duration">
-              时长：{{
-                dayjs()
-                  .minute(Math.floor(state.duration / 60))
-                  .second(state.duration % 60)
-                  .format('mm:ss')
-              }}
-            </div>
+      <div ref="scrollerRef" class="product-scroller">
+        <!-- 文章头部 -->
+        <div class="product-header">
+          <div class="product-header-item">作者：{{ state.penname }}</div>
+          <div class="product-header-item">时间：{{ dayjs(state.createAt).format('YYYY-MM-DD HH:mm:ss') }}</div>
+          <div class="product-header-item">字数：{{ state.wordage }}</div>
+          <div class="product-header-item" v-if="state.type === 'course' && state.duration">
+            时长：{{
+              dayjs()
+                .minute(Math.floor(state.duration / 60))
+                .second(state.duration % 60)
+                .format('mm:ss')
+            }}
           </div>
-          <n-divider class="product-header-divider" dashed />
-          <!-- 文章主体 -->
-          <div class="product-main">
-            <div class="product-title">{{ state.title }}</div>
-            <div ref="editorRef" class="editor" />
-          </div>
-          <n-divider class="product-footer-divider" dashed />
         </div>
+        <n-divider class="product-header-divider" dashed />
+        <!-- 文章主体 -->
+        <div class="product-main">
+          <div class="product-title">{{ state.title }}</div>
+          <div ref="editorRef" class="editor" />
+        </div>
+        <n-divider class="product-footer-divider" dashed />
+      </div>
     </div>
     <div v-show="state.type === 'course'" ref="controllerRef" :class="['controller']"></div>
   </div>

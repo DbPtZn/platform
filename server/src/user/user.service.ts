@@ -84,10 +84,30 @@ export class UserService {
     }
   }
 
-  async findUserInfo(id: string) {
+  async findUserInfoById(id: string) {
     try {
       const user = await this.usersRepository.findOne({
         where: { id }
+      })
+      // const publicDir = this.configService.get('common.publicDir')
+      // const prefix = this.configService.get('common.staticPrefix')
+      // user.avatar = user.avatar ? prefix + user.avatar.split(publicDir)[1] : ''
+      return user
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async findUserInfoByUID(uid: string) {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { UID: uid },
+        select: [
+          'UID',
+          'avatar',
+          'nickname',
+          'desc',
+        ]
       })
       // const publicDir = this.configService.get('common.publicDir')
       // const prefix = this.configService.get('common.staticPrefix')
@@ -104,11 +124,11 @@ export class UserService {
         where: {},
         select: ['UID', 'nickname', 'avatar', 'desc', 'updateAt', 'createAt']      
       })
-      users.forEach(user => {
-        const publicDir = this.configService.get('common.publicDir')
-        const prefix = this.configService.get('common.staticPrefix')
-        user.avatar = user.avatar ? prefix + user.avatar.split(publicDir)[1] : ''
-      })
+      // users.forEach(user => {
+      //   const publicDir = this.configService.get('common.publicDir')
+      //   const prefix = this.configService.get('common.staticPrefix')
+      //   user.avatar = user.avatar ? prefix + user.avatar.split(publicDir)[1] : ''
+      // })
       return users
     } catch (error) {
       throw error

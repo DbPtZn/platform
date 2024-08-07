@@ -3,19 +3,19 @@ import { UserService } from 'src/user/user.service'
 import { extname } from 'path'
 import * as fs from 'fs'
 import { AuthcodeService } from 'src/authcode/authcode.service'
-import { ArticleService } from 'src/article/article.service'
 import { UploadfileService } from 'src/uploadfile/uploadfile.service'
 import { CreateArticleDto } from './dto/receive.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from 'src/user/user.entity'
+import { SubmissionService } from 'src/submission/submission.service'
 
 @Injectable()
 export class ReceiverService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    private readonly articleService: ArticleService,
+    private readonly submissionService: SubmissionService,
     private readonly authcodeService: AuthcodeService,
     private readonly fileService: UploadfileService
   ) {}
@@ -97,14 +97,14 @@ export class ReceiverService {
     // 检测是否属于更新投稿(有附带版本 id 一般属于更新投稿)
     let fromEditionId = ''
     if(dto.editionId) {
-      const result = await this.articleService.queryEditionExists(dto.editionId)
+      const result = await this.submissionService.queryEditionExists(dto.editionId)
       if(result) {
         fromEditionId = dto.editionId
       }
     }
 
 
-    const result = await this.articleService.create(
+    const result = await this.submissionService.create(
       data,
       user.id,
       fromEditionId

@@ -1,17 +1,17 @@
 import { maxios as axios } from './index'
 
-interface UpdateUserInfoDto {
+export interface UpdateUserInfoDto {
   nickname: string
   avatar: string
   desc: string
 }
 
-interface UpdateUserPwdDto {
+export interface UpdateUserPwdDto {
   oldPwd: string
   newPwd: string
 }
 
-interface UpdateUserConfigDto {
+export interface UpdateUserConfigDto {
   autoDisplay: boolean
 }
 

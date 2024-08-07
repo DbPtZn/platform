@@ -14,18 +14,18 @@ const blogRoutes: Array<RouteRecordRaw> = [
         name: 'list',
         component: () => import(/* webpackChunkName: "about" */ '@/views/blog/list/AllArticleList.vue'),
       },
-      // {
-      //   path: `/`,
-      //   component: () => import(/* webpackChunkName: "about" */ '@/pages/blog/ColumnPage.vue'),
-      // },
-      // {
-      //   path: `/:UID/column`,
-      //   component: () => import(/* webpackChunkName: "about" */ '@/pages/blog/ColumnPage.vue'),
-      // },
-      // {
-      //   path: `/:UID/article/:AID`,
-      //   component: () => import(/* webpackChunkName: "about" */ '@/pages/blog/ArticlePage.vue'),
-      // },
+      {
+        path: `album`,
+        component: () => import(/* webpackChunkName: "about" */ '@/views/blog/album/Album.vue'),
+      },
+      {
+        path: `tag`,
+        component: () => import(/* webpackChunkName: "about" */ '@/views/blog/tag/Tag.vue'),
+      },
+      {
+        path: `about`,
+        component: () => import(/* webpackChunkName: "about" */ '@/views/blog/about/About.vue'),
+      },
     ]
     // 思考作品页面的链接上要不要加博客UID
     // 考虑博客页不添加 blogger 作为头部，仅使用 UID

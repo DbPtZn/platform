@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { NButton, NIcon, NSelect, NSpace, useDialog, useMessage, useThemeVars } from 'naive-ui'
-import type { DataTableColumns, DropdownOption, PaginationInfo } from 'naive-ui'
+import { NButton, NSelect, NSpace, useDialog, useMessage, useThemeVars } from 'naive-ui'
+import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import _ from 'lodash'
-import { onMounted, createApp, computed, ref, onUnmounted, h, nextTick } from 'vue'
-import type { ParsedArticleFile, Submission } from '@/types'
+import { onMounted, computed, ref, h, nextTick } from 'vue'
+import type { Submission } from '@/types'
 import useStore from '@/store'
 import dayjs from 'dayjs'
 import '@textbus/editor/bundles/textbus.min.css'
@@ -17,9 +17,6 @@ const message = useMessage()
 const dialog = useDialog()
 const themeVars = useThemeVars()
 const router = useRouter()
-// const id = computed(() => router.currentRoute.value.query.id as string)
-// const page = computed(() => Number(router.currentRoute.value.query.page))
-// const docs = computed<Submission[]>(() => submissionStore.items)
 onMounted(() => {
   // 初始载入时，自动加载数据
   if (submissionStore.items.length === 0) {
@@ -74,28 +71,78 @@ const handleOpen = (row: Model) => {
   message.success(row.id)
   router.push('/manage/article/' + row.id)
 }
+
+const handleAllot = (row: Model) => {
+  const opitons = albumListStore.data.map(item => {
+    return {
+      key: item.id,
+      label: item.name,
+      value: item.id
+    }
+  })
+  const albumVal = ref(row.album?.id)
+  dialog.create({
+    title: '选择一个专栏',
+    content: () =>
+      h(NSelect, {
+        value: albumVal.value,
+        options: opitons,
+        onUpdateValue: value => {
+          albumVal.value = value
+        }
+      }),
+    icon: () => renderIcon('material-symbols-light:folder-data-rounded'),
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      albumVal.value &&
+        submissionStore
+          .allot({
+            articleId: row.id,
+            albumId: albumVal.value
+          })
+          .then(() => {
+            message.success('专栏分配成功')
+          })
+    },
+    onNegativeClick: () => {
+      message.error('取消')
+    }
+  })
+}
 const handlePublish = (row: Model, isPublished: boolean) => {
-  // submissionStore.publish({
-  //   id: row.id,
-  //   isPublished: isPublished
-  // })
+  submissionStore.updatePublishStatus(row.id, isPublished)
 }
 const handleDisplay = (row: Model, isDisplayed: boolean) => {
-  // submissionStore.display({
-  //   id: row.id,
-  //   isDisplayed: isDisplayed
-  // })
+  submissionStore.updateDisplayStatus(row.id, isDisplayed)
 }
-const handleRemove = (row: Model) => {
+const handleRefuse = (row: Model) => {
+  dialog.warning({
+    icon: () => renderIcon('material-symbols:do-not-touch-sharp'),
+    title: '拒绝稿件',
+    content: '一旦拒稿将无法再恢复，请谨慎确认！',
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      submissionStore.refuse({
+        id: row.id,
+        msg: ''
+      })
+    },
+    onNegativeClick: () => {
+      message.error('取消')
+    }
+  })
+}
+
+const handleDelete = (row: Model) => {
   dialog.warning({
     title: '删除稿件',
     content: '是否删除稿件',
     positiveText: '确定',
     negativeText: '取消',
     onPositiveClick: () => {
-      // submissionStore.remove({
-      //   id: row.id
-      // })
+      submissionStore.delete(row.id)
     }
   })
 }
@@ -255,71 +302,10 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                   size: 'small',
                   onClick: () => {
                     if (row.isParsed) {
-                      const opitons = albumListStore.data.map(item => {
-                        return {
-                          key: item.id,
-                          label: item.name,
-                          value: item.id
-                        }
-                      })
-                      const albumVal = ref(row.album?.id)
-                      dialog.create({
-                        title: '选择一个专栏',
-                        content: () =>
-                          h(NSelect, {
-                            value: albumVal.value,
-                            options: opitons,
-                            onUpdateValue: value => {
-                              albumVal.value = value
-                            }
-                          }),
-                        icon: () => renderIcon('material-symbols-light:folder-data-rounded'),
-                        positiveText: '确定',
-                        negativeText: '取消',
-                        onPositiveClick: () => {
-                          albumVal.value &&
-                            submissionStore
-                              .allot({
-                                articleId: row.id,
-                                albumId: albumVal.value
-                              })
-                              .then(() => {
-                                message.success('专栏分配成功')
-                              })
-                          // $fetch(`/api/manage/article/allot`, {
-                          //   method: 'POST',
-                          //   body: dto
-                          // }).then(() => {
-                          //   const index = docs.value.findIndex(item => item.id === row.id)
-                          //   const album = albumListStore.data.find(item => item.id === albumVal.value)
-                          //   if(!album) return
-                          //   docs.value[index].album = album
-                          // })
-                        },
-                        onNegativeClick: () => {
-                          message.error('取消')
-                        }
-                      })
+                      handleAllot(row)
                       return
                     }
-                    dialog.create({
-                      title: '确定拒稿？',
-                      content: '一旦拒稿将无法再恢复，请谨慎确认！',
-                      icon: () => renderIcon('material-symbols:do-not-touch-sharp'),
-                      positiveText: '确定',
-                      negativeText: '取消',
-                      onPositiveClick: () => {
-                        // $fetch(`/api/manage/authcode/delete/${row.id}`, {
-                        //   method: 'delete'
-                        // }).then(() => {
-                        //   const index = data.value.findIndex(item => item.id === row.id)
-                        //   data.value.splice(index, 1)
-                        // })
-                      },
-                      onNegativeClick: () => {
-                        message.error('取消')
-                      }
-                    })
+                    handleRefuse(row)
                   }
                 },
                 { default: () => (row.isParsed ? '分配' : '拒稿') }
@@ -332,12 +318,12 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                     tertiary: true,
                     size: 'small',
                     onClick: (e: MouseEvent) => {
-                      targetRow.value = row
                       e.preventDefault()
                       e.stopPropagation()
+                      targetRow.value = row
                       showDropdownRef.value = false
                       let target = e.target as HTMLElement
-                      if(target.tagName !== 'BUTTON') {
+                      if (target.tagName !== 'BUTTON') {
                         target = target.parentElement as HTMLElement
                       }
                       const rect = target.getBoundingClientRect()
@@ -433,7 +419,7 @@ const generateOptions = (row: Model | null): DropdownOption[] => {
       key: 'parseAndOpen',
       props: {
         onClick: () => {
-          targetRow.value && handleParse(targetRow.value)
+          row && handleParse(row)
         }
       }
     },
@@ -443,7 +429,7 @@ const generateOptions = (row: Model | null): DropdownOption[] => {
       show: row.isParsed,
       props: {
         onClick: () => {
-          // targetRow.value && handleParse(targetRow.value)
+          row && handleAllot(row)
         }
       }
     },
@@ -453,17 +439,17 @@ const generateOptions = (row: Model | null): DropdownOption[] => {
       show: row.isParsed,
       props: {
         onClick: () => {
-          // targetRow.value && handleParse(targetRow.value)
+          row && handlePublish(row, !row.isPublished)
         }
       }
     },
     {
-      label: () => (row.isPublished ? '取消展示' : '展示'),
+      label: () => (row.isDisplayed ? '取消展示' : '展示'),
       key: 'display',
       show: row.isParsed,
       props: {
         onClick: () => {
-          // targetRow.value && handleParse(targetRow.value)
+          row && handleDisplay(row, !row.isDisplayed)
         }
       }
     },
@@ -473,49 +459,17 @@ const generateOptions = (row: Model | null): DropdownOption[] => {
       key: 'Refusal',
       props: {
         onClick: () => {
-          dialog.create({
-            title: '是否彻底删除？',
-            icon: () => renderIcon('material-symbols:do-not-touch-sharp'),
-            positiveText: '确定',
-            negativeText: '取消',
-            onPositiveClick: () => {
-              // targetRow.value && $fetch(`/api/manage/authcode/delete/${targetRow.value?.id}`, {
-              //   method: 'delete'
-              // }).then(() => {
-              //   const index = data.value.findIndex(row => row.id === targetRow.value?.id)
-              //   data.value.splice(index, 1)
-              // })
-            },
-            onNegativeClick: () => {
-              message.error('取消')
-            }
-          })
+          row && handleRefuse(row)
         }
       }
     },
     {
-      label: '移除',
+      label: '删除',
       show: row.isParsed,
       key: 'delete',
       props: {
         onClick: () => {
-          dialog.create({
-            title: '是否彻底删除？',
-            icon: () => renderIcon('material-symbols:do-not-touch-sharp'),
-            positiveText: '确定',
-            negativeText: '取消',
-            onPositiveClick: () => {
-              // targetRow.value && $fetch(`/api/manage/authcode/delete/${targetRow.value?.id}`, {
-              //   method: 'delete'
-              // }).then(() => {
-              //   const index = data.value.findIndex(row => row.id === targetRow.value?.id)
-              //   data.value.splice(index, 1)
-              // })
-            },
-            onNegativeClick: () => {
-              message.error('取消')
-            }
-          })
+          row && handleDelete(row)
         }
       }
     }

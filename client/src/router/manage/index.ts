@@ -11,7 +11,7 @@ const managerRoutes: Array<RouteRecordRaw> = [
       {
         path: '',
         name: 'default',
-        component: () => import(/* webpackChunkName: "about" */ '@/pages/manage/DefaultPage.vue')
+        component: () => import(/* webpackChunkName: "about" */ '@/views/manage/default/Default.vue')
       },
       {
         path: 'auth',

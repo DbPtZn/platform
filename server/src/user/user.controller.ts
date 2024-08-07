@@ -15,7 +15,19 @@ export class UserController {
   @Get(`/info`)
   async getUserInfo(@Req() req, @Res() res) {
     try {
-      const info = await this.userService.findUserInfo(req.user.id)
+      const info = await this.userService.findUserInfoById(req.user.id)
+      // console.log(info)
+      return res.status(200).send(info)
+    } catch (error) {
+      return res.status(400).send('获取用户信息失败！' + error.message)
+    }
+  }
+
+  @Get(`/blog/:uid`)
+  async getUserInfoToBlog(@Param('uid') uid, @Req() req, @Res() res) {
+    // console.log('获取用户信息：' + uid)
+    try {
+      const info = await this.userService.findUserInfoByUID(uid)
       // console.log(info)
       return res.status(200).send(info)
     } catch (error) {
@@ -82,10 +94,11 @@ export class UserController {
     }
   }
 
-  @Get('list')
+  @Get('/list')
   async getList(@Req() req, @Res() res) {
     try {
       const users = await this.userService.findAll()
+      console.log(users)
       res.send(users)
     } catch (error) {
       res.status(400).send(error.message)

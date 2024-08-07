@@ -1,7 +1,6 @@
 import { AlbumService } from './album.service'
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
-import { ParseArticleDto } from 'src/article/dto'
 import { CreateAlbumDto } from './dto/create-album.dto'
 
 @Controller('album')

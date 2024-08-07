@@ -69,11 +69,13 @@ function handleBack() {
   <div class="nav">
     <div class="nav-container">
       <n-page-header class="wrapper">
-        <template #title>
-          <router-link to="/">Tapenote</router-link>
-        </template>
+        <!-- <template #title>
+          <router-link to="/">主页</router-link>
+        </template> -->
         <template #avatar>
-          <img class="logo" src="/logo.png" />
+          <router-link to="/">
+            <img class="logo" src="/logo.png" />
+          </router-link>
         </template>
         <template #extra>
           <n-space>
@@ -104,7 +106,7 @@ function handleBack() {
   height: 64px;
   min-height: 64px;
   box-sizing: border-box;
-  border: 1px solid v-bind('themeVars.dividerColor');
+  border-bottom: 1px solid v-bind('themeVars.dividerColor');
   background-color: v-bind('themeVars.bodyColor');
   box-shadow: v-bind('themeVars.boxShadow1');
   .nav-container {
@@ -126,6 +128,7 @@ function handleBack() {
   }
 }
 .logo {
-  height: 24px;
+  height: 32px;
+  cursor: pointer;
 }
 </style>
