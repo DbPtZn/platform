@@ -29,6 +29,7 @@ onMounted(() => {
 .home {
   height: 100%;
   width: 100%;
+  min-height: 100vh;
   color: v-bind('themeVars.textColor1');
   background-color: v-bind('themeVars.bodyColor');
   margin: 0 auto;

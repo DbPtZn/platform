@@ -77,6 +77,9 @@ importers:
       vue-router:
         specifier: ^4.4.0
         version: 4.4.0(vue@3.4.34(typescript@5.5.4))
+      vue3-touch-events:
+        specifier: ^4.1.8
+        version: 4.1.8
     devDependencies:
       '@iconify/vue':
         specifier: ^4.1.2
@@ -1002,6 +1005,9 @@ packages:
     peerDependencies:
       typescript: '>=5.0.0'
 
+  vue3-touch-events@4.1.8:
+    resolution: {integrity: sha512-8Zs0mj5k/7R579JHsc5w1V2IqAkNlz2gJs18bRV4T5WyCMfd5sBf2ESJ2xR8z+n7ypgK8fQO5MmDOPal0Evf3Q==}
+
   vue@3.4.34:
     resolution: {integrity: sha512-VZze05HWlA3ItreQ/ka7Sx7PoD0/3St8FEiSlSTVgb6l4hL+RjtP2/8g5WQBzZgyf8WG2f+g1bXzC7zggLhAJA==}
     peerDependencies:
@@ -1832,6 +1838,8 @@ snapshots:
       '@vue/language-core': 2.0.29(typescript@5.5.4)
       semver: 7.6.3
       typescript: 5.5.4
+
+  vue3-touch-events@4.1.8: {}
 
   vue@3.4.34(typescript@5.5.4):
     dependencies:

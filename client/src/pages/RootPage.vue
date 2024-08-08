@@ -18,5 +18,6 @@ const bgcolor = computed(() => settingStore.theme === 'dark' ? '#000' : '#fff')
   width: 100%;
   height: 100%;
   background-color: v-bind('bgcolor');
+  // overflow-x: hidden;
 }
 </style>

@@ -39,7 +39,7 @@ export class Album {
     type: 'boolean',
     default: false
   })
-  isPublish: boolean
+  isDisplayed: boolean
 
   @Column({
     type: 'varchar',

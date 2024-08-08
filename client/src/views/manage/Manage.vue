@@ -3,10 +3,15 @@ import useStore from '@/store'
 import Layout from './layout/Layout.vue'
 import { Sidebar, Itemlist } from '.'
 import { onMounted } from 'vue'
+import { onUnmounted } from 'vue';
 const { albumStore, userStore } = useStore('manage')
 onMounted(() => {
   // 获取用户数据
   userStore.fetchAndSet()
+  document.documentElement.style.overflow = 'hidden'
+})
+onUnmounted(() => {
+  document.documentElement.style.overflow = 'unset'
 })
 </script>
 

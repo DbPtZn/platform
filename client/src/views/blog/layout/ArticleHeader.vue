@@ -48,10 +48,10 @@ const subs: Subscription[] = []
 const visible = ref(false)
 onMounted(() => {
   subs.push(
-    // fromEvent(document.body, 'scroll').subscribe(() => {
+    // fromEvent(window, 'scroll').subscribe(() => {
     //   console.log('scro')
     // }),
-    fromEvent<WheelEvent>(document.body, 'wheel').subscribe(event => {
+    fromEvent<WheelEvent>(window, 'wheel').subscribe(event => {
       // console.log(event)
       if (event.deltaY > 0) {
         // 用户向上滚动
@@ -109,7 +109,7 @@ function handleMoreClick() {
 </template>
 
 <style scoped lang="scss">
-.visible {
+.nav.visible {
   position: sticky;
   top: 0px;
   animation: fadeInDown 0.5s ease-in-out;
@@ -124,7 +124,7 @@ function handleMoreClick() {
   color: v-bind('themeVars.textColor1');
   border-bottom: 1px solid v-bind('themeVars.dividerColor');
   background-color: v-bind('themeVars.cardColor');
-  box-shadow: v-bind('themeVars.boxShadow1');
+  // box-shadow: v-bind('themeVars.boxShadow1');
   .nav-container {
     display: flex;
     flex-direction: row;
@@ -154,7 +154,7 @@ function handleMoreClick() {
     overflow: clip;
   }
   .logo {
-    height: 24px;
+    height: 32px;
   }
   .tapenote-name {
     display: block;

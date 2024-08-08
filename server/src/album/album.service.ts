@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Article } from 'src/article/article.entity';
-import { User } from 'src/user/user.entity';
-import { Repository, DataSource } from 'typeorm';
-import { Album } from './album.entity';
-import { CreateAlbumDto } from './dto/create-album.dto';
-import { RemovedEnum } from 'src/enum';
+import { Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Article } from 'src/article/article.entity'
+import { User } from 'src/user/user.entity'
+import { Repository, DataSource } from 'typeorm'
+import { Album } from './album.entity'
+import { CreateAlbumDto } from './dto/create-album.dto'
+import { RemovedEnum } from 'src/enum'
 
 @Injectable()
 export class AlbumService {
@@ -38,7 +38,7 @@ export class AlbumService {
       let newalbum: Album
       try {
         newalbum = await queryRunner.manager.save(album)
-        if(user.albumSequence) {
+        if (user.albumSequence) {
           user.albumSequence.push(newalbum.id)
         } else {
           user.albumSequence = [newalbum.id]
@@ -52,7 +52,7 @@ export class AlbumService {
       } finally {
         await queryRunner.release()
       }
-      
+
       return newalbum
     } catch (error) {
       console.log(error)
@@ -83,6 +83,7 @@ export class AlbumService {
           'cover',
           'isParsed',
           'isPublished',
+          'isDisplayed',
           'author',
           'detail'
         ]
@@ -94,7 +95,7 @@ export class AlbumService {
       const data = {
         id: album.id,
         name: album.name,
-        isPublish: album.isPublish,
+        isDisplayed: album.isDisplayed,
         subfiles: articles.map(article => {
           return {
             id: article.id,
@@ -105,7 +106,7 @@ export class AlbumService {
             abbrev: article.abbrev,
             cover: article.cover,
             isParsed: article.isParsed,
-            isPublish: article.isPublished,
+            isPublished: article.isPublished,
             author: article.author,
             detail: article.detail
           }

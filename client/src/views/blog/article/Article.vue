@@ -13,6 +13,7 @@ import useStore from '@/store'
 import { useRouter } from 'vue-router'
 import { blogApi } from '@/api'
 import ArticleHeader from '../layout/ArticleHeader.vue'
+import { Icon } from '@iconify/vue'
 import { AnimeEventService, AnimeProvider, DialogProvider, OutlineService, Player, RootEventService, Structurer, ThemeProvider } from '@/editor'
 const themeVars = useThemeVars()
 const { settingStore } = useStore('common')
@@ -79,12 +80,13 @@ const state = ref<PublicArticleType>({
 })
 
 let player: Editor
+let controller: Player
 const subs: Array<Subscription> = []
 let headings: NodeListOf<HTMLElement>
 const outlineData: { tagName: string; text: string; offsetTop: number }[] = []
 const activeIndex = ref(0)
 onMounted(() => {
-  scrollerRef.value = document.body
+  scrollerRef.value = document.documentElement
   if (id.value) {
     blogApi.article
       .get<PublicArticleType>(id.value)
@@ -102,7 +104,7 @@ onMounted(() => {
           .then(res => {
             player = res
             // console.log(player)
-            const controller = player.get(Player)
+            controller = player.get(Player)
             subs.push(
               controller.onStateUpdate.subscribe(() => {
                 // console.log('playing')
@@ -134,12 +136,12 @@ onMounted(() => {
         // console.log(err)
         if (err.response.status === 307) {
           // console.log(err.response.data)
-          if(err.response?.data?.examining) {
+          if (err.response?.data?.examining) {
             message.info('文章正在审核中...')
             isExamining.value = true
             return
           }
-          if(err.response?.data?.refused) {
+          if (err.response?.data?.refused) {
             isRefused.value = true
             refuseMsg.value = err.response?.data?.refuseMsg || '未知'
             return
@@ -149,9 +151,12 @@ onMounted(() => {
       })
   }
   /** 监听 scroll 事件，设置目录焦点 */
+  // console.log(scrollerRef.value)
   subs.push(
-    fromEvent(document.body, 'scroll').subscribe(() => {
-      activeIndex.value = outlineData.findIndex(item => item.offsetTop > document.body.scrollTop)
+    fromEvent(window, 'scroll').subscribe(() => {
+      // console.log('body')
+      activeIndex.value = outlineData.findIndex(item => item.offsetTop > scrollerRef.value.scrollTop)
+      // console.log(activeIndex.value)
     })
   )
 })
@@ -191,7 +196,7 @@ function handleMoreClick() {
 
 /** 侧边抽屉滚动控制 */
 function handleScrollTo(offsetTop: number) {
-  document.body.scrollTo({
+  scrollerRef.value.scrollTo({
     top: offsetTop - 10, // 滚动到指定位置( - 10px 偏移修正)
     behavior: 'smooth'
   })
@@ -204,26 +209,67 @@ function handleFloatBtnClick() {
   if (!controller.isPlaying && !controller.isPause) {
     controller.start()
     isPlaying.value = true
-    // floatBtnIcon.value = 'material-symbols:pause-rounded'
     return
   }
   if (controller.isPlaying && !controller.isPause) {
     controller.pause()
     isPlaying.value = false
-    // floatBtnIcon.value = 'material-symbols:play-arrow-rounded'
     return
   }
   if (!controller.isPlaying && controller.isPause) {
     controller.resume()
     isPlaying.value = true
-    // floatBtnIcon.value = 'material-symbols:pause-rounded'
     return
   }
 }
-// function updateFloatBtnIcon(icon: string) {
-//   if (!controller.isPlaying && !controller.isPause)
-// }
-const isMenuVisible = ref(true)
+
+const controlMethods = {
+  handlePlay: () => {
+    if (!controller.isPlaying && !controller.isPause) {
+      controller.start()
+      isPlaying.value = true
+      return
+    }
+    if (controller.isPlaying && !controller.isPause) {
+      controller.pause()
+      isPlaying.value = false
+      return
+    }
+    if (!controller.isPlaying && controller.isPause) {
+      controller.resume()
+      isPlaying.value = true
+      return
+    }
+  },
+  handleRewind: () => {
+    controller.rewind()
+  },
+  handleForward: () => {
+    controller.forward()
+  },
+  handleSpeedDown: () => {
+    controller.speedDown()
+  },
+  handleSpeedUp: () => {
+    controller.speedUp()
+  },
+  handleReplay: () => {
+    controller.replay()
+    isPlaying.value = true
+  },
+  handleStop: () => {
+    controller.stop()
+    isPlaying.value = false
+  },
+  handleVolumeDown: () => {
+    controller.volumeDown()
+  },
+  handleVolumeUp: () => {
+    controller.volumeUp()
+  }
+}
+
+const isMenuVisible = ref(false)
 let timer: NodeJS.Timeout
 function handleMouseDown() {
   timer = setTimeout(() => {
@@ -239,12 +285,31 @@ function handleMouseUp() {
 function handleShowMenu(value: boolean) {
   isMenuVisible.value = value
 }
+function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
+  if (event === 'top') {
+    // 用户向上滑动
+    // console.log('用户向上滑动')
+    navRef.value.setNavVisible(false)
+  } else if (event === 'bottom') {
+    // 用户向下滑动
+    // console.log('用户向下滑动')
+    navRef.value.setNavVisible(true)
+  } else if (event === 'left') {
+    // 用户向左滑动
+    // console.log('用户向左滑动')
+    isMenuVisible.value = true
+  } else if (event === 'right') {
+    // 用户向右滑动
+    // console.log('用户向右滑动')
+    isMenuVisible.value = false
+  }
+}
 </script>
 
 <template>
   <ArticleHeader ref="navRef" :user="state.user" @outline-visible="handleOutlineVisible" @more-click="handleMoreClick" />
   <div ref="rootRef" class="article">
-    <div class="wrapper">
+    <div class="wrapper" v-touch:swipe="handleSwipe">
       <div class="header">
         <div class="title">{{ state.title }}</div>
         <!-- <div class="intro">一段介绍的话</div> -->
@@ -254,19 +319,19 @@ function handleShowMenu(value: boolean) {
         <div class="detail">
           <!-- @click="handleBloggerClick(state.UID)" -->
           <div class="author">
-            <Icon name="clarity:avatar-solid" size="20px" />
+            <Icon icon="clarity:avatar-solid" height="20px" />
             <span>{{ state.penname }}</span>
           </div>
           <div class="time">
-            <Icon name="material-symbols:calendar-clock" size="20px" />
+            <Icon icon="material-symbols:calendar-clock" height="20px" />
             <span>{{ dayjs(state.createAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
           </div>
           <div class="wordage">
-            <Icon name="ant-design:field-number-outlined" size="24px" />
+            <Icon icon="ant-design:field-number-outlined" height="24px" />
             <span>{{ state.wordage }}</span>
           </div>
           <div v-if="state.duration" class="duration">
-            <Icon name="material-symbols:alarm" size="20px" />
+            <Icon icon="material-symbols:alarm" height="20px" />
             <span>{{
               dayjs()
                 .minute(Math.floor(state.duration / 60))
@@ -287,56 +352,44 @@ function handleShowMenu(value: boolean) {
     <div v-show="state.type === 'course'" ref="controllerRef" :class="['controller']"></div>
   </div>
 
-  <!-- <n-float-button
-    class="mo-controller"
+  <!-- 控制器按钮组 -->
+  <n-float-button-group
+    :class="['mo-controller-group', isMenuVisible ? 'mo-controller-group-show' : 'mo-controller-group-hidden']"
     shape="circle"
     position="fixed"
-    right="40px"
-    top="240px"
-    menu-trigger="click"
   >
-    <Icon name="streamline:interface-setting-slider-horizontal-adjustment-adjust-controls-fader-horizontal-settings-slider" size="24" />
-    <template #menu>
-      <n-float-button >
-        <Icon name="clarity:avatar-solid" size="20px" />
-      </n-float-button>
-      <n-float-button >
-        <Icon name="clarity:avatar-solid" size="20px" />
-      </n-float-button>
-      <n-float-button >
-        <Icon name="clarity:avatar-solid" size="20px" />
-      </n-float-button>
-    </template>
-  </n-float-button> -->
+    <n-float-button @click="controlMethods.handleSpeedDown()">
+      <Icon icon="material-symbols:keyboard-double-arrow-up-rounded" height="20px" />
+    </n-float-button>
+    <n-float-button @click="controlMethods.handleRewind()">
+      <Icon icon="material-symbols:replay-5-rounded" height="20px" />
+    </n-float-button>
+    <n-float-button @click="controlMethods.handlePlay()">
+      <Icon :icon="floatBtnIcon" height="24" />
+    </n-float-button>
+    <n-float-button @click="controlMethods.handleForward()">
+      <Icon icon="material-symbols:forward-5-rounded" height="20px" />
+    </n-float-button>
+    <n-float-button @click="controlMethods.handleSpeedUp()">
+      <Icon icon="material-symbols:keyboard-double-arrow-down-rounded" height="20px" />
+    </n-float-button>
+  </n-float-button-group>
+
+  <!-- 控制器启动/暂停按钮 -->
   <n-float-button
+    v-show="!isMenuVisible"
     class="mo-controller"
     shape="circle"
     position="fixed"
     right="40px"
     bottom="40px"
     @click="handleFloatBtnClick"
-    @mousedown="handleMouseDown"
-    @mouseup="handleMouseUp"
-    @touchstart="handleMouseDown"
-    @touchend="handleMouseUp"
-    @toucemove="handleMouseUp"
   >
-    <Icon :name="floatBtnIcon" size="24" />
-    <template #menu>
-      <n-float-button>
-        <Icon name="clarity:avatar-solid" size="20px" />
-      </n-float-button>
-      <n-float-button>
-        <Icon name="clarity:avatar-solid" size="20px" />
-      </n-float-button>
-      <n-float-button>
-        <Icon name="clarity:avatar-solid" size="20px" />
-      </n-float-button>
-    </template>
+    <Icon :icon="floatBtnIcon" height="24" />
   </n-float-button>
 
   <n-back-top class="back-top" :right="100" :to="rootRef" />
-  <n-drawer v-model:show="drawerActive" width="50%" placement="right" :to="rootRef">
+  <n-drawer v-model:show="drawerActive" width="50%" placement="right">
     <n-drawer-content title="Menu">
       <div>
         <n-flex>
@@ -353,6 +406,27 @@ function handleShowMenu(value: boolean) {
             </template>
           </n-switch>
         </n-flex>
+        <n-divider class="divider" />
+
+        <n-flex vertical>
+          <n-button @click="controlMethods.handleReplay()">
+            <Icon icon="material-symbols:replay-rounded" height="20px" />
+            <span>重播</span>
+          </n-button>
+          <n-button @click="controlMethods.handleStop()">
+            <Icon icon="material-symbols:stop-rounded" height="20px" />
+            <span>结束</span>
+          </n-button>
+          <!-- <n-button>
+            <Icon icon="material-symbols:volume-down-rounded" height="20px" />
+            <span>减小音量</span>
+          </n-button>
+          <n-button>
+            <Icon icon="material-symbols:volume-up-rounded" height="20px" />
+            <span>增大音量</span>
+          </n-button> -->
+        </n-flex>
+
         <n-divider class="divider" />
         <div class="custom-outline">
           <n-flex vertical>
@@ -404,6 +478,30 @@ function handleShowMenu(value: boolean) {
   background-color: v-bind('themeVars.cardColor');
   padding-top: 10%;
 }
+
+.mo-controller-group {
+  z-index: 1;
+  opacity: 0.6;
+  bottom: 30%;
+  // bottom: 50%;
+  // transform: translateY(50%);
+  display: none;
+  &:hover {
+    opacity: 0.8;
+  }
+}
+.mo-controller-group-show {
+  right: 40px;
+  animation: bounceInRight 0.5s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+
+.mo-controller-group-hidden {
+  right: -100px;
+  // animation: fadeInRight 0.5s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+
 .mo-controller {
   z-index: 1;
   opacity: 0.6;
@@ -524,6 +622,7 @@ function handleShowMenu(value: boolean) {
         width: 100%;
         margin: 0 auto;
         // background-color: v-bind('themeVars.cardColor');
+        background-color: unset;
       }
     }
   }
@@ -586,6 +685,10 @@ function handleShowMenu(value: boolean) {
     display: none;
   }
 
+  .mo-controller-group {
+    display: block;
+  }
+
   .mo-controller {
     display: flex;
   }
@@ -600,13 +703,16 @@ function handleShowMenu(value: boolean) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: v-bind('themeVars.textColor3');
+  // color: v-bind('themeVars.textColor3');
+  opacity: 0.7;
   &:hover {
-    color: v-bind('themeVars.textColor1');
+    // color: v-bind('themeVars.textColor1');
+    opacity: 1;
   }
 }
 .outline-heading-active {
-  color: v-bind('themeVars.textColor1');
+  // color: v-bind('themeVars.textColor1');
+  opacity: 0.95;
 }
 .outline-heading-h1 {
   line-height: 2;

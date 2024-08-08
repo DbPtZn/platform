@@ -10,7 +10,7 @@ const props = defineProps<{
   abbrev: string,
   /** 最近更新时间 */
   date: string | number,
-  isPublish: boolean,
+  isPublished: boolean,
   /** 卡片聚焦状态  */
   active: boolean
 }>()

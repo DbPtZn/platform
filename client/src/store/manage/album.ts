@@ -9,7 +9,7 @@ export const useAlbumStore = defineStore('albumStore',{
       return {
         id: '',
         name: '',
-        isPublish: false,
+        isDisplayed: false,
         subfiles: []
       }
     },
@@ -18,7 +18,7 @@ export const useAlbumStore = defineStore('albumStore',{
         return manageApi.album.get<AlbumState>(id).then(res => {
           this.id = res.data.id
           this.name = res.data.name
-          this.isPublish = res.data.isPublish
+          this.isDisplayed = res.data.isDisplayed
           this.subfiles = res.data.subfiles
         })
       },

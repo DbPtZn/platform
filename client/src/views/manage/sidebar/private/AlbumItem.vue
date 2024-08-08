@@ -16,7 +16,7 @@ const themeVar = useThemeVars()
       <Icon icon="material-symbols:drag-indicator" height="24" />
     </div>
     <div class="icon">
-      <Icon :icon="item.isPublish ? 'material-symbols:menu-book' : 'material-symbols:book-2'" :height="24" />
+      <Icon :icon="item.isDisplayed ? 'material-symbols:menu-book' : 'material-symbols:book-2'" :height="24" />
     </div>
     <div class="label">
       <div class="txt">{{ item.name }}</div>

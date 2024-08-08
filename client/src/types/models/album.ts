@@ -9,7 +9,7 @@ export interface Album {
   name: string
   cover: string
   desc: string
-  isPublish: boolean
+  isDisplayed: boolean
   removed: RemovedEnum
   createAt: string
   updateAt: string
@@ -22,6 +22,6 @@ export type AlbumType = Omit<Album, 'id' | 'userId' | 'removed' | 'createAt' | '
   updateAt: string
 }
 
-export type AlbumState = Pick<AlbumType, 'id' | 'name' | 'isPublish'> & {
+export type AlbumState = Pick<AlbumType, 'id' | 'name' | 'isDisplayed'> & {
   subfiles: Subfile[]
 }
