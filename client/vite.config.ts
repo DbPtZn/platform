@@ -29,6 +29,10 @@ export default defineConfig(({ command, mode }) => {
           additionalData: "@use '@/assets/styles/var.scss' as *;"
         }
       }
+    },
+    server: {
+      port: Number(env.VITE_DEV_PORT),
+      strictPort: true,
     }
   }
 })

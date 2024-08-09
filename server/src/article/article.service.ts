@@ -74,7 +74,7 @@ export class ArticleService {
       .createQueryBuilder('article')
       .leftJoinAndSelect('article.user', 'user')
       .select(['article', 'user.UID', 'user.nickname', 'user.avatar'])
-      .where({ id: id, isParsed: true, isPublished: true })
+      .where({ id: id })
       .getOne()
       // console.log(article.user)
       // console.log(article)

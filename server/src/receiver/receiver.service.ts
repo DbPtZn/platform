@@ -9,6 +9,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from 'src/user/user.entity'
 import { SubmissionService } from 'src/submission/submission.service'
+import { ConfigService } from '@nestjs/config'
+import { commonConfig } from 'src/config'
 
 @Injectable()
 export class ReceiverService {
@@ -17,7 +19,8 @@ export class ReceiverService {
     private usersRepository: Repository<User>,
     private readonly submissionService: SubmissionService,
     private readonly authcodeService: AuthcodeService,
-    private readonly fileService: UploadfileService
+    private readonly fileService: UploadfileService,
+    private readonly configService: ConfigService
   ) {}
 
   async receive(
@@ -42,7 +45,7 @@ export class ReceiverService {
 
     /** 授权码验证 */
     let authcodeId = ''
-    console.log(user.receiverConfig)
+    // console.log(user.receiverConfig)
     if(user.receiverConfig.status === 1 && code) {
       const authcode = await this.authcodeService.validateCode(code, user.id)
       console.log(authcode)
@@ -109,7 +112,12 @@ export class ReceiverService {
       user.id,
       fromEditionId
     )
-    return { editionId: result.editionId || dto.editionId }
+    
+    const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+    return { 
+      editionId: result.editionId || dto.editionId,
+      address: common.clientDomain + 'article' + '/' + result.id,
+    }
   }
 
   reject() {}

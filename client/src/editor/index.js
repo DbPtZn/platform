@@ -10185,7 +10185,7 @@ let Player = class {
     this.animeElementSequence.forEach((item, index) => {
       if (index >= startPoint) {
         item.forEach((el) => {
-          el.style.opacity = visible ? "1" : "0";
+          el.style.visibility = visible ? "visible" : "hidden";
         });
       }
     });
@@ -10216,6 +10216,7 @@ let Player = class {
         el.style.display = "block";
         break;
     }
+    el.style.visibility = "visible";
     const anime2 = this.anime.getAnime(effectValue);
     if (anime2) {
       anime2.applyEffect(el).finished.then(() => {

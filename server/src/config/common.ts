@@ -15,4 +15,6 @@ export default registerAs('common', () => ({
   fullPrivateDir: path.join(process.env.SYSTEM_DIR ? process.env.SYSTEM_DIR : process.cwd(), process.env.APP_DIR, process.env.PRIVATE_DIR),
   fullTempDir: path.join(process.env.SYSTEM_DIR ? process.env.SYSTEM_DIR : process.cwd(), process.env.APP_DIR, process.env.TEMP_DIR),
   fullLogDir: path.join(process.env.SYSTEM_DIR ? process.env.SYSTEM_DIR : process.cwd(), process.env.APP_DIR, process.env.LOG_DIR),
+
+  clientDomain: process.env.CLIENT_DOMAIN, // 客户端域名
 }))

@@ -54,6 +54,9 @@ export class ArticleController {
       if(!result.isPublished) {
         return res.status(307).send({ examining: true, msg: '正在审核中...' })
       }
+      if(!result.isParsed) {
+        throw new Error('文章内容未解析')
+      }
       const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
       if(result.audio) {
         result.audio = common.staticPrefix + result.audio.split(common.publicDir.slice(1))[1]

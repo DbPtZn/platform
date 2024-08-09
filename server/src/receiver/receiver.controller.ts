@@ -48,7 +48,8 @@ export class ReceiverController {
       .receive(formdata, files, UID, code)
       .then(result => {
         console.log('接收投稿成功！')
-        res.status(200).send({ editionId: result.editionId })
+        console.log(result)
+        res.status(200).send(result)
       })
       .catch(err => {
         console.log(err)

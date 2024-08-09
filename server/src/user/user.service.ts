@@ -39,7 +39,7 @@ export class UserService {
       const encryptedPassword = bcrypt.hashSync(password, salt)
       // console.log(encryptedPassword)
       const receiverConfig: ReceiverConfig = {
-        status: 0,
+        status: 1,
         autoParse: false,
         sizeLimit: 0
       }

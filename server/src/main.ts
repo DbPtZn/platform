@@ -26,6 +26,7 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService)
   const common = configService.get<ReturnType<typeof commonConfig>>('common')
+  console.log(common.clientDomain)
   // console.log(path.join(__rootdirname, userDir, publicDir), staticPrefix)
   app.useStaticAssets(common.fullPublicDir, { prefix: common.staticPrefix })
 

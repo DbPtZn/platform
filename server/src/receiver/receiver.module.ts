@@ -46,7 +46,8 @@ const __rootdirname = process.cwd()
     ArticleModule,
     SubmissionModule,
     UploadfileModule,
-    AuthcodeModule
+    AuthcodeModule,
+    ConfigModule
   ],
   controllers: [ReceiverController],
   providers: [ReceiverService]

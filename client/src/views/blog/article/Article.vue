@@ -531,7 +531,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
 
 .article {
   width: 100%;
-  min-height: 100%;
+  min-height: 100vh;
   height: fit-content;
   display: flex;
   justify-content: center;

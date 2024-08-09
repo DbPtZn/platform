@@ -248,8 +248,17 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                         投稿地址：${import.meta.env.VITE_BASE_URL}/receiver/${uid.value}/${row.code}；
                         授权码：${row.code}
                       `
-                      await navigator.clipboard.writeText(text)
-                      message.success('复制成功！' + text)
+                      if(navigator.clipboard) {
+                        await navigator.clipboard.writeText(text)
+                        message.success('复制成功！' + text)
+                      } else {
+                        dialog.create({
+                          title: '浏览器安全策略限制，请手动复制',
+                          content: text,
+                          positiveText: '确定',
+                          negativeText: '取消',
+                        })
+                      }
                     } catch (err) {
                       console.error('Failed to copy: ', err)
                     }
