@@ -152,12 +152,26 @@ onMounted(() => {
   }
   /** 监听 scroll 事件，设置目录焦点 */
   // console.log(scrollerRef.value)
+  let lastScrollTop = 0
   subs.push(
-    fromEvent(window, 'scroll').subscribe(() => {
-      // console.log('body')
+    fromEvent(window, 'scroll').subscribe((ev) => {
       activeIndex.value = outlineData.findIndex(item => item.offsetTop > scrollerRef.value.scrollTop)
       // console.log(activeIndex.value)
-    })
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      if (scrollTop > lastScrollTop) {
+        // 向下滚动
+        navRef.value.setNavVisible(false)
+      } else {
+        // 向上滚动
+        if (!isPlaying.value) {
+          navRef.value.setNavVisible(true)
+        }
+      }
+
+      // 更新上一次滚动的位置
+      lastScrollTop = scrollTop
+    }),
   )
 })
 
@@ -286,20 +300,18 @@ function handleShowMenu(value: boolean) {
   isMenuVisible.value = value
 }
 function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
-  if (event === 'top') {
-    // 用户向上滑动
-    // console.log('用户向上滑动')
-    navRef.value.setNavVisible(false)
-  } else if (event === 'bottom') {
-    // 用户向下滑动
-    // console.log('用户向下滑动')
-    navRef.value.setNavVisible(true)
-  } else if (event === 'left') {
-    // 用户向左滑动
+  // 弃用：该事件的检测不是很灵敏且必须在手指离开屏幕后触发，故弃用
+  // if (event === 'top') {
+  //   // console.log('用户向上滑动')
+  //   // navRef.value.setNavVisible(false)
+  // } else if (event === 'bottom') {
+  //   // console.log('用户向下滑动')
+  //   // navRef.value.setNavVisible(true)
+  // }
+  if (event === 'left') {
     // console.log('用户向左滑动')
     isMenuVisible.value = true
   } else if (event === 'right') {
-    // 用户向右滑动
     // console.log('用户向右滑动')
     isMenuVisible.value = false
   }
@@ -482,7 +494,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
 .mo-controller-group {
   z-index: 1;
   opacity: 0.6;
-  bottom: 30%;
+  bottom: 25%;
   // bottom: 50%;
   // transform: translateY(50%);
   display: none;
@@ -491,7 +503,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
   }
 }
 .mo-controller-group-show {
-  right: 40px;
+  right: 30px;
   animation: bounceInRight 0.5s ease-in-out;
   transition: all 0.2s ease-in-out;
 }
@@ -657,7 +669,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
   }
 }
 
-@include Mobile {
+@include Tablet {
   .header {
     padding: 12px 8px 0px 8px;
     box-sizing: border-box;

@@ -63,9 +63,14 @@ onMounted(() => {
     --n: 3;
   }
 }
-@include Mobile {
+@include Tablet {
   .cards {
     --n: 2;
+  }
+}
+@include Mobile {
+  .cards {
+    --n: 1;
   }
 }
 </style>

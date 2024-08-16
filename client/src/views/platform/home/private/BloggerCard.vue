@@ -3,7 +3,7 @@ import { useThemeVars } from 'naive-ui'
 import type { UserListItem } from '@/types'
 const themeVars = useThemeVars()
 const props = defineProps<{
-  data: UserListItem
+  data?: UserListItem
 }>()
 const handleError = (ev) => {
   ev.target.src = '/avatar03.png'
@@ -18,9 +18,9 @@ const handleError = (ev) => {
     </div> -->
     <div class="card__img">
       <div class="card__avatar">
-        <img :src="data.avatar" alt="avatar" @error="handleError">
+        <img :src="data?.avatar" alt="avatar" @error="handleError">
       </div>
-      <span class="card-fullname">{{ data.nickname }}</span>
+      <span class="card-fullname">{{ data?.nickname }}</span>
     </div>
     <!-- <a href="#" class="card_link">
       <div class="card__img--hover">
@@ -29,10 +29,10 @@ const handleError = (ev) => {
     </a> -->
     <div class="card__info">
       <span class="card__category"> Desc</span>
-      <h3 class="card__title">{{ data.desc }}</h3>
+      <h3 class="card__title">{{ data?.desc }}</h3>
       <span class="card__by">
         <!-- <Icon name="material-symbols-light:arrow-right-alt" size="24" /> -->
-        <router-link class="card__author" title="author" :to="`/${data.UID}`">查看主页</router-link>
+        <router-link class="card__author" title="author" :to="`/${data?.UID}`">查看主页</router-link>
         <!-- <a href="#" class="card__author" title="author"></a> -->
       </span>
     </div>

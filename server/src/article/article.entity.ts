@@ -1,31 +1,40 @@
 import { RemovedEnum } from 'src/enum'
-import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm'
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, ManyToOne, OneToMany, DeleteDateColumn } from 'typeorm'
 import { Authcode } from 'src/authcode/authcode.entity'
 import { User } from 'src/user/user.entity'
-import { VArticle } from 'src/varticle/varticle.entity'
 import { Album } from 'src/album/album.entity'
+
 @Entity()
 export class Article {
   @PrimaryGeneratedColumn('uuid') id: string
-  
-  @Column('varchar') UID: string
-
-  @Column({
-    type: 'uuid',
-    nullable: true
-  })
-  editionId: string // 版本 id
-
-  @Column({
-    type: 'uuid',
-    nullable: true
-  })
-  fromEditionId: string // 来源版本 id
-
-  @OneToMany(() => VArticle, varticle => varticle.primary)
-  varticles: VArticle[]
 
   @Column('uuid') userId: string
+
+  @Column('varchar') UID: string
+
+  // 可以通过 id 访问，也可以通过 agentId 访问
+  @Column('uuid') agentId: string // 代理 id, 通过该 id 访问公开文章
+
+  @Column('uuid') editionId: string // 版号 （ 用于匹配相同版号的文章，也用于投稿时进行版本匹配，有重码的可能，应结合 userId 来锁定同一个版号）
+
+  @Column({
+    type: 'boolean',
+    default: false
+  })
+  isMultiEdition: boolean // 是否多版本（用来手动标记该项目是否有多个版本，节省查询开销）
+
+  @Column({
+    type: 'boolean',
+    default: false
+  })
+  isCurrent: boolean // 当前版本（结合 agentId 查询，标记当前使用的版本，需要保证所有版本中有且仅有一个作为当前版本）
+
+  @Column({
+    type: 'boolean',
+    default: false
+  })
+  isParsed: boolean // 是否完成解析
+
   @ManyToOne(() => User, user => user.articles)
   user: User
 
@@ -46,12 +55,6 @@ export class Article {
     default: 'other'
   })
   type: 'note' | 'course' | 'other'
-
-  @Column({
-    type: 'boolean',
-    default: false
-  })
-  isParsed: boolean
 
   @Column({
     type: 'varchar',
@@ -110,41 +113,37 @@ export class Article {
     type: 'simple-array',
     nullable: true
   })
-  promoterSequence: string[]
+  promoterSequence: string[]  // 启动子序列
 
   @Column({
     type: 'simple-array',
     nullable: true
   })
-  keyframeSequence: number[]
+  keyframeSequence: number[]  // 关键帧序列
 
   @Column({
     type: 'simple-array',
     nullable: true
   })
+  subtitleSequence: string[]  // 字幕序列
 
   @Column({
     type: 'simple-array',
     nullable: true
   })
-  subtitleSequence: string[]
-  @Column({
-    type: 'simple-array',
-    nullable: true
-  })
-  subtitleKeyframeSequence: number[]
+  subtitleKeyframeSequence: number[] // 字幕关键帧序列
 
   @Column({
     type: 'simple-array',
     nullable: true
   })
-  tags: string[]
+  tags: string[] // 标签
 
   @Column({
     type: 'boolean',
     default: false
   })
-  isPublished: boolean
+  isPublished: boolean // 是否公开发布 （是否能通过项目链接被所有人公开访问）
 
   @Column({
     type: 'boolean',
@@ -162,19 +161,19 @@ export class Article {
     type: 'varchar',
     default: '佚名'
   })
-  penname: string // 笔名 便利查询
+  penname: string // 笔名
 
   @Column({
     type: 'varchar',
     default: ''
   })
-  email: string // 邮箱 便利查询
+  email: string // 邮箱
 
   @Column({
     type: 'varchar',
     default: ''
   })
-  avatar: string
+  avatar: string // 头像
 
   // 作者的其它信息
   @Column({
@@ -182,20 +181,20 @@ export class Article {
     nullable: true
   })
   author: {
-    blog?: string
+    blog?: string // 个人博客
   }
 
   @Column({
     type: 'int',
     default: 0
   })
-  wordage: number
+  wordage: number //  字数
 
   @Column({
     type: 'float',
     default: 0
   })
-  duration: number
+  duration: number // 时长
 
   // 作品的其它信息
   @Column({
@@ -203,7 +202,7 @@ export class Article {
     nullable: true
   })
   detail: {
-    fileSize?: number
+    fileSize?: number // 文件大小
   }
 
   @Column({
@@ -219,6 +218,7 @@ export class Article {
 
   @CreateDateColumn() createAt: Date
   @UpdateDateColumn() updateAt: Date
+  @DeleteDateColumn() deleteAt: Date
 
   /** 插入实体时设置创建时间 */
   @BeforeInsert()

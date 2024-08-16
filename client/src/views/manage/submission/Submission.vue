@@ -530,14 +530,15 @@ function handlePageChange(page: number) {
           </n-space>
         </n-checkbox-group>
       </div>
-      <div class="group">
+      <!-- 数据筛选 -->
+      <!-- <div class="group">
         <n-select
           v-model:value="showSelectOption"
           :options="showSelectOptions"
           :consistent-menu-width="false"
           @update:value="handleShowSelectOptionUpdate"
         />
-      </div>
+      </div> -->
     </div>
     <n-data-table :columns="columns" :data="submissionStore.items" :bordered="false" :row-props="rowProps" @update:sorter="handleSorterChange" />
     <div class="footer">

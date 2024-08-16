@@ -1,7 +1,7 @@
 import { Article } from 'src/article/article.entity'
 import { Authcode } from 'src/authcode/authcode.entity'
 import { UploadFile } from 'src/uploadfile/uploadfile.entity'
-import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, OneToMany, DeleteDateColumn } from 'typeorm'
 import { Exclude } from 'class-transformer'
 import { Album } from 'src/album/album.entity'
 
@@ -105,6 +105,7 @@ export class User {
 
   @CreateDateColumn() createAt: Date
   @UpdateDateColumn() updateAt: Date
+  @DeleteDateColumn() deleteAt: Date
 
   /** 插入实体时设置创建时间 */
   @BeforeInsert()

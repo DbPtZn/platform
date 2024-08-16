@@ -55,11 +55,9 @@ onMounted(() => {
       // console.log(event)
       if (event.deltaY > 0) {
         // 用户向上滚动
-        // console.log('向上滚动')
         visible.value = false
       } else {
         // 用户向下滚动
-        // console.log('向下滚动')
         visible.value = true
       }
     })
@@ -243,7 +241,7 @@ function handleMoreClick() {
   }
 }
 
-@include Mobile {
+@include Tablet {
   .nav {
     .nav-container {
       width: 100%;

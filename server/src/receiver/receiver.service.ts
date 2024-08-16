@@ -58,7 +58,7 @@ export class ReceiverService {
     }
     // console.log(authcodeId)
     const data: CreateArticleDto = {
-      isParsed: false,
+      isParsed: false,  // 后续可能会开发自动解析，预留这个选项
       editorVersion: '',
       UID,
       authcodeId,
@@ -98,11 +98,11 @@ export class ReceiverService {
     // console.log(data.keyframeSequence)
 
     // 检测是否属于更新投稿(有附带版本 id 一般属于更新投稿)
-    let fromEditionId = ''
+    let editionId = ''
     if(dto.editionId) {
       const result = await this.submissionService.queryEditionExists(dto.editionId)
       if(result) {
-        fromEditionId = dto.editionId
+        editionId = dto.editionId
       }
     }
 
@@ -110,7 +110,7 @@ export class ReceiverService {
     const result = await this.submissionService.create(
       data,
       user.id,
-      fromEditionId
+      editionId
     )
     
     const common = this.configService.get<ReturnType<typeof commonConfig>>('common')

@@ -7,7 +7,7 @@ import { Authcode } from 'src/authcode/authcode.entity'
 import { UploadfileService } from 'src/uploadfile/uploadfile.service'
 import { AllotArticleDto, ArticleFilter, CreateArticleDto, ParseArticleDto } from './dto'
 import { User } from 'src/user/user.entity'
-import { Repository } from 'typeorm'
+import { DataSource, Repository } from 'typeorm'
 import fsx from 'fs-extra'
 import fs from 'fs'
 import { RemovedEnum } from 'src/enum'
@@ -26,7 +26,9 @@ export class SubmissionService {
     @InjectRepository(Album)
     private albumsRepository: Repository<Album>,
     // private readonly fileService: UploadfileService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    // private readonly generationService: GenerationService,
+    private readonly dataSource: DataSource,
     // private readonly userService: UserService
   ) {}
 
@@ -35,7 +37,7 @@ export class SubmissionService {
     return this.articlesRepository.existsBy({ editionId })
   }
 
-  async create(dto: CreateArticleDto, userId: string, fromEditionId: string) {
+  async create(dto: CreateArticleDto, userId: string, editionId: string) {
     const {
       UID,
       isParsed,
@@ -56,38 +58,42 @@ export class SubmissionService {
     try {
       const user = await this.usersRepository.findOneBy({ id: userId })
       if (!user) throw new Error('用户不存在！')
+
       const authcode = await this.authcodesRepository.findOneBy({ id: authcodeId })
-      if (!user) throw new Error('授权不存在！')
+      if (!authcode) throw new Error('授权不存在！')
+
       const article = new Article()
+      article.userId = user.id
+      article.UID = user.UID
       article.user = user
+
       article.authcode = authcode
-      const data = {
-        isParsed,
-        editionId: !fromEditionId ? UUID.v4() : null,
-        fromEditionId: fromEditionId ? fromEditionId : null,
-        editorVersion,
-        // authcodeId,
-        msg,
-        type,
-        title,
-        abbrev,
-        content,
-        audio,
-        penname,
-        email,
-        author: {
-          blog
-        },
-        duration,
-        wordage,
-        detail: {
-          fileSize: 0
-        },
-        userId,
-        UID
+
+      article.isParsed = isParsed
+      article.isPublished = false
+      article.isDisplayed = user.config?.autoDisplay || true // 根据用户设置（默认展示）
+
+      article.editionId = editionId ? editionId : UUID.v4()
+    
+      article.editorVersion = editorVersion
+      article.msg = msg
+      article.type = type
+      article.title = title
+      article.abbrev = abbrev
+      article.content = content
+      article.audio = audio
+      article.penname = penname
+      article.email = email
+      article.author = {
+        blog
       }
-      const entity = Object.assign(article, data)
-      return this.articlesRepository.save(entity)
+      article.duration = duration
+      article.wordage = wordage
+      article.detail = {
+        fileSize: 0
+      }
+
+      return this.articlesRepository.save(article)
     } catch (error) {
       throw error
     }
@@ -138,6 +144,23 @@ export class SubmissionService {
       article.subtitleSequence = subtitleSequence
       article.subtitleKeyframeSequence = subtitleKeyframeSequence
       console.log('解析成功')
+
+       // 使用事务来确保所有操作要么全部成功，要么全部撤销
+      //  const queryRunner = this.dataSource.createQueryRunner()
+      //  await queryRunner.connect()
+      //  await queryRunner.startTransaction()
+      //  try {
+      //    await queryRunner.manager.save(article)
+      //   //  const generation = await this.generationService.generateData(article)
+      //   //  await queryRunner.manager.save(generation)
+      //    await queryRunner.commitTransaction()
+      //  } catch (error) {
+      //    await queryRunner.rollbackTransaction()
+      //    throw error
+      //  } finally {
+      //    await queryRunner.release()
+      //  }
+
       return this.articlesRepository.save(article)
     } catch (error) {
       throw error
@@ -157,8 +180,9 @@ export class SubmissionService {
         select: [
           'id',
           'UID',
+          'isMultiEdition',
+          'isCurrent',
           'editionId',
-          'fromEditionId',
           'albumId',
           'isParsed',
           'isPublished',
@@ -175,6 +199,44 @@ export class SubmissionService {
       })
       // console.log(result)
       return result
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async findEditions(editionId: string, userId: string) {
+    try {
+      const editions = await this.articlesRepository.find({
+        where: { editionId, userId },
+        relations: ['authcode', 'album'],
+        select: [
+          'id',
+          'UID',
+          'editionId',
+          'isCurrent',
+          'albumId',
+          'isParsed',
+          'isPublished',
+          'isDisplayed',
+          'title',
+          'msg',
+          'editorVersion',
+          'type',
+          'abbrev',
+          'author',
+          'createAt',
+          'updateAt'
+        ]
+      })
+      return editions
+    } catch (error) {
+      throw error
+    }
+  }
+
+  updateCurrentEdition(id: string, userId: string) {
+    try {
+      // 切换当前版本时，新的当前版本的 column \ isPublished \ isDisplayed 应该与上一个当前版本保持一致
     } catch (error) {
       throw error
     }
@@ -220,7 +282,7 @@ export class SubmissionService {
         where: { id, removed: RemovedEnum.NEVER, isParsed: true },
         select: {
           editionId: false,
-          fromEditionId: false,
+          // fromEditionId: false,
           msg: false,
           removed: false
         },

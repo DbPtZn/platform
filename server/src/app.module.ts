@@ -8,12 +8,12 @@ import { databaseConfig, jwtConfig, commonConfig } from './config'
 import { AuthcodeModule } from './authcode/authcode.module'
 import { UploadfileModule } from './uploadfile/uploadfile.module'
 import { UserModule } from './user/user.module'
-import { VarticleModule } from './varticle/varticle.module'
 import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from './logger/logger.module'
 import { ReceiverModule } from './receiver/receiver.module'
 import { AlbumModule } from './album/album.module';
 import { SubmissionModule } from './submission/submission.module';
+import { GenerationModule } from './generation/generation.module';
 
 @Module({
   imports: [
@@ -47,12 +47,12 @@ import { SubmissionModule } from './submission/submission.module';
     AuthcodeModule,
     UploadfileModule,
     UserModule,
-    VarticleModule,
     AuthModule,
     LoggerModule,
     ReceiverModule,
     AlbumModule,
-    SubmissionModule
+    SubmissionModule,
+    GenerationModule
   ],
   controllers: [AppController],
   providers: [AppService]

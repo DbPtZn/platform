@@ -142,8 +142,8 @@ export class UserService {
     // 校验该地址是否已经存在
     let isExist = await this.usersRepository.existsBy({ UID })
     let fullPath = path.join(__rootdirname, 'public', UID)
-    console.log(fullPath)
-    console.log(isExist)
+    // console.log(fullPath)
+    // console.log(isExist)
     while (fs.existsSync(fullPath) || isExist) {
       console.log('该用户文件夹已存在，重新生成')
       UID = generateRandomStr()

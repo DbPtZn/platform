@@ -316,7 +316,7 @@ function handleMoreClick() {
   }
 }
 
-@include Mobile {
+@include Tablet {
   .nav {
     .nav-container {
       width: 100%;
