@@ -5,15 +5,20 @@ import type { ArticleUserInfo, AuthCode, Album } from '.'
 
 export interface Article {
   id: string
-  UID: string
-  editionId: string
-  fromEditionId: string
   userId: string
-  authcodeId: string
+  UID: string
+  agentId: string
+  editionId: string
+  isMultiEdition: boolean
+  isCurrent: boolean
+  isParsed: boolean
+
   albumId: string
   type: 'note' | 'course' | 'other'
-  isParsed: boolean
+ 
   msg: string
+  refuseMsg: string 
+
   editorVersion: string
   cover: string
   title: string
@@ -26,9 +31,10 @@ export interface Article {
   subtitleSequence: string[]
   subtitleKeyframeSequence: number[]
   tags: string[]
+
   isPublished: boolean
   isDisplayed: boolean
-  refuseMsg: string
+
   removed: RemovedEnum
   penname: string
   email: string
@@ -56,8 +62,9 @@ export type Submission = Pick<
   | 'id'
   | 'UID'
   | 'editionId'
-  | 'fromEditionId'
+  | 'isMultiEdition'
   | 'albumId'
+  | 'isCurrent'
   | 'isParsed'
   | 'isPublished'
   | 'isDisplayed'
@@ -78,6 +85,12 @@ export type Submission = Pick<
 > & {
   authcode?: AuthCode
   album?: Album
+  children: SubmissionChild[]
+  isLeaf: boolean
+  isSame?: boolean
+}
+export type SubmissionChild = Omit<Submission, 'children' | 'isLeaf'> & {
+  parent?: Submission
 }
 
 export interface SubmissionState {
@@ -108,8 +121,6 @@ export type Subfile = Pick<
   | 'id'
   | 'UID'
   | 'editionId'
-  | 'fromEditionId'
-  | 'authcodeId'
   | 'albumId'
   | 'isParsed'
   | 'isPublished'

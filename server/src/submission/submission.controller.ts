@@ -29,6 +29,26 @@ export class SubmissionController {
     }
   }
 
+  @Get('/editions/:id')
+  async getEditions(@Param('id') id: string, @Req() req, @Res() res) {
+    try {
+      const result = await this.submissionService.findEditions(id, req.user.id)
+      res.send(result)
+    } catch (error) {
+      res.status(400).send(error.message)
+    }
+  }
+
+  @Patch('/current/:id')
+  async updateCurrentEdition(@Param('id') id: string, @Req() req, @Res() res) {
+    try {
+      const result = await this.submissionService.updateCurrentEdition(id, req.user.id)
+      res.send(result)
+    } catch (error) {
+      res.status(400).send(error.message)
+    }
+  }
+
   @Post('list')
   async getArticleList(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,

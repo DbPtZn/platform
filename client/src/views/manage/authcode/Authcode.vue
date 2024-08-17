@@ -244,10 +244,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                   style: { display: editData.value?.id === row.id ? 'none' : 'block', marginLeft: '10px' },
                   onClick: async () => {
                     try {
-                      const text = `
-                        投稿地址：${import.meta.env.VITE_BASE_URL}/receiver/${uid.value}/${row.code}；
-                        授权码：${row.code}
-                      `
+                      const text = `投稿地址：${import.meta.env.VITE_BASE_URL}/receiver/${uid.value}；授权码：${row.code}`
                       if(navigator.clipboard) {
                         await navigator.clipboard.writeText(text)
                         message.success('复制成功！' + text)

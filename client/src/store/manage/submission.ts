@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type {  Album, ParsedArticleFile, Submission, SubmissionState } from '@/types'
+import type { Album, ParsedArticleFile, Submission, SubmissionChild, SubmissionState } from '@/types'
 import { manageApi } from '@/api'
 
 export const useSubmissionStore = defineStore('submissionStore', {
@@ -25,9 +25,31 @@ export const useSubmissionStore = defineStore('submissionStore', {
       return this.fetch(dto).then(res => {
         // console.log(res.data.items[0])
         // this.$patch(res.data)
-        this.items = res.data.items
+        this.items = res.data.items.map(item => {
+          return {
+            ...item,
+            key: item.id,
+            isLeaf: item.isMultiEdition ? false : true
+          }
+        })
         this.meta = res.data.meta
         this.links = res.data.links
+      })
+    },
+    fetchEditions(editionId: string) {
+      return manageApi.submission.getEditions<SubmissionChild[]>(editionId)
+    },
+    updateCurrentEdition(id: string) {
+      return manageApi.submission.updateCurrentEdition<SubmissionChild>(id).then(res => {
+        const index = this.items.findIndex(item => item.id === id)
+        if(index !== -1) {
+          this.items[index].isCurrent = true
+          this.items[index].album = res.data.album
+          this.items[index].albumId = res.data.albumId
+          this.items[index].isDisplayed = res.data.isDisplayed
+          this.items[index].isPublished = res.data.isPublished
+        }
+        return res.data
       })
     },
     getUnparsedFile(id: string) {

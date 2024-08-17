@@ -4,13 +4,13 @@ import { extname } from 'path'
 import * as fs from 'fs'
 import { AuthcodeService } from 'src/authcode/authcode.service'
 import { UploadfileService } from 'src/uploadfile/uploadfile.service'
-import { CreateArticleDto } from './dto/receive.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User } from 'src/user/user.entity'
 import { SubmissionService } from 'src/submission/submission.service'
 import { ConfigService } from '@nestjs/config'
 import { commonConfig } from 'src/config'
+import { CreateArticleDto } from 'src/submission/dto'
 
 @Injectable()
 export class ReceiverService {
@@ -36,21 +36,21 @@ export class ReceiverService {
     // 查询用户
     const user = await this.usersRepository.findOneBy({ UID })
     /** 用户验证 */
-    if(!user) throw new Error('用户不存在！')
+    if (!user) throw new Error('用户不存在！')
     if (user.receiverConfig.status === 2) {
       fs.unlinkSync(jsonDoc.path)
       fs.unlinkSync(audio.path)
-      throw new Error('目标当前拒绝任何投稿！' )
+      throw new Error('目标当前拒绝任何投稿！')
     }
 
     /** 授权码验证 */
     let authcodeId = ''
     // console.log(user.receiverConfig)
-    if(user.receiverConfig.status === 1 && code) {
+    if (user.receiverConfig.status === 1 && code) {
       const authcode = await this.authcodeService.validateCode(code, user.id)
       console.log(authcode)
       authcodeId = authcode.id
-      if(!authcode) {
+      if (!authcode) {
         fs.unlinkSync(jsonDoc.path)
         fs.unlinkSync(audio.path)
         throw new Error('授权码验证失败！')
@@ -58,40 +58,47 @@ export class ReceiverService {
     }
     // console.log(authcodeId)
     const data: CreateArticleDto = {
-      isParsed: false,  // 后续可能会开发自动解析，预留这个选项
+      isParsed: false, // 后续可能会开发自动解析，预留这个选项
       editorVersion: '',
       UID,
+      editionId: dto.editionId,
       authcodeId,
       penname: dto.penname || '佚名',
       email: dto.email || '',
       blog: dto.blog || '',
       msg: dto.msg || '',
-      type: dto.type as any || 'other',
+      type: (dto.type as any) || 'other',
       title: dto.title || '',
       abbrev: dto.abbrev || '',
-      content: jsonDoc.path,
+      unparsedFile: jsonDoc.path,
+      content: '',
       audio: audio?.path || '',
       duration: dto.duration || 0,
-      wordage: dto.wordage || 0,
+      wordage: dto.wordage || 0
     }
 
-    
     /** 数据文档 */
-    const filepath = await this.fileService.saveJSON({
-      dirname: UID,
-      extname: 'json',
-      sourcePath: jsonDoc.path,
-    }, user.id)
+    const filepath = await this.fileService.saveJSON(
+      {
+        dirname: UID,
+        extname: 'json',
+        sourcePath: jsonDoc.path
+      },
+      user.id
+    )
 
     data.content = filepath
 
     /** 处理音频文件 */
     if (audio) {
-      const audioPath = await this.fileService.saveAudio({
-        dirname: user.UID,
-        sourcePath: audio.path,
-        extname: extname(audio.path),
-      }, user.id)
+      const audioPath = await this.fileService.saveAudio(
+        {
+          dirname: user.UID,
+          sourcePath: audio.path,
+          extname: extname(audio.path)
+        },
+        user.id
+      )
       data.audio = audioPath
     }
     // console.log(data)
@@ -99,24 +106,19 @@ export class ReceiverService {
 
     // 检测是否属于更新投稿(有附带版本 id 一般属于更新投稿)
     let editionId = ''
-    if(dto.editionId) {
+    if (dto.editionId) {
       const result = await this.submissionService.queryEditionExists(dto.editionId)
-      if(result) {
+      if (result) {
         editionId = dto.editionId
       }
     }
 
+    const result = await this.submissionService.create(data, user.id)
 
-    const result = await this.submissionService.create(
-      data,
-      user.id,
-      editionId
-    )
-    
     const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
-    return { 
+    return {
       editionId: result.editionId || dto.editionId,
-      address: common.clientDomain + 'article' + '/' + result.id,
+      address: common.clientDomain + 'article' + '/' + result.id
     }
   }
 

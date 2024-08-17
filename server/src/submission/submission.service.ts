@@ -37,10 +37,11 @@ export class SubmissionService {
     return this.articlesRepository.existsBy({ editionId })
   }
 
-  async create(dto: CreateArticleDto, userId: string, editionId: string) {
+  async create(dto: CreateArticleDto, userId: string) {
     const {
       UID,
       isParsed,
+      unparsedFile,
       editorVersion,
       authcodeId,
       penname,
@@ -62,25 +63,45 @@ export class SubmissionService {
       const authcode = await this.authcodesRepository.findOneBy({ id: authcodeId })
       if (!authcode) throw new Error('授权不存在！')
 
+      // 版本管理
+      let editionId = dto.editionId
+      console.log(editionId)
+      let isMultiEdition = false
+      if(editionId) {
+        const editionCount = await this.articlesRepository.countBy({ editionId, userId })
+        console.log(editionCount)
+        if(editionCount > 0) {
+          isMultiEdition = true
+        }
+        if(editionCount === 0) {
+          editionId = UUID.v4()
+        }
+      } else {
+        editionId = UUID.v4()
+      }
+
       const article = new Article()
       article.userId = user.id
       article.UID = user.UID
-      article.user = user
+      article.agentId = UUID.v4()
+      article.editionId = editionId
 
       article.authcode = authcode
+      article.user = user
 
       article.isParsed = isParsed
       article.isPublished = false
       article.isDisplayed = user.config?.autoDisplay || true // 根据用户设置（默认展示）
+      article.isCurrent = false
+      article.isMultiEdition = isMultiEdition
 
-      article.editionId = editionId ? editionId : UUID.v4()
-    
       article.editorVersion = editorVersion
       article.msg = msg
       article.type = type
       article.title = title
       article.abbrev = abbrev
       article.content = content
+      article.unparsedFile = unparsedFile
       article.audio = audio
       article.penname = penname
       article.email = email
@@ -214,6 +235,7 @@ export class SubmissionService {
           'UID',
           'editionId',
           'isCurrent',
+          'isMultiEdition',
           'albumId',
           'isParsed',
           'isPublished',
@@ -234,9 +256,44 @@ export class SubmissionService {
     }
   }
 
-  updateCurrentEdition(id: string, userId: string) {
+  async updateCurrentEdition(id: string, userId: string) {
     try {
+      // 使用事务来确保所有操作要么全部成功，要么全部撤销
+      const queryRunner = this.dataSource.createQueryRunner()
+      await queryRunner.connect()
+      await queryRunner.startTransaction()
+
+      let article: Article
       // 切换当前版本时，新的当前版本的 column \ isPublished \ isDisplayed 应该与上一个当前版本保持一致
+      try {
+        article = await queryRunner.manager.findOneBy(Article, { id, userId })
+        if(!article) throw new Error('目标文章不存在！')
+        const editions = await queryRunner.manager.findBy(Article, { editionId: article.editionId, userId, isCurrent: true })
+        for(const edition of editions) {
+          edition.isCurrent = false
+          await queryRunner.manager.save(edition)
+        }
+        if (editions.length > 0) {
+          const edition = editions[0]
+          article.isDisplayed = edition.isDisplayed
+          article.isPublished = edition.isPublished
+          article.album = edition.album
+          article.albumId = edition.albumId
+        }
+        article.isCurrent = true
+      
+        await queryRunner.manager.save(article)
+
+        await queryRunner.commitTransaction()
+      } catch (error) {
+        console.log('update current edition error')
+        await queryRunner.rollbackTransaction()
+        throw error
+      } finally {
+        await queryRunner.release()
+      }
+      console.log('update current edition success')
+      return article
     } catch (error) {
       throw error
     }

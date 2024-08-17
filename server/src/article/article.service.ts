@@ -19,7 +19,6 @@ import { User } from 'src/user/user.entity'
 import { Authcode } from 'src/authcode/authcode.entity'
 import { commonConfig } from 'src/config'
 import { ArticleFilter } from './dto/getList.dto'
-import { GenerationService } from 'src/generation/generation.service'
 
 @Injectable()
 export class ArticleService {

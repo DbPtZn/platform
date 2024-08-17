@@ -54,6 +54,12 @@ export const submission = {
   get<T>(id: string) {
     return axios.get<T>(`/submission/${id}`)
   },
+  getEditions<T>(editionId: string) {
+    return axios.get<T>(`/submission/editions/${editionId}`)
+  },
+  updateCurrentEdition<T>(id: string) {
+    return axios.patch<T>(`/submission/current/${id}`)
+  },
   getUnparsedFile<T>(id: string) {
     return axios.get<T>(`/submission/unparsedfile/${id}`)
   },

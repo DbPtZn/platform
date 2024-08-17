@@ -13,7 +13,6 @@ import { LoggerModule } from './logger/logger.module'
 import { ReceiverModule } from './receiver/receiver.module'
 import { AlbumModule } from './album/album.module';
 import { SubmissionModule } from './submission/submission.module';
-import { GenerationModule } from './generation/generation.module';
 
 @Module({
   imports: [
@@ -51,8 +50,7 @@ import { GenerationModule } from './generation/generation.module';
     LoggerModule,
     ReceiverModule,
     AlbumModule,
-    SubmissionModule,
-    GenerationModule
+    SubmissionModule
   ],
   controllers: [AppController],
   providers: [AppService]

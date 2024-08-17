@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common'
 import { ReceiverService } from './receiver.service'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
-import { CreateArticleDto } from './dto/receive.dto';
+import { CreateArticleDto } from 'src/submission/dto';
 
 @Controller('receiver')
 export class ReceiverController {

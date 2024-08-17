@@ -32,38 +32,40 @@ import { IsString } from 'class-validator'
 //   duration: number // 音频时长
 // }
 
-export class CreateArticleDto {
-  isParsed: boolean // 是否已解析
+// export class CreateArticleDto {
+//   isParsed: boolean // 是否已解析
 
-  editionId?: string // 版本号
+//   unparsedFile: string // 未解析文件
 
-  romEditionId?: string // 来源版本 id
+//   editionId?: string // 版本号
 
-  editorVersion: string // 编辑器版本号
+//   romEditionId?: string // 来源版本 id
 
-  UID: string // 用户 UID
+//   editorVersion: string // 编辑器版本号
 
-  authcodeId: string // 授权码
+//   UID: string // 用户 UID
 
-  penname: string // 笔名
+//   authcodeId: string // 授权码
 
-  email: string // 邮箱
+//   penname: string // 笔名
 
-  blog: string // 作者博客
+//   email: string // 邮箱
 
-  msg: string // 附加信息(在未分配时显示，分配后清除)
+//   blog: string // 作者博客
 
-  type: 'course' | 'note' | 'other' // 作品的类型
+//   msg: string // 附加信息(在未分配时显示，分配后清除)
 
-  title: string // 标题
+//   type: 'course' | 'note' | 'other' // 作品的类型
 
-  abbrev: string // 缩略
+//   title: string // 标题
 
-  content: string // 内容
+//   abbrev: string // 缩略
 
-  audio: string // 音频地址
+//   content: string // 内容
 
-  duration: number // 音频时长
+//   audio: string // 音频地址
 
-  wordage: number // 字数
-}
+//   duration: number // 音频时长
+
+//   wordage: number // 字数
+// }

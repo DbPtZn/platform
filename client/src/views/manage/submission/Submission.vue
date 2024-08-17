@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { NButton, NSelect, NSpace, useDialog, useMessage, useThemeVars } from 'naive-ui'
+import { NButton, NSelect, NSpace, NText, useDialog, useMessage, useThemeVars } from 'naive-ui'
 import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import _ from 'lodash'
 import { onMounted, computed, ref, h, nextTick } from 'vue'
-import type { Submission } from '@/types'
+import type { Submission, SubmissionChild } from '@/types'
 import useStore from '@/store'
 import dayjs from 'dayjs'
 import '@textbus/editor/bundles/textbus.min.css'
@@ -11,6 +11,7 @@ import { useParser } from './hooks/useParser'
 import { RemovedEnum } from '@/enums'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import { RowData } from 'naive-ui/es/data-table/src/interface'
 type Model = Submission
 const { userStore, submissionStore, albumListStore } = useStore('manage')
 const message = useMessage()
@@ -33,6 +34,12 @@ onMounted(() => {
 /** 渲染图标 */
 const renderIcon = (name: string) => {
   return h(Icon, { icon: name, height: 'auto' })
+}
+const rowClassName = (row: Model) => {
+  if (row.isSame) {
+    return 'same'
+  }
+  return ''
 }
 /** 解析 */
 const handleParse = (row: Model) => {
@@ -149,12 +156,23 @@ const handleDelete = (row: Model) => {
 
 const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColumns<Model> => {
   return [
+    // {
+    //   type: 'expand',
+    //   expandable: rowData => rowData.title !== '',
+    //   renderExpand: (rowData) => {
+    //     return `is a good guy.`
+    //   }
+    // },
     {
       title: '类型',
       key: 'type',
       resizable: true,
       width: '8%',
-      render: row => renderIcon(row.type === 'note' ? 'mdi:notebook' : 'material-symbols-light:play-lesson-rounded')
+      render: row => renderIcon(row.type === 'note' ? 'mdi:notebook' : 'material-symbols-light:play-lesson-rounded'),
+      // render: row => h('span', { style: { display: 'inline-flex', alginItems: 'center', justifyContent: 'center' } }, [
+      //   renderIcon(row.type === 'note' ? 'mdi:notebook' : 'material-symbols-light:play-lesson-rounded'),
+      //   row.isSame ? '(展开项)' : ''
+      // ])
     },
     {
       title: '专栏',
@@ -229,6 +247,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
     {
       title: '是否公开',
       key: 'isPublished',
+
       resizable: true,
       width: '6%',
       render: row => renderIcon(row.isPublished ? 'material-symbols:share' : 'material-symbols:share-off')
@@ -255,7 +274,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       // }
     },
     {
-      title: '创建时间',
+      title: '投稿时间',
       key: 'createAt',
       resizable: true,
       width: '12%',
@@ -277,9 +296,11 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
           { align: 'baseline' },
           {
             default: () => [
-              h(
+              // 打开 解析
+              !(row.isLeaf === undefined && !row.isParsed) && h(
                 NButton,
                 {
+                  style: { display: row.isLeaf === undefined && !row.isParsed ? 'none' : 'block' },
                   strong: true,
                   type: 'primary',
                   size: 'small',
@@ -293,9 +314,11 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                   }
                 }
               ),
-              h(
+              // 分配 拒稿
+              row.isLeaf !== undefined && h(
                 NButton,
                 {
+                  style: { display: row.isLeaf === undefined ? 'none' : 'block' },
                   show: !row.isParsed,
                   strong: true,
                   tertiary: true,
@@ -310,10 +333,12 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                 },
                 { default: () => (row.isParsed ? '分配' : '拒稿') }
               ),
-              row.isParsed &&
+              // 更多选项
+              (row.isParsed && row.isLeaf !== undefined)  &&
                 h(
                   NButton,
                   {
+                    style: { display: row.isLeaf === undefined ? 'none' : 'block' },
                     strong: true,
                     tertiary: true,
                     size: 'small',
@@ -339,7 +364,46 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                       return '更多'
                     }
                   }
-                )
+                ),
+              (row.isLeaf === undefined && row.isParsed) &&
+                h(
+                  NButton,
+                  {
+                    strong: true,
+                    tertiary: true,
+                    size: 'small',
+                    disabled: row.isCurrent,
+                    onClick: () => {
+                      submissionStore.updateCurrentEdition(row.id).then((data) => {
+                        const rowData = row as unknown as SubmissionChild
+                        if (rowData.parent) {
+                          // 找到所有的子节点（发生更新的版本）
+                          rowData.parent.children.forEach(c => {
+                            // 更新所有关联版本的数据
+                            const index = submissionStore.items.findIndex(item => item.id === c.id)
+                            if (submissionStore.items[index].children && submissionStore.items[index].children.length > 0) {
+                              submissionStore.items[index].children = submissionStore.items[index].children.map(child => {
+                                if(child.id === row.id) {
+                                  child.isCurrent = true
+                                  child.album = data.album
+                                  child.albumId = data.albumId
+                                  child.isDisplayed = data.isDisplayed
+                                  child.isPublished = data.isPublished
+                                } else {
+                                  child.isCurrent = false
+                                }
+                                return child
+                              })
+                            }
+                          })
+                        }
+                      })
+                    }
+                  },
+                  { default: () => (row.isCurrent ? '主版本' : '设为主版本') }
+                ),
+                (row.isLeaf === undefined && !row.isParsed) && h(NText, {}, ['未解析项目无法进行操作'])
+
             ]
           }
         )
@@ -360,7 +424,7 @@ const cities = ref([
   'isParsed',
   'isPublished',
   'isDisplayed',
-  'updateAt',
+  // 'updateAt',
   'createAt',
   'actions'
 ])
@@ -412,7 +476,7 @@ const rowProps = (row: Model) => {
 }
 
 const generateOptions = (row: Model | null): DropdownOption[] => {
-  if (!row) return []
+  if (!row || row.isLeaf === undefined) return []
   return [
     {
       label: () => (row.isParsed ? '打开' : '解析'),
@@ -500,6 +564,27 @@ function handlePageChange(page: number) {
     page: page || 1
   })
 }
+function handleRefresh() {
+  submissionStore.fetchAndSet({
+    filter: { removed: RemovedEnum.NEVER },
+    limit: 10,
+    page: 1
+  })
+}
+function onLoad(row: Model | RowData) {
+  return new Promise<void>(resolve => {
+    submissionStore.fetchEditions(row.editionId).then(res => {
+      row.children = res.data.map(item => {
+        return {
+          parent: row,
+          isSame: row.id === item.id,
+          ...item
+        }
+      })
+      resolve()
+    })
+  })
+}
 </script>
 
 <template>
@@ -507,6 +592,7 @@ function handlePageChange(page: number) {
     <div class="header">
       <div class="group">
         <n-flex>
+          <n-button secondary @click="handleRefresh"> 刷新列表 </n-button>
           <!-- 显示筛选 -->
           <n-button secondary @click="columnSelect = !columnSelect"> 列可见 </n-button>
         </n-flex>
@@ -540,7 +626,15 @@ function handlePageChange(page: number) {
         />
       </div> -->
     </div>
-    <n-data-table :columns="columns" :data="submissionStore.items" :bordered="false" :row-props="rowProps" @update:sorter="handleSorterChange" />
+    <n-data-table
+      :columns="columns"
+      :data="submissionStore.items"
+      :bordered="false"
+      :row-props="rowProps"
+      :row-class-name="rowClassName"
+      @update:sorter="handleSorterChange"
+      @load="onLoad"
+    />
     <div class="footer">
       <n-pagination v-model:page="submissionStore.meta.currentPage" :page-count="submissionStore.getTotalPages" @update:page="handlePageChange" />
     </div>
@@ -558,6 +652,10 @@ function handlePageChange(page: number) {
 </template>
 
 <style lang="scss" scoped>
+:deep(.same td) {
+  color: #f0f9eb60 !important;
+  // cursor: not-allowed;
+}
 .submission-manage {
   height: 100%;
   width: 100%;

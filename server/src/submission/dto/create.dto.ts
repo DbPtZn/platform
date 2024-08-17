@@ -3,6 +3,10 @@
 export interface CreateArticleDto {
   isParsed: boolean // 是否已解析
 
+  editionId: string // 版本 ID
+
+  unparsedFile: string // 未解析文件
+
   editorVersion: string // 编辑器版本号
 
   UID: string // 用户 UID
