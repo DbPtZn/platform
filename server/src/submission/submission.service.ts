@@ -264,11 +264,11 @@ export class SubmissionService {
       await queryRunner.startTransaction()
 
       let article: Article
-      // 切换当前版本时，新的当前版本的 column \ isPublished \ isDisplayed 应该与上一个当前版本保持一致
+      // 切换当前版本时，新的当前版本的 album \ isPublished \ isDisplayed 应该与上一个当前版本保持一致
       try {
-        article = await queryRunner.manager.findOneBy(Article, { id, userId })
+        article = await queryRunner.manager.findOne(Article, { where: { id, userId }, relations: ['album'] })
         if(!article) throw new Error('目标文章不存在！')
-        const editions = await queryRunner.manager.findBy(Article, { editionId: article.editionId, userId, isCurrent: true })
+        const editions = await queryRunner.manager.find(Article, { where: { editionId: article.editionId, userId, isCurrent: true }, relations: ['album'] })
         for(const edition of editions) {
           edition.isCurrent = false
           await queryRunner.manager.save(edition)
