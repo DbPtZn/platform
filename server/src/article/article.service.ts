@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Article } from './article.entity'
 import { Repository } from 'typeorm'
@@ -45,6 +45,7 @@ export class ArticleService {
         relations: ['album'],
         select: {
           id: true,
+          agentId: true,
           albumId: true,
           cover: true,
           title: true,
@@ -77,12 +78,32 @@ export class ArticleService {
       .select(['article', 'user.UID', 'user.nickname', 'user.avatar'])
       .where({ id: id })
       .getOne()
+      if(!article) throw new NotFoundException('文章不存在')
       // console.log(article.user)
       // console.log(article)
       article.unparsedFile = ''
       return article
     } catch (error) {
-      console.log(error)
+      // console.log(error)
+      throw error
+    }
+  }
+
+  async findOneByAgentId(id: string) {
+    try {
+      const article = await this.articlesRepository
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.user', 'user')
+      .select(['article', 'user.UID', 'user.nickname', 'user.avatar'])
+      .where({ agentId: id, isCurrent: true })
+      .getOne()
+      if(!article) throw new NotFoundException('文章不存在')
+      // console.log(article.user)
+      // console.log(article)
+      article.unparsedFile = ''
+      return article
+    } catch (error) {
+      // console.log(error)
       throw error
     }
   }

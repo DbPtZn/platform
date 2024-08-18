@@ -16,7 +16,7 @@ export class ArticleController {
   ) {}
 
   @Post('list')
-  async getBlogArticleList(
+  async getArticleList(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
     @Body() filter: Partial<ArticleFilter>,
@@ -43,11 +43,11 @@ export class ArticleController {
   }
 
   @Get('/:id')
-  async getBlogArticle(@Param('id') id: string, @Req() req, @Res() res) {
+  async getArticleByAgentId(@Param('id') id: string, @Req() req, @Res() res) {
     try {
       // console.log(id)
-      const result = await this.articleService.findOne(id)
-      console.log(result.refuseMsg)
+      const result = await this.articleService.findOneByAgentId(id)
+      // console.log(result.refuseMsg)
       if(result.removed === RemovedEnum.ACTIVE && result.refuseMsg) {
         return res.status(307).send({ refused: true, refuseMsg: result.refuseMsg })
       }
@@ -64,6 +64,34 @@ export class ArticleController {
       // console.log(result.user)
       res.send(result)
     } catch (error) {
+      console.log(error)
+      res.status(400).send(error.message)
+    }
+  }
+
+  @Get()
+  async getArticleByArticleId(@Query('id') id: string, @Req() req, @Res() res) {
+    try {
+      console.log(id)
+      const result = await this.articleService.findOne(id)
+      // console.log(result.refuseMsg)
+      if(result.removed === RemovedEnum.ACTIVE && result.refuseMsg) {
+        return res.status(307).send({ refused: true, refuseMsg: result.refuseMsg })
+      }
+      if(!result.isPublished) {
+        return res.status(307).send({ examining: true, msg: '正在审核中...' })
+      }
+      if(!result.isParsed) {
+        throw new Error('文章内容未解析')
+      }
+      const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+      if(result.audio) {
+        result.audio = common.staticPrefix + result.audio.split(common.publicDir.slice(1))[1]
+      }
+      // console.log(result.user)
+      res.send(result)
+    } catch (error) {
+      console.log(error)
       res.status(400).send(error.message)
     }
   }

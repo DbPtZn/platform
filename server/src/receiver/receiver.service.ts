@@ -118,7 +118,7 @@ export class ReceiverService {
     const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
     return {
       editionId: result.editionId || dto.editionId,
-      address: common.clientDomain + 'article' + '/' + result.id
+      address: common.clientDomain + 'article' + '?id=' + result.id
     }
   }
 

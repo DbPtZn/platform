@@ -60,14 +60,15 @@ export const useSubmissionStore = defineStore('submissionStore', {
     },
     allot(dto: Parameters<typeof manageApi.submission.allot>[0]) {
       return manageApi.submission.allot<Album>(dto).then(res => {
-        this.items.forEach(item => {
+        this.items.some(item => {
           if (item.id === dto.articleId) {
             item.album = res.data
+            return true
           }
-          if (item.isLeaf !== undefined || item.children) {
-            item.children = []
-            item.isLeaf = false
-          }
+          // if (item.isLeaf !== undefined || item.children) {
+          //   item.children = []
+          //   item.isLeaf = false
+          // }
         })
       })
     },

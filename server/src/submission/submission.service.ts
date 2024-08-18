@@ -229,7 +229,7 @@ export class SubmissionService {
     try {
       const editions = await this.articlesRepository.find({
         where: { editionId, userId },
-        relations: ['authcode', 'album'],
+        relations: ['authcode'],
         select: [
           'id',
           'UID',
@@ -238,8 +238,8 @@ export class SubmissionService {
           'isMultiEdition',
           'albumId',
           'isParsed',
-          'isPublished',
-          'isDisplayed',
+          // 'isPublished',
+          // 'isDisplayed',
           'title',
           'msg',
           'editorVersion',

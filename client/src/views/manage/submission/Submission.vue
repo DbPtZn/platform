@@ -39,6 +39,9 @@ const rowClassName = (row: Model) => {
   if (row.isSame) {
     return 'same'
   }
+  if (row.isCurrent) {
+    return 'current'
+  }
   return ''
 }
 /** 解析 */
@@ -154,6 +157,48 @@ const handleDelete = (row: Model) => {
   })
 }
 
+const handleSetCurrent = (row: Model) => {
+  submissionStore.updateCurrentEdition(row.id).then(data => {
+    // const children = row.isLeaf !== undefined ? row.children : (row as unknown as SubmissionChild).parent?.children
+    // if (children) {
+    //   // 找到所有的子节点（发生更新的版本）
+    //   children.forEach(c => {
+    //     // 更新所有关联版本的数据
+    //     const index = submissionStore.items.findIndex(item => item.id === c.id)
+    //     if(index !== -1) {
+    //       submissionStore.items[index].isCurrent = c.id === row.id ? true : false
+    //       if (submissionStore.items[index].children && submissionStore.items[index].children.length > 0) {
+    //         submissionStore.items[index].children = submissionStore.items[index].children.map(child => {
+    //           child.isCurrent = child.id === row.id ? true : false
+    //           return child
+    //         })
+    //       }
+    //     }
+    //   })
+    // } else {
+    //   // 未展开的情况无法获取 children 但仍需要更新所有关联项目
+    //   submissionStore.items.forEach(item => {
+    //     if(item.editionId === row.editionId) {
+    //       item.isCurrent = item.id === row.id ? true : false
+    //     }
+    //   })
+    // }
+    // 更新所有关联版本的数据
+    submissionStore.items.forEach(item => {
+      if(item.editionId === row.editionId) {
+        item.isCurrent = item.id === row.id ? true : false
+        // 若是有子节点也要更新
+        if (item.children && item.children.length > 0) {
+          item.children = item.children.map(child => {
+            child.isCurrent = child.id === row.id ? true : false
+            return child
+          })
+        }
+      }
+    })
+  })
+}
+
 const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColumns<Model> => {
   return [
     // {
@@ -167,8 +212,11 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       title: '类型',
       key: 'type',
       resizable: true,
-      width: '8%',
-      render: row => renderIcon(row.type === 'note' ? 'mdi:notebook' : 'material-symbols-light:play-lesson-rounded'),
+      width: '9%',
+      render: row =>
+        row.isLeaf !== undefined
+          ? renderIcon(row.type === 'note' ? 'mdi:notebook' : 'material-symbols-light:play-lesson-rounded')
+          : `${row.isSame ? '( 展开项 )' : ''}`
       // render: row => h('span', { style: { display: 'inline-flex', alginItems: 'center', justifyContent: 'center' } }, [
       //   renderIcon(row.type === 'note' ? 'mdi:notebook' : 'material-symbols-light:play-lesson-rounded'),
       //   row.isSame ? '(展开项)' : ''
@@ -199,7 +247,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       title: '内容缩略',
       key: 'abbrev',
       resizable: true,
-      width: '10%',
+      width: '14%',
       ellipsis: {
         tooltip: true
       }
@@ -208,7 +256,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       title: '授权来源',
       key: 'authcode',
       resizable: true,
-      width: '10%',
+      width: '8%',
       ellipsis: {
         tooltip: true
       },
@@ -220,7 +268,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       title: '作者',
       key: 'author',
       resizable: true,
-      width: '8%',
+      width: '6%',
       ellipsis: {
         tooltip: true
       },
@@ -232,32 +280,39 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       title: '稿件备注',
       key: 'msg',
       resizable: true,
-      width: '10%',
+      width: '8%',
       ellipsis: {
         tooltip: true
       }
+    },
+    {
+      title: '主版本',
+      key: 'isCurrent',
+      resizable: true,
+      width: '5%',
+      render: row => renderIcon(row.isCurrent ? 'material-symbols-light:brightness-empty' : '')
     },
     {
       title: '解析状态',
       key: 'isParsed',
       resizable: true,
       width: '6%',
-      render: row => renderIcon(row.isParsed ? 'mdi:email-open' : 'material-symbols-light:mail-lock')
+      render: row => (row.isLeaf !== undefined ? renderIcon(row.isParsed ? 'mdi:email-open' : 'material-symbols-light:mail-lock') : '')
     },
     {
       title: '是否公开',
       key: 'isPublished',
-
       resizable: true,
       width: '6%',
-      render: row => renderIcon(row.isPublished ? 'material-symbols:share' : 'material-symbols:share-off')
+      render: row => (row.isPublished !== undefined ? renderIcon(row.isPublished ? 'material-symbols:share' : 'material-symbols:share-off') : '')
     },
     {
       title: '是否展示',
       key: 'isDisplayed',
       resizable: true,
       width: '6%',
-      render: row => renderIcon(row.isDisplayed ? 'material-symbols:visibility-rounded' : 'material-symbols:visibility-off')
+      render: row =>
+        row.isDisplayed !== undefined ? renderIcon(row.isDisplayed ? 'material-symbols:visibility-rounded' : 'material-symbols:visibility-off') : ''
     },
     {
       title: '更新时间',
@@ -277,7 +332,7 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
       title: '投稿时间',
       key: 'createAt',
       resizable: true,
-      width: '12%',
+      width: '11%',
       sortOrder: false,
       sorter: 'default',
       render(row) {
@@ -297,44 +352,47 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
           {
             default: () => [
               // 打开 解析
-              !(row.isLeaf === undefined && !row.isParsed) && h(
-                NButton,
-                {
-                  style: { display: row.isLeaf === undefined && !row.isParsed ? 'none' : 'block' },
-                  strong: true,
-                  type: 'primary',
-                  size: 'small',
-                  onClick: () => {
-                    row.isParsed ? handleOpen(row) : handleParse(row)
-                  }
-                },
-                {
-                  default: () => {
-                    return row.isParsed ? '打开' : '解析'
-                  }
-                }
-              ),
-              // 分配 拒稿
-              row.isLeaf !== undefined && h(
-                NButton,
-                {
-                  style: { display: row.isLeaf === undefined ? 'none' : 'block' },
-                  show: !row.isParsed,
-                  strong: true,
-                  tertiary: true,
-                  size: 'small',
-                  onClick: () => {
-                    if (row.isParsed) {
-                      handleAllot(row)
-                      return
+              !(row.isLeaf === undefined && !row.isParsed) &&
+                h(
+                  NButton,
+                  {
+                    style: { display: row.isLeaf === undefined && !row.isParsed ? 'none' : 'block' },
+                    strong: true,
+                    type: 'primary',
+                    size: 'small',
+                    onClick: () => {
+                      row.isParsed ? handleOpen(row) : handleParse(row)
                     }
-                    handleRefuse(row)
+                  },
+                  {
+                    default: () => {
+                      return row.isParsed ? '打开' : '解析'
+                    }
                   }
-                },
-                { default: () => (row.isParsed ? '分配' : '拒稿') }
-              ),
+                ),
+              // 分配 拒稿
+              row.isLeaf !== undefined &&
+                h(
+                  NButton,
+                  {
+                    style: { display: row.isLeaf === undefined ? 'none' : 'block' },
+                    show: !row.isParsed,
+                    strong: true,
+                    tertiary: true,
+                    size: 'small',
+                    onClick: () => {
+                      if (row.isParsed) {
+                        handleAllot(row)
+                        return
+                      }
+                      handleRefuse(row)
+                    }
+                  },
+                  { default: () => (row.isParsed ? '分配' : '拒稿') }
+                ),
               // 更多选项
-              (row.isParsed && row.isLeaf !== undefined)  &&
+              row.isParsed &&
+                row.isLeaf !== undefined &&
                 h(
                   NButton,
                   {
@@ -365,7 +423,8 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                     }
                   }
                 ),
-              (row.isLeaf === undefined && row.isParsed) &&
+              row.isLeaf === undefined &&
+                row.isParsed &&
                 h(
                   NButton,
                   {
@@ -374,36 +433,12 @@ const createColumns = ({ play }: { play: (row: Model) => void }): DataTableColum
                     size: 'small',
                     disabled: row.isCurrent,
                     onClick: () => {
-                      submissionStore.updateCurrentEdition(row.id).then((data) => {
-                        const rowData = row as unknown as SubmissionChild
-                        if (rowData.parent) {
-                          // 找到所有的子节点（发生更新的版本）
-                          rowData.parent.children.forEach(c => {
-                            // 更新所有关联版本的数据
-                            const index = submissionStore.items.findIndex(item => item.id === c.id)
-                            if (submissionStore.items[index].children && submissionStore.items[index].children.length > 0) {
-                              submissionStore.items[index].children = submissionStore.items[index].children.map(child => {
-                                if(child.id === row.id) {
-                                  child.isCurrent = true
-                                  child.album = data.album
-                                  child.albumId = data.albumId
-                                  child.isDisplayed = data.isDisplayed
-                                  child.isPublished = data.isPublished
-                                } else {
-                                  child.isCurrent = false
-                                }
-                                return child
-                              })
-                            }
-                          })
-                        }
-                      })
+                      handleSetCurrent(row)
                     }
                   },
                   { default: () => (row.isCurrent ? '主版本' : '设为主版本') }
                 ),
-                (row.isLeaf === undefined && !row.isParsed) && h(NText, {}, ['未解析项目无法进行操作'])
-
+              row.isLeaf === undefined && !row.isParsed && h(NText, {}, { default: () => '未解析项目无法进行操作' })
             ]
           }
         )
@@ -421,6 +456,7 @@ const cities = ref([
   'album',
   'msg',
   'author',
+  'isCurrent',
   'isParsed',
   'isPublished',
   'isDisplayed',
@@ -494,6 +530,16 @@ const generateOptions = (row: Model | null): DropdownOption[] => {
       props: {
         onClick: () => {
           row && handleAllot(row)
+        }
+      }
+    },
+    {
+      label: () => !row.isCurrent && '设为主版本',
+      key: 'current',
+      show: !row.isCurrent,
+      props: {
+        onClick: () => {
+          row && handleSetCurrent(row)
         }
       }
     },
@@ -607,6 +653,7 @@ function onLoad(row: Model | RowData) {
             <n-checkbox value="authcode" label="授权来源" />
             <n-checkbox value="author" label="作者" />
             <n-checkbox value="msg" label="稿件备注" />
+            <n-checkbox value="isCurrent" label="主版本" />
             <n-checkbox value="isParsed" label="解析状态" />
             <n-checkbox value="isPublished" label="是否公开" />
             <n-checkbox value="isDisplayed" label="是否展示" />
@@ -656,6 +703,9 @@ function onLoad(row: Model | RowData) {
   color: #f0f9eb60 !important;
   // cursor: not-allowed;
 }
+// :deep(.current td) {
+//   color: rgb(255, 242, 218)!important;
+// }
 .submission-manage {
   height: 100%;
   width: 100%;

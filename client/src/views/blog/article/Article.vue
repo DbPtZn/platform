@@ -19,9 +19,11 @@ const themeVars = useThemeVars()
 const { settingStore } = useStore('common')
 const router = useRouter()
 const message = useMessage()
-const id = computed(() => router.currentRoute.value.params.id as string)
+const agentId = computed(() => router.currentRoute.value.params.id as string)
+const id = computed(() => router.currentRoute.value.query.id as string)
 const isExamining = ref(false)
 const isRefused = ref(false)
+const isNotFound = ref(false)
 const refuseMsg = ref('')
 const scrollerRef = ref()
 const controllerRef = ref()
@@ -37,7 +39,6 @@ const state = ref<PublicArticleType>({
     avatar: ''
   },
   editionId: '',
-  fromEditionId: '',
   type: 'note',
   isParsed: false,
   msg: '',
@@ -76,7 +77,10 @@ const state = ref<PublicArticleType>({
   createAt: '',
   updateAt: '',
   unparsedFile: '',
-  refuseMsg: ''
+  refuseMsg: '',
+  agentId: '',
+  isMultiEdition: false,
+  isCurrent: false
 })
 
 let player: Editor
@@ -85,11 +89,15 @@ const subs: Array<Subscription> = []
 let headings: NodeListOf<HTMLElement>
 const outlineData: { tagName: string; text: string; offsetTop: number }[] = []
 const activeIndex = ref(0)
+function fetchArticle(id: string, isAgent: boolean) {
+  return isAgent ? blogApi.article.getByAgentId<PublicArticleType>(id) : blogApi.article.getById<PublicArticleType>(id)
+}
 onMounted(() => {
   scrollerRef.value = document.documentElement
-  if (id.value) {
-    blogApi.article
-      .get<PublicArticleType>(id.value)
+  console.log(agentId.value, id.value)
+  if (agentId.value || id.value) {
+    const _id = agentId.value || id.value
+    fetchArticle(_id, !!agentId.value)
       .then(res => {
         res.data.audio = res.config.baseURL + res.data.audio
         state.value = res.data
@@ -147,6 +155,9 @@ onMounted(() => {
             return
           }
         }
+        if(err.response.status === 400) {
+          isNotFound.value = true
+        }
         message.error('获取文章失败!')
       })
   }
@@ -154,7 +165,7 @@ onMounted(() => {
   // console.log(scrollerRef.value)
   let lastScrollTop = 0
   subs.push(
-    fromEvent(window, 'scroll').subscribe((ev) => {
+    fromEvent(window, 'scroll').subscribe(ev => {
       activeIndex.value = outlineData.findIndex(item => item.offsetTop > scrollerRef.value.scrollTop)
       // console.log(activeIndex.value)
 
@@ -171,7 +182,7 @@ onMounted(() => {
 
       // 更新上一次滚动的位置
       lastScrollTop = scrollTop
-    }),
+    })
   )
 })
 
@@ -457,6 +468,16 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
       </div>
     </n-drawer-content>
   </n-drawer>
+  <div v-if="isNotFound" class="cover">
+    <n-result status="error" title="未找到目标文章" description="请检测链接是否正确">
+      <template #footer>
+        <n-flex align="center" justify="center">
+          <n-button @click="() => router.go(0)"> 刷新 </n-button>
+          <n-button @click="() => router.back()"> 返回 </n-button>
+        </n-flex>
+      </template>
+    </n-result>
+  </div>
   <div v-if="isExamining" class="cover">
     <n-result status="info" title="正在审核中..." description="审核通过后才能访问该文章">
       <template #footer>

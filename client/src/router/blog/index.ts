@@ -32,8 +32,13 @@ const blogRoutes: Array<RouteRecordRaw> = [
     // 作品页不添加UID
   },
   {
-    name: RouteNameEnum.ARTICLE,
+    name: 'agent',
     path: '/article/:id',
+    component: () => import(/* webpackChunkName: "about" */ '@/views/blog/article/Article.vue'),
+  },
+  {
+    name: 'article',
+    path: '/article',
     component: () => import(/* webpackChunkName: "about" */ '@/views/blog/article/Article.vue'),
   }
 ]

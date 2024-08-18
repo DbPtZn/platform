@@ -11,7 +11,7 @@ const themeVars = useThemeVars()
 const router = useRouter()
 const articles = ref<ArticleListItem[]>([])
 function handleClick(item: ArticleListItem) {
-  router.push(`/article/${item.id}`)
+  router.push(`/article/${item.agentId}`)
 }
 onMounted(() => {
   blogApi.article.getList<ArticleList>({
