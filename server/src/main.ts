@@ -26,13 +26,13 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService)
   const common = configService.get<ReturnType<typeof commonConfig>>('common')
-  console.log(common.clientDomain)
+  // console.log(common.clientDomain)
   // console.log(path.join(__rootdirname, userDir, publicDir), staticPrefix)
   app.useStaticAssets(common.fullPublicDir, { prefix: common.staticPrefix })
 
   /** 数据验证错误的响应 */
   app.useGlobalPipes(new ValidationPipe())
-
-  await app.listen(3000)
+  const port = process.env.SERVER_PORT
+  await app.listen(port)
 }
 bootstrap()
