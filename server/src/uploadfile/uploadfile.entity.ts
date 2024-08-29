@@ -1,33 +1,83 @@
 import { RemovedEnum } from 'src/enum'
 import { User } from 'src/user/user.entity'
-import { Entity, ObjectId, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn, AfterUpdate, BeforeInsert, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
+import {
+  Entity,
+  ObjectId,
+  ObjectIdColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  AfterUpdate,
+  BeforeInsert,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  BeforeUpdate
+} from 'typeorm'
 
 @Entity()
 export class UploadFile {
-  @PrimaryGeneratedColumn('uuid') id: ObjectId
+  @PrimaryGeneratedColumn('uuid') id: string
 
-  @Column('uuid') userId: string
-  @ManyToOne(() => User, user => user.files)
-  user: User
+  @Column({
+    type: 'uuid',
+    nullable: true
+  })
+  userId: string // 用户ID
 
-  @Column('varchar') type: 'image' | 'audio' | 'json' | 'log' | 'text'
-  @Column('varchar') name: string
-  @Column('varchar') extname: string
-  @Column('int') size: number
-  @Column('varchar') md5: string
-  @Column('varchar') path: string
+  @Column({
+    type: 'varchar',
+    length: 18,
+  })
+  dirname: string
 
-  @CreateDateColumn() createAt: Date
-  @UpdateDateColumn() updateAt: Date
+  @Column({
+    type: 'varchar'
+  })
+  md5: string // 文件MD5
 
-  /** 插入实体时设置创建时间 */
+  @Column({
+    type: 'simple-array'
+    // default: JSON.stringify([])
+  })
+  quote: string[] // 引用的项目 id
+
+  @Column({
+    type: 'varchar',
+    length: 24
+  })
+  mimetype: string // 文件类型
+
+  @Column({
+    type: 'varchar',
+    length: 255
+  })
+  name: string // 文件名
+
+  @Column({
+    type: 'varchar',
+    length: 255
+  })
+  path: string // 文件路径
+
+  @Column({
+    type: 'int'
+  })
+  size: number // 文件大小
+
+  @CreateDateColumn()
+  createAt: Date
+
+  @UpdateDateColumn()
+  updateAt: Date
+
   @BeforeInsert()
   createDate() {
     this.createAt = new Date()
+    this.updateAt = new Date()
   }
 
-  /** 实体更新时自动更新时间 */
-  @AfterUpdate()
+  /** 实体更新时自动更新时间 （仅在使用 save 方法进行更新时生效） */
+  @BeforeUpdate()
   updateDate() {
     this.updateAt = new Date()
   }

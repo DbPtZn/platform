@@ -8,7 +8,7 @@ export function useUploadImg() {
       formdata.append('file', file) //图片文件
       manageApi.upload.uploadImg(formdata).then(res => {
         // TODO 如果是上传到对象存储库，这里可能返回的就是完整的图片路径
-        const url = res.config.baseURL + res.data
+        const url = res.data
         resolve(url)
       }).catch(err => reject(err))
     })

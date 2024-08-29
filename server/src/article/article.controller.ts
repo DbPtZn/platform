@@ -19,11 +19,12 @@ export class ArticleController {
   async getArticleList(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+    @Query('UID') UID: string,
     @Body() filter: Partial<ArticleFilter>,
     @Req() req,
     @Res() res
   ) {
-    // console.log(page)
+    // console.log(UID)
     // console.log(limit)
     // console.log(filter)
     try {
@@ -33,7 +34,8 @@ export class ArticleController {
           limit,
           // route: '/list'
         },
-        filter
+        filter,
+        UID
       )
       // console.log(result)
       res.status(200).send(result)

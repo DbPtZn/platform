@@ -24,7 +24,7 @@ const state = ref<Article>({
   id: '',
   UID: '',
   userId: '',
-  authcodeId: '',
+  // authcodeId: '',
   albumId: '',
   type: 'other',
   isParsed: false,
@@ -59,13 +59,16 @@ const state = ref<Article>({
     comments: 0
   },
   editionId: '',
-  fromEditionId: '',
+  // fromEditionId: '',
   msg: '',
   removed: RemovedEnum.NEVER,
   createAt: '',
   updateAt: '',
   unparsedFile: '',
-  refuseMsg: ''
+  refuseMsg: '',
+  agentId: '',
+  isMultiEdition: false,
+  isCurrent: false
 })
 
 let player: Editor
@@ -73,7 +76,7 @@ onMounted(() => {
   console.log(id.value)
   manageApi.submission.get<Article>(id.value).then(res => {
     // console.log(res)
-    res.data.audio = res.config.baseURL + res.data.audio
+    res.data.audio = res.data.audio
     // console.log(res.data.audio)
     state.value = res.data
     usePlayer({

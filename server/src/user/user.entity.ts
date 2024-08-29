@@ -28,8 +28,8 @@ export class User {
   @OneToMany(() => Album, album => album.user)
   albums: Album[]
 
-  @OneToMany(() => UploadFile, file => file.user)
-  files: UploadFile[]
+  // @OneToMany(() => UploadFile, file => file.user)
+  // files: UploadFile[]      
 
   @Column({
     type: 'varchar',

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { UserService } from 'src/user/user.service'
-import { extname } from 'path'
+import { basename, extname } from 'path'
 import * as fs from 'fs'
 import { AuthcodeService } from 'src/authcode/authcode.service'
 import { UploadfileService } from 'src/uploadfile/uploadfile.service'
@@ -78,28 +78,34 @@ export class ReceiverService {
     }
 
     /** 数据文档 */
-    const filepath = await this.fileService.saveJSON(
+    const filepath = await this.fileService.upload(
       {
-        dirname: UID,
-        extname: 'json',
-        sourcePath: jsonDoc.path
+        path: jsonDoc.path,
+        filename: basename(jsonDoc.path),
+        mimetype: 'application/json'
       },
-      user.id
+      user.id,
+      UID,
+      '',
+      true
     )
-
-    data.content = filepath
+    console.log('内容文件：', filepath)
+    data.unparsedFile = basename(filepath)
 
     /** 处理音频文件 */
     if (audio) {
-      const audioPath = await this.fileService.saveAudio(
+      console.log('音频文件：', audio.path, audio.mimetype)
+      const audioPath = await this.fileService.upload(
         {
-          dirname: user.UID,
-          sourcePath: audio.path,
-          extname: extname(audio.path)
+          path: audio.path,
+          filename: basename(audio.path),
+          mimetype: 'audio/ogg'
         },
-        user.id
+        user.id,
+        user.UID
       )
-      data.audio = audioPath
+      console.log('音频文件：', audioPath)
+      data.audio = basename(audioPath)
     }
     // console.log(data)
     // console.log(data.keyframeSequence)

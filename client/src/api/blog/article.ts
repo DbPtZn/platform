@@ -15,12 +15,13 @@ export interface ArticleFilter {
 export interface GetArticleListDto {
   page: number,
   limit: number
+  UID: string
   filter?: Partial<ArticleFilter>
 }
 
 export const article = {
   getList<T>(dto: GetArticleListDto) {
-    return axios.post<T>(`/article/list?page=${dto.page}&limit=${dto.limit}`, dto.filter)
+    return axios.post<T>(`/article/list?page=${dto.page}&limit=${dto.limit}&UID=${dto.UID}`, dto.filter)
   },
   getByAgentId<T>(id: string) {
     console.log('getByAgentId', id)

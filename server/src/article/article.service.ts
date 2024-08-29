@@ -37,11 +37,11 @@ export class ArticleService {
     // private readonly userService: UserService
   ) {}
 
-  async findAll(options: IPaginationOptions, filter: Partial<ArticleFilter>) {
+  async findAll(options: IPaginationOptions, filter: Partial<ArticleFilter>, UID: string) {
     // console.log(filter)
     try {
       const result = await paginate<Article>(this.articlesRepository, options, {
-        where: { ...filter, isParsed: true, isPublished: true, isDisplayed: true },
+        where: { ...filter, isParsed: true, isPublished: true, isDisplayed: true, UID },
         relations: ['album'],
         select: {
           id: true,
@@ -63,6 +63,9 @@ export class ArticleService {
           updateAt: true
         }
       })
+      result.items.forEach(item => {
+        item.avatar = this.fileService.getResponsePath(item.avatar, UID)
+      })
       // console.log(result)
       return result
     } catch (error) {
@@ -79,6 +82,9 @@ export class ArticleService {
       .where({ id: id })
       .getOne()
       if(!article) throw new NotFoundException('文章不存在')
+      const UID = article.UID
+      if(article.avatar) article.avatar = this.fileService.getResponsePath(article.avatar, UID)
+      if(article.audio) article.audio = this.fileService.getResponsePath(article.audio, UID)
       // console.log(article.user)
       // console.log(article)
       article.unparsedFile = ''

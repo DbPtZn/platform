@@ -7,6 +7,9 @@ import { MulterModule } from '@nestjs/platform-express'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { commonConfig } from 'src/config'
 import { diskStorage } from 'multer'
+import { extname } from 'path'
+import randomstring from 'randomstring'
+import { BucketModule } from 'src/bucket/bucket.module'
 
 @Module({
   imports: [
@@ -21,13 +24,14 @@ import { diskStorage } from 'multer'
           storage: diskStorage({
             destination: dest,
             filename: (_, file, cb) => {
-               // 使用 file.originalname 的时候，如果上传多张图片，必须确保图片名称不一样，否则后面的图片会覆盖前面的
-              cb(null, file.originalname)
+              const filename = `${randomstring.generate(5)}-${new Date().getTime()}${extname(file.originalname)}`
+              cb(null, filename)
             }
           })
         }
       }
     }),
+    BucketModule
   ],
   controllers: [UploadfileController],
   providers: [UploadfileService],

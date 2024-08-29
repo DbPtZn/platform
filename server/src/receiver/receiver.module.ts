@@ -14,7 +14,7 @@ import { commonConfig } from 'src/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from 'src/user/user.entity'
 import { SubmissionModule } from 'src/submission/submission.module'
-const __rootdirname = process.cwd()
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
@@ -23,20 +23,11 @@ const __rootdirname = process.cwd()
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const common = configService.get<ReturnType<typeof commonConfig>>('common')
-        // const dest = common.appDir && common.tempDir ? join(common.appDir, common.tempDir) : join(__rootdirname, 'temp')
         return {
           storage: diskStorage({
             destination: common.fullTempDir,
             filename: (_, file, cb) => {
-              // console.log(_.files)
-              // console.log(_.fields)
-              // console.log(_.body)
-              // console.log(_.baseUrl)
-              // // console.log(_.ip)
-              // console.log(extname(file.mimetype))
-              // console.log('storage')
-              // console.log(file)
-              const filename = `${randomstring.generate(3)}${new Date().getTime()}${extname(file.originalname)}`
+              const filename = `${randomstring.generate(5)}${new Date().getTime()}${extname(file.originalname)}`
               cb(null, filename)
             }
           })

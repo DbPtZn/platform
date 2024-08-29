@@ -6,9 +6,11 @@ import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { onMounted } from 'vue'
 import { blogApi } from '@/api'
-
+import { computed } from 'vue'
 const themeVars = useThemeVars()
 const router = useRouter()
+console.log(router.currentRoute.value)
+const UID = computed(() => router.currentRoute.value.params.UID as string)
 const articles = ref<ArticleListItem[]>([])
 function handleClick(item: ArticleListItem) {
   router.push(`/article/${item.agentId}`)
@@ -17,6 +19,7 @@ onMounted(() => {
   blogApi.article.getList<ArticleList>({
     page: 1,
     limit: 10,
+    UID: UID.value,
     filter: {}
   }).then(res => {
     console.log(res)

@@ -18,23 +18,17 @@ export class UploadfileController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadImg(@UploadedFile() file, @Body() formData, @Req() req, @Res() res) {
     try {
+      // const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
       // console.log(file)
       // console.log(formData.dirname) // 暂不考虑该方案
-      const filePath = await this.fileService.saveImage(
-        {
-          sourcePath: file.path,
-          extname: extname(file.originalname),
-          dirname: req.user.UID
-        },
-        req.user.id
-      )
-      const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+      const filePath = await this.fileService.upload(file, req.user.id, req.user.UID)
+      console.log('上传文件-UID:', req.user.UID)
+      // console.log(filePath)
+      // console.log(common.publicDir)
+      // console.log(filePath.split(common.publicDir.slice(1)))
+      // const path = filePath
       console.log(filePath)
-      console.log(common.publicDir)
-      console.log(filePath.split(common.publicDir.slice(1)))
-      const path = common.staticPrefix + filePath.split(common.publicDir.slice(1))[1]
-      console.log(path)
-      res.status(200).send(path)
+      res.status(200).send(filePath)
     } catch (error) {
       console.log(error)
       res.status(400).send(error)

@@ -16,6 +16,7 @@ import { commonConfig } from 'src/config'
 import * as UUID from 'uuid'
 @Injectable()
 export class SubmissionService {
+  private readonly common: ReturnType<typeof commonConfig>
   constructor(
     @InjectRepository(Article)
     private articlesRepository: Repository<Article>,
@@ -25,12 +26,14 @@ export class SubmissionService {
     private authcodesRepository: Repository<Authcode>,
     @InjectRepository(Album)
     private albumsRepository: Repository<Album>,
-    // private readonly fileService: UploadfileService,
+    private readonly fileService: UploadfileService,
     private readonly configService: ConfigService,
     // private readonly generationService: GenerationService,
     private readonly dataSource: DataSource,
     // private readonly userService: UserService
-  ) {}
+  ) {
+    this.common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+  }
 
   /** 查询文章版本是否存在 */
   queryEditionExists(editionId: string) {
@@ -65,11 +68,11 @@ export class SubmissionService {
 
       // 版本管理
       let editionId = dto.editionId
-      console.log(editionId)
+      console.log('editionId:', editionId)
       let isMultiEdition = false
       if(editionId) {
         const editionCount = await this.articlesRepository.countBy({ editionId, userId })
-        console.log(editionCount)
+        console.log('editionCount:', editionCount)
         if(editionCount > 0) {
           isMultiEdition = true
         }
@@ -188,8 +191,15 @@ export class SubmissionService {
     }
   }
 
-  findOne(id: string, userId: string) {
-    return this.articlesRepository.findOneBy({ id, userId })
+  async findOne(id: string, userId: string) {
+    try {
+      const submission = await this.articlesRepository.findOneBy({ id, userId })
+      submission.audio = this.fileService.getResponsePath(submission.audio, submission.UID)
+      console.log(submission.audio)
+      return submission
+    } catch (error) {
+      throw error
+    }
   }
 
   async find(options: IPaginationOptions, filter: Partial<ArticleFilter>, userId: string) {
@@ -303,16 +313,27 @@ export class SubmissionService {
     try {
       // TODO 未解析文件改成存放在 unparsedFile 字段
       const article = await this.articlesRepository.findOneBy({ id, userId })
-      if (article && !article.isParsed) {
-        const filepath = article.content
-        if (fs.existsSync(filepath)) {
-          const file = fs.readFileSync(filepath)
-          return file
-        } else {
-          throw new Error('目标文件不存在！')
-        }
+      if (!article) throw new Error('目标项目不存在！')
+      console.log(article)
+      if (article.isParsed) throw new Error('目标项目已解析！')
+      let filepath
+      if(this.common.enableCOS) {
+        filepath = this.fileService.createTempFilePath('json')
+        await this.fileService.getCosPrivateFile(article.unparsedFile, article.UID, filepath)
       } else {
-        throw new Error('目标项目不存在！')
+        filepath = this.fileService.getLocalFilePath(article.unparsedFile, article.UID)
+      }
+      
+      if (fs.existsSync(filepath)) {
+        const file = fs.readFileSync(filepath)
+        try {
+          this.common.enableCOS && fs.unlinkSync(filepath) // cos的情况，读取完直接删除临时文件
+        } catch (error) {
+          console.log('删除临时文件失败:', error.message)
+        }
+        return file
+      } else {
+        throw new Error('目标文件不存在！')
       }
     } catch (error) {
       throw error

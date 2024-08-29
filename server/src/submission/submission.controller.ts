@@ -19,10 +19,10 @@ export class SubmissionController {
   async getArticle(@Param('id') id: string, @Req() req, @Res() res) {
     try {
       const result = await this.submissionService.findOne(id, req.user.id)
-      const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
-      if (result.audio) {
-        result.audio = common.staticPrefix + result.audio.split(common.publicDir.slice(1))[1]
-      }
+      // const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+      // if (result.audio) {
+      //   result.audio = common.staticPrefix + result.audio.split(common.publicDir.slice(1))[1]
+      // }
       res.send(result)
     } catch (error) {
       res.status(400).send(error.message)
