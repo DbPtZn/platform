@@ -20,7 +20,7 @@ export const useAlbumListStore = defineStore('albumListStore',{
       },
       get() {
         return manageApi.album.getList<Album[]>().then(res => {
-          console.log(res.data)
+          // console.log(res.data)
           this.data = res.data
         })
       }

@@ -94,7 +94,7 @@ function fetchArticle(id: string, isAgent: boolean) {
 }
 onMounted(() => {
   scrollerRef.value = document.documentElement
-  console.log(agentId.value, id.value)
+  // console.log(agentId.value, id.value)
   if (agentId.value || id.value) {
     const _id = agentId.value || id.value
     fetchArticle(_id, !!agentId.value)

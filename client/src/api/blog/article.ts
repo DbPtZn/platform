@@ -24,7 +24,7 @@ export const article = {
     return axios.post<T>(`/article/list?page=${dto.page}&limit=${dto.limit}&UID=${dto.UID}`, dto.filter)
   },
   getByAgentId<T>(id: string) {
-    console.log('getByAgentId', id)
+    // console.log('getByAgentId', id)
     return axios.get<T>(`/article/${id}`)
   },
   getById<T>(id: string) {

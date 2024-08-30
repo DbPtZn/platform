@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
 import { PassportModule } from '@nestjs/passport'
@@ -9,10 +9,14 @@ import { JwtStrategy } from './jwt.stratagy'
 import { JwtAuthGuard, LocalAuthGuard } from './auth.guard'
 import { UserModule } from 'src/user/user.module'
 import { LoggerModule } from 'src/logger/logger.module'
+import { commonConfig } from 'src/config'
+import { AuthMiddleware } from './auth.middleware'
+import { HttpModule } from '@nestjs/axios'
 @Module({
   imports: [
     UserModule,
     LoggerModule,
+    HttpModule,
     PassportModule.register({ defaultStrategy: ['jwt', 'local'] }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -29,4 +33,21 @@ import { LoggerModule } from 'src/logger/logger.module'
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy, LocalAuthGuard, JwtAuthGuard]
 })
-export class AuthModule {}
+export class AuthModule {
+  constructor(
+    private readonly configService: ConfigService
+  ) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+    // console.log('common.ssoDomain:', common.ssoDomain)
+    // 开启 sso 单点登录的时候，会拦截 login | register 请求
+    common.ssoEnable && consumer.apply(AuthMiddleware).forRoutes(
+      { path: `/auth/login`, method: RequestMethod.POST },
+      { path: `/auth/register`, method: RequestMethod.POST },
+      { path: `/auth/refresh`, method: RequestMethod.GET },
+      { path: `/auth/sendCode/:email`, method: RequestMethod.GET },
+      // { path: `/auth/identify`, method: RequestMethod.GET },
+    )
+  }
+}

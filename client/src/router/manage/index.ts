@@ -1,7 +1,7 @@
 import { RouteNameEnum, RoutePathEnum } from '@/enums'
 import { RouteRecordRaw } from 'vue-router'
 
-const managerRoutes: Array<RouteRecordRaw> = [
+const manageRoutes: Array<RouteRecordRaw> = [
   /** 主页 */
   {
     path: RoutePathEnum.MANAGE,
@@ -36,7 +36,7 @@ const managerRoutes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "about" */ '@/views/login/Login.vue'),
     // 访问该路由之前执行：
     beforeEnter(to, from, next) {
-      const token = sessionStorage.getItem('managerToken')
+      const token = sessionStorage.getItem('serverToken') || sessionStorage.getItem('ssoToken')
       token ? next(RoutePathEnum.MANAGE) : next()
     }
   },
@@ -48,7 +48,7 @@ const managerRoutes: Array<RouteRecordRaw> = [
 ].map((route, index, arr) => {
   if (![RouteNameEnum.REGISTER, RouteNameEnum.LOGIN].includes(route.name)) {
     arr[index].beforeEnter = (to, from, next) => {
-      const token = sessionStorage.getItem('managerToken')
+      const token = sessionStorage.getItem('serverToken') || sessionStorage.getItem('ssoToken')
       if (token || to.name === RouteNameEnum.LOGIN || to.name === RouteNameEnum.REGISTER) {
         next()
       } else {
@@ -59,7 +59,7 @@ const managerRoutes: Array<RouteRecordRaw> = [
   return route
 })
 
-export default managerRoutes
+export default manageRoutes
 
 // 登录状态导航守卫：
 // router.beforeEach((to, from, next) => {

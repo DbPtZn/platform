@@ -18,6 +18,7 @@ export class UserService {
     private usersRepository: Repository<User>,
     private readonly configService: ConfigService
   ) {}
+
   /** 创建新用户 */
   async create(createUserDto: CreateUserDto) {
     try {

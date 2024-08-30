@@ -57,12 +57,12 @@ const formRef = ref<FormInst | null>(null)
 function handleFinish(args: { file: UploadFileInfo; event?: ProgressEvent }) {
   if (args.event) {
     console.log(args.event.currentTarget)
-    const path = import.meta.env.VITE_ASSETS_URL + (args.event.currentTarget as XMLHttpRequest).response
+    const path = (args.event.currentTarget as XMLHttpRequest).response
     console.log(path)
     model.value.avatar = path
   }
 }
-const accessToken = sessionStorage.getItem('managerToken')
+const accessToken = sessionStorage.getItem('serverToken')
 /** 提交 */
 function handleSubmit(e: MouseEvent) {
   e.preventDefault()

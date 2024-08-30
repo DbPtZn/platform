@@ -20,7 +20,8 @@ function handleDblClick() {
   router.push({ path: `/manage` })
 }
 function handleError(ev: Event) {
-  
+  const target = ev.target as HTMLImageElement
+  target.src = './default.png'
 }
 const options: DropdownOption[] = [
   {
@@ -54,7 +55,8 @@ const options: DropdownOption[] = [
     key: 'logout',
     props: {
       onClick: () => {
-        sessionStorage.removeItem('managerToken')
+        sessionStorage.removeItem('ssoToken')
+        sessionStorage.removeItem('serverToken')
         router.push({ path: `/login` })
       }
     }
@@ -83,7 +85,7 @@ function handleBack() {
               <n-avatar
                 class="avatar"
                 :bordered="false"
-                @error="handleError"
+                :fallback-src="'./error.png'"
                 :src="userStore.avatar"
               />
               <!-- <n-button :bordered="false" style="padding: 0 4px;font-size: 24px;line-height: 24px;"> ··· </n-button> -->

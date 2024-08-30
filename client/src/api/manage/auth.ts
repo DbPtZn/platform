@@ -2,12 +2,14 @@ import axios from "axios"
 export interface LoginDto {
   account: string
   password: string
+  code?: string
 }
 
 export interface CreateUserDto {
-  nickname: string
+  nickname?: string
   account: string
   password: string
+  code: string
 }
 
 export const auth = {

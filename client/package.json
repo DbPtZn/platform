@@ -22,6 +22,7 @@
     "dayjs": "^1.11.11",
     "element-resize-detector": "^1.2.4",
     "formidable": "^3.5.1",
+    "jsrsasign": "^11.1.0",
     "lodash": "^4.17.21",
     "material-icons": "^1.13.12",
     "naive-ui": "^2.39.0",
@@ -36,6 +37,7 @@
   },
   "devDependencies": {
     "@iconify/vue": "^4.1.2",
+    "@types/jsrsasign": "^10.5.14",
     "@types/lodash": "^4.17.5",
     "@types/node": "^20.14.2",
     "@vitejs/plugin-vue": "^5.0.5",

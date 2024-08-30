@@ -9,7 +9,7 @@ import { blogApi } from '@/api'
 import { computed } from 'vue'
 const themeVars = useThemeVars()
 const router = useRouter()
-console.log(router.currentRoute.value)
+// console.log(router.currentRoute.value)
 const UID = computed(() => router.currentRoute.value.params.UID as string)
 const articles = ref<ArticleListItem[]>([])
 function handleClick(item: ArticleListItem) {
