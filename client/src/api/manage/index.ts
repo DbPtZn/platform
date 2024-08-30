@@ -66,11 +66,15 @@ maxios.interceptors.request.use(config => {
     if (serverToken) {
       config.headers.set('Authorization', `Bearer ${serverToken}`)
     }
+    if(['/user/pwd'].includes(config.url!)) {
+      const ssoToken = getSsoToken()
+      if(ssoToken) config.headers.Authorization = `Bearer ${ssoToken}`
+    }
   }
-
+  defense = 0
   return config
 })
-
+let defense = 0 // 防御措施，防止无限重试
 maxios.interceptors.response.use(
   (response: AxiosResponse) => {
     // 对响应数据做点什么
@@ -80,6 +84,14 @@ maxios.interceptors.response.use(
     if (err.response?.status) {
       switch (err.response?.status) {
         case 401:
+          /** ------------ ↓ 防御性策略 ↓ ------------ */
+          // 短时间达到 10 次 401 错误，则抛出错误不要继续请求
+          if(defense > 10) {
+            defense = 0
+            return Promise.reject(err)
+          }
+          defense ++
+          /** ------------ ↑ 防御性策略 ↑ ------------ */
           const response = err.response
           if(getSsoToken()) {
             if(!isRefreshRequest(response.config)) {
