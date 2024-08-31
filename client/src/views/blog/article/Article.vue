@@ -99,7 +99,7 @@ onMounted(() => {
     const _id = agentId.value || id.value
     fetchArticle(_id, !!agentId.value)
       .then(res => {
-        res.data.audio = res.config.baseURL + res.data.audio
+        // res.data.audio = res.data.audio
         state.value = res.data
         usePlayer({
           rootRef,

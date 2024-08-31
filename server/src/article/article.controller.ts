@@ -59,10 +59,10 @@ export class ArticleController {
       if(!result.isParsed) {
         throw new Error('文章内容未解析')
       }
-      const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
-      if(result.audio) {
-        result.audio = common.staticPrefix + result.audio.split(common.publicDir.slice(1))[1]
-      }
+      // const common = this.configService.get<ReturnType<typeof commonConfig>>('common')
+      // if(result.audio) {
+      //   result.audio = common.staticPrefix + result.audio.split(common.publicDir.slice(1))[1]
+      // }
       // console.log(result.user)
       res.send(result)
     } catch (error) {

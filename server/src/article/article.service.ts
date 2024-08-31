@@ -104,8 +104,11 @@ export class ArticleService {
       .where({ agentId: id, isCurrent: true })
       .getOne()
       if(!article) throw new NotFoundException('文章不存在')
+
+      if(article.avatar) article.avatar = this.fileService.getResponsePath(article.avatar, article.UID)
+      if(article.audio) article.audio = this.fileService.getResponsePath(article.audio, article.UID)
       // console.log(article.user)
-      // console.log(article)
+      console.log(article)
       article.unparsedFile = ''
       return article
     } catch (error) {

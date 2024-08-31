@@ -4745,7 +4745,6 @@ let ImgToUrlService = class {
   // 处理队列中的上传任务(当前上传任务大于 this.maxConcurrency 时会进入等待)
   processQueue() {
     if (this.queue.length > 0 && this.isRunning < this.maxConcurrency) {
-      console.log("this.isRunning", this.isRunning);
       const task = this.queue.shift();
       this.isRunning++;
       task && this.uploadTask(task).then(() => {
@@ -9648,13 +9647,13 @@ let AnimeStateProvider = class {
       const dataSerial = element.dataset.serial;
       const dataEffect = element.dataset.effect;
       const dataState = element.dataset.state;
-      const title = element.title;
+      const dataTitle = element.dataset.title;
       this.commander.applyFormat(animeFormatter, {
         dataId: state.id !== void 0 ? state.id : dataId,
         dataSerial: state.serial !== void 0 ? state.serial.toString() : dataSerial,
         dataEffect: state.effect !== void 0 ? state.effect : dataEffect,
         dataState: state.state !== void 0 ? state.state : dataState,
-        title
+        dataTitle: state.title !== void 0 ? state.title : dataTitle
       });
       this.selection.toNext();
     }

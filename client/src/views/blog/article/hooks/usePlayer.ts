@@ -138,6 +138,7 @@ export function usePlayer(args: {
   const { data, rootRef, editorRef, scrollerRef, outlineRef, controllerRef } = args
   let editor: Editor
   return new Promise<Editor>(async (resolve, reject) => {
+    // console.log(data)
     const courseData: CourseData = {
       audio: data.audio,
       duration: data.duration || 0,
@@ -146,7 +147,7 @@ export function usePlayer(args: {
       subtitleSequence: data.subtitleSequence,
       subtitleKeyframeSequence: data.subtitleKeyframeSequence
     }
-    // console.log(courseData)
+    console.log(courseData)
     const content = data.content
     // console.log(content)
     try {

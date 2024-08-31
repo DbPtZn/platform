@@ -135,6 +135,7 @@ export class SubmissionService {
         subtitleSequence,
         subtitleKeyframeSequence
       } = dto
+      console.log(dto)
       const article = await this.articlesRepository.findOneBy({ id })
       if (!article) {
         throw new Error('文章不存在！')
