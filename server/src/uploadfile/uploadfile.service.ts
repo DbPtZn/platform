@@ -94,8 +94,8 @@ export class UploadfileService {
     return `${dirPath}/${filename}`
   }
 
-  getCosPrivateFile(filename: string, dirname: string, output: string) {
-    return this.bucketService.getPrivateFile(filename, dirname, output)
+  fetchRemoteFile(filename: string, dirname: string, output: string, prv = false) {
+    return this.bucketService.fetchFile(filename, dirname, output, prv)
   }
 
   async upload(file: LocalUploadFile, userId: string, dirname: string, quoteId?: string, prv = false) {

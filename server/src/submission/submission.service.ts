@@ -15,7 +15,7 @@ import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate'
 import { commonConfig } from 'src/config'
 import * as UUID from 'uuid'
 import { FfmpegService } from 'src/ffmpeg/ffmpeg.service'
-import { basename } from 'path'
+import { basename, extname } from 'path'
 @Injectable()
 export class SubmissionService {
   private readonly common: ReturnType<typeof commonConfig>
@@ -167,15 +167,22 @@ export class SubmissionService {
       article.subtitleKeyframeSequence = subtitleKeyframeSequence
 
       // 适配浏览器 保持一份 mp3 格式的音频
-      const mp3path = this.fileService.createTempFilePath('.mp3', article.audio)
-      // console.log('article.audio:', article.audio)
-      // console.log(this.fileService.getFilePath(article.audio, article.UID))
-      await this.ffmpegService.convertToMp3(this.fileService.getFilePath(article.audio, article.UID), mp3path)
-      await this.fileService.upload({
-        filename: basename(mp3path),
-        path: mp3path,
-        mimetype: 'audio/mp3'
-      }, article.userId, article.UID, article.id)
+      try {
+        const mp3path = this.fileService.createTempFilePath('.mp3', article.audio)
+        // console.log('article.audio:', article.audio)
+        // console.log(this.fileService.getFilePath(article.audio, article.UID))
+        const tempAudioPath = this.fileService.createTempFilePath(extname(article.audio))
+        await this.fileService.fetchRemoteFile(article.audio, article.UID, tempAudioPath)
+        await this.ffmpegService.convertToMp3(tempAudioPath, mp3path)
+        fs.unlinkSync(tempAudioPath)
+        await this.fileService.upload({
+          filename: basename(mp3path),
+          path: mp3path,
+          mimetype: 'audio/mp3'
+        }, article.userId, article.UID, article.id)
+      } catch (error) {
+        throw new Error(`音频文件转换失败: ${error.message}`)
+      }
       // const mp3duration = await this.ffmpegService.calculateDuration(mp3path)
       // console.log(`ogg音频时长：${duration}s，mp3音频时长：${mp3duration}s`)
 
@@ -334,7 +341,7 @@ export class SubmissionService {
       let filepath
       if(this.common.enableCOS) {
         filepath = this.fileService.createTempFilePath('json')
-        await this.fileService.getCosPrivateFile(article.unparsedFile, article.UID, filepath)
+        await this.fileService.fetchRemoteFile(article.unparsedFile, article.UID, filepath, true)
       } else {
         filepath = this.fileService.getLocalFilePath(article.unparsedFile, article.UID)
       }

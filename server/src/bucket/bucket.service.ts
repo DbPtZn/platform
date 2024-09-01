@@ -56,25 +56,52 @@ export class BucketService {
     })
   }
 
+  // /**
+  //  * 获取私有文件
+  //  * @param filename 文件名
+  //  * @param dirname 目录名
+  //  * @param output 输出路径
+  //  * @returns data
+  //  */
+  // async getPrivateFile(filename: string, dirname: string, output: string) {
+  //   return new Promise((resolve, reject) => {
+  //     this.cos.getObject(
+  //       {
+  //         Bucket: this.common.privateBucket,
+  //         Region: this.common.privateREGION,
+  //         Key: `${dirname}/${filename}`,
+  //         Output: fsx.createWriteStream(output)
+  //       },
+  //       function (err, data) {
+  //         console.log(err)
+  //         if (err) {
+  //           reject(err)
+  //         }
+  //         resolve(data)
+  //       }
+  //     )
+  //   })
+  // }
+
   /**
-   * 获取私有文件
-   * @param filename 文件名 
+   * 获取远程文件
+   * @param filename 文件名
    * @param dirname 目录名
    * @param output 输出路径
    * @returns data
    */
-  async getPrivateFile(filename: string, dirname: string, output: string) {
+  async fetchFile(filename: string, dirname: string, output: string, prv = false) {
     return new Promise((resolve, reject) => {
       this.cos.getObject(
         {
-          Bucket: this.common.privateBucket,
-          Region: this.common.privateREGION,
+          Bucket:  !prv ? this.common.bucket : this.common.privateBucket,
+          Region: !prv ? this.common.region : this.common.privateREGION,
           Key: `${dirname}/${filename}`,
-          Output: fsx.createWriteStream(output),
+          Output: fsx.createWriteStream(output)
         },
         function (err, data) {
-          console.log(err)
-          if(err) {
+          // console.log(err)
+          if (err) {
             reject(err)
           }
           resolve(data)
