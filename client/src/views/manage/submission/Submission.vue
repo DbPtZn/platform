@@ -466,7 +466,7 @@ const cities = ref([
 ])
 const columnSelect = ref(false)
 const columns = computed(() => createColumns({ play(row) {} }).filter((c: any) => cities.value.includes(c.key)))
-// console.log(albums)
+// TODO 将展示状态缓存到 localStorage
 
 /** 排序 */
 
@@ -536,7 +536,7 @@ const generateOptions = (row: Model | null): DropdownOption[] => {
     {
       label: () => !row.isCurrent && '设为主版本',
       key: 'current',
-      show: !row.isCurrent,
+      show: !row.isCurrent && row.isParsed && row.isMultiEdition,
       props: {
         onClick: () => {
           row && handleSetCurrent(row)

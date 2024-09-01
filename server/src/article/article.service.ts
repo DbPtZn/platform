@@ -41,7 +41,7 @@ export class ArticleService {
     // console.log(filter)
     try {
       const result = await paginate<Article>(this.articlesRepository, options, {
-        where: { ...filter, isParsed: true, isPublished: true, isDisplayed: true, UID },
+        where: { ...filter, isCurrent: true, isParsed: true, isPublished: true, isDisplayed: true, UID },
         relations: ['album'],
         select: {
           id: true,

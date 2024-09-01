@@ -14,6 +14,8 @@ import { RemovedEnum } from 'src/enum'
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate'
 import { commonConfig } from 'src/config'
 import * as UUID from 'uuid'
+import { FfmpegService } from 'src/ffmpeg/ffmpeg.service'
+import { basename } from 'path'
 @Injectable()
 export class SubmissionService {
   private readonly common: ReturnType<typeof commonConfig>
@@ -26,6 +28,7 @@ export class SubmissionService {
     private authcodesRepository: Repository<Authcode>,
     @InjectRepository(Album)
     private albumsRepository: Repository<Album>,
+    private readonly ffmpegService: FfmpegService,
     private readonly fileService: UploadfileService,
     private readonly configService: ConfigService,
     // private readonly generationService: GenerationService,
@@ -68,19 +71,25 @@ export class SubmissionService {
 
       // 版本管理
       let editionId = dto.editionId
-      console.log('editionId:', editionId)
+      // console.log('editionId:', editionId)
       let isMultiEdition = false
+      let isCurrent = false
       if(editionId) {
         const editionCount = await this.articlesRepository.countBy({ editionId, userId })
-        console.log('editionCount:', editionCount)
+        // console.log('editionCount:', editionCount)
+        // 多个版本
         if(editionCount > 0) {
           isMultiEdition = true
         }
+        // 无多版本
         if(editionCount === 0) {
           editionId = UUID.v4()
+          isCurrent = true
         }
       } else {
+        // 非新版本投稿
         editionId = UUID.v4()
+        isCurrent = true
       }
 
       const article = new Article()
@@ -95,7 +104,7 @@ export class SubmissionService {
       article.isParsed = isParsed
       article.isPublished = false
       article.isDisplayed = user.config?.autoDisplay || true // 根据用户设置（默认展示）
-      article.isCurrent = false
+      article.isCurrent = isCurrent
       article.isMultiEdition = isMultiEdition
 
       article.editorVersion = editorVersion
@@ -140,19 +149,7 @@ export class SubmissionService {
       if (!article) {
         throw new Error('文章不存在！')
       }
-      // let filepath = ''
-      // if (article.type === 'course' && article.audio) {
-      //   // filepath = await this.fileService.saveAudio(
-      //   //   {
-      //   //     sourcePath: article.audio,
-      //   //     extname: path.extname(article.audio),
-      //   //     dirname: UID
-      //   //   },
-      //   //   userId
-      //   // )
-      //   // console.log(filepath)
-      //   filepath = article.audio
-      // }
+
       const text = content.replace(/<[^>]+>/g, '')
       article.isParsed = true
       article.cover = cover
@@ -168,9 +165,23 @@ export class SubmissionService {
       article.keyframeSequence = keyframeSequence
       article.subtitleSequence = subtitleSequence
       article.subtitleKeyframeSequence = subtitleKeyframeSequence
-      console.log('解析成功')
 
-       // 使用事务来确保所有操作要么全部成功，要么全部撤销
+      // 适配浏览器 保持一份 mp3 格式的音频
+      const mp3path = this.fileService.createTempFilePath('.mp3', article.audio)
+      // console.log('article.audio:', article.audio)
+      // console.log(this.fileService.getFilePath(article.audio, article.UID))
+      await this.ffmpegService.convertToMp3(this.fileService.getFilePath(article.audio, article.UID), mp3path)
+      await this.fileService.upload({
+        filename: basename(mp3path),
+        path: mp3path,
+        mimetype: 'audio/mp3'
+      }, article.userId, article.UID, article.id)
+      // const mp3duration = await this.ffmpegService.calculateDuration(mp3path)
+      // console.log(`ogg音频时长：${duration}s，mp3音频时长：${mp3duration}s`)
+
+      console.log('解析成功')
+      
+      // 使用事务来确保所有操作要么全部成功，要么全部撤销
       //  const queryRunner = this.dataSource.createQueryRunner()
       //  await queryRunner.connect()
       //  await queryRunner.startTransaction()
@@ -227,7 +238,10 @@ export class SubmissionService {
           'author',
           'createAt',
           'updateAt'
-        ]
+        ],
+        order: {
+          createAt: 'DESC'
+        }
       })
       // console.log(result)
       return result

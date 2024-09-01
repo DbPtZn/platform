@@ -192,6 +192,7 @@ $--header-height: 60px;
 }
 
 .product-main {
+  min-height: 100%;
   padding: 0 15px;
   box-sizing: border-box;
   // .scroller {

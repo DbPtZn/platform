@@ -9886,6 +9886,8 @@ let Player = class {
     __publicField(this, "timer");
     __publicField(this, "scrollTimer");
     /** 公开状态 */
+    __publicField(this, "isLoaded", false);
+    // 数据是否载入
     __publicField(this, "subtitle", "");
     __publicField(this, "rate", 1);
     __publicField(this, "volume", 1);
@@ -9936,10 +9938,11 @@ let Player = class {
             subtitleKeyframeSequence: item.subtitleKeyframeSequence
           };
         });
+        this.isLoaded = true;
         resolve(this.data);
       }).catch((error) => {
-        console.error("音频文件加载失败：" + error);
-        return;
+        console.error("音频文件加载失败：", error);
+        reject(error);
       });
     });
   }
@@ -10436,12 +10439,13 @@ function getTopDistance(el) {
   return i;
 }
 function loadAudio(src) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const audio = new Audio(src);
     audio.addEventListener("canplaythrough", () => {
       resolve(audio);
     });
     audio.addEventListener("error", (error) => {
+      console.error("音频加载失败1:", error);
       reject(error);
     });
     audio.load();

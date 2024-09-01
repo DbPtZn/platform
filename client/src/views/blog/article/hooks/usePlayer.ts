@@ -139,6 +139,11 @@ export function usePlayer(args: {
   let editor: Editor
   return new Promise<Editor>(async (resolve, reject) => {
     // console.log(data)
+    // 音频换源
+    const aud = new Audio()
+    const result = aud.canPlayType('audio/ogg')
+    if (result === '') data.audio = data.audio.replace('.ogg', '.mp3')
+
     const courseData: CourseData = {
       audio: data.audio,
       duration: data.duration || 0,
@@ -176,7 +181,10 @@ export function usePlayer(args: {
         /** 载入微课数据 */
         if (data.type === 'course') {
           const player = editor?.get(Player)
-          player.loadData([courseData])
+          player.loadData([courseData]).catch((error) => {
+            console.error('加载动画数据失败:', error)
+            reject(error)
+          })
         }
       })
       resolve(editor)

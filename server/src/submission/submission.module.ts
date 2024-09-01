@@ -9,9 +9,10 @@ import { Authcode } from 'src/authcode/authcode.entity'
 import { UploadfileModule } from 'src/uploadfile/uploadfile.module'
 import { User } from 'src/user/user.entity'
 import { UserModule } from 'src/user/user.module'
+import { FfmpegModule } from 'src/ffmpeg/ffmpeg.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Article, User, Authcode, Album]), UserModule, ConfigModule, UploadfileModule],
+  imports: [TypeOrmModule.forFeature([Article, User, Authcode, Album]), UserModule, ConfigModule, UploadfileModule, FfmpegModule],
   controllers: [SubmissionController],
   providers: [SubmissionService],
   exports: [SubmissionService],

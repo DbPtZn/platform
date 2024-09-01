@@ -14,7 +14,7 @@ import { useRouter } from 'vue-router'
 import { blogApi } from '@/api'
 import ArticleHeader from '../layout/ArticleHeader.vue'
 import { Icon } from '@iconify/vue'
-import { AnimeEventService, AnimeProvider, DialogProvider, OutlineService, Player, RootEventService, Structurer, ThemeProvider } from '@/editor'
+import { AnimeEventService, AnimeProvider, CourseData, DialogProvider, OutlineService, Player, RootEventService, Structurer, ThemeProvider } from '@/editor'
 const themeVars = useThemeVars()
 const { settingStore } = useStore('common')
 const router = useRouter()
@@ -227,10 +227,27 @@ function handleScrollTo(offsetTop: number) {
   })
 }
 
+
 const isPlaying = ref(false)
 const floatBtnIcon = computed(() => (isPlaying.value ? 'material-symbols:pause-rounded' : 'material-symbols:play-arrow-rounded'))
-function handleFloatBtnClick() {
+async function handleFloatBtnClick() {
   const controller = player.get(Player)
+  // if(!controller.isLoaded) {
+  //   const data = state.value
+  //   const courseData: CourseData = {
+  //     audio: data.audio,
+  //     duration: data.duration || 0,
+  //     promoterSequence: data.promoterSequence,
+  //     keyframeSequence: data.keyframeSequence,
+  //     subtitleSequence: data.subtitleSequence,
+  //     subtitleKeyframeSequence: data.subtitleKeyframeSequence
+  //   }
+  //   try {
+  //     await controller.loadData([courseData])
+  //   } catch (error) {
+  //     console.error('加载数据失败:', error)
+  //   }
+  // }
   if (!controller.isPlaying && !controller.isPause) {
     controller.start()
     isPlaying.value = true

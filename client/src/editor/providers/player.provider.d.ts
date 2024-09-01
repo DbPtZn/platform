@@ -39,6 +39,7 @@ export declare class Player {
     private timer;
     private scrollTimer;
     /** 公开状态 */
+    isLoaded: boolean;
     subtitle: string;
     rate: number;
     volume: number;

@@ -54,10 +54,18 @@ export class UploadfileService {
     return filepath
   }
 
-  /** 参数： 拓展名， 如 '.wav' */
-  createTempFilePath(extname: string) {
+  /**
+   * 创建一个临时文件路径
+   * @param extname 文件拓展名， 如 '.wav'
+   * @param filename 文件名称 （可选，不提供的情况会自动生成文件名）
+   * @returns path
+   */
+  createTempFilePath(extname: string, filename?: string) {
     const extWithoutDot = extname.charAt(0) === '.' ? extname.slice(1) : extname
-    return path.join(os.tmpdir(), `${randomstring.generate(5)}-${new Date().getTime()}.${extWithoutDot}`)
+    if(!filename) return path.join(os.tmpdir(), `${randomstring.generate(5)}-${new Date().getTime()}.${extWithoutDot}`)
+    const fileNameWithoutExt = filename.replace(path.extname(filename), '')
+    console.log('fileNameWithoutExt:', fileNameWithoutExt)
+    return path.join(os.tmpdir(), `${fileNameWithoutExt}.${extWithoutDot}`)
   }
 
   /**
@@ -80,7 +88,7 @@ export class UploadfileService {
 
   getFilePath(filename: string, dirname: string, prv = false) {
     if (this.common.enableCOS) {
-      return `${this.common.proxyDomain}/${dirname}`
+      return `${this.common.proxyDomain}/${dirname}/${filename}`
     }
     const dirPath = this.getDir(dirname, prv)
     return `${dirPath}/${filename}`

@@ -128,7 +128,7 @@ export class ReceiverService {
     }
   }
 
-  reject() {}
+  // reject() {}
 }
 
 // 目前编辑器无法在服务端渲染实例，

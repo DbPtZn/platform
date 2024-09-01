@@ -14,6 +14,7 @@ import { ReceiverModule } from './receiver/receiver.module'
 import { AlbumModule } from './album/album.module';
 import { SubmissionModule } from './submission/submission.module';
 import { BucketModule } from './bucket/bucket.module'
+import { FfmpegModule } from './ffmpeg/ffmpeg.module';
 
 @Module({
   imports: [
@@ -52,7 +53,8 @@ import { BucketModule } from './bucket/bucket.module'
     ReceiverModule,
     AlbumModule,
     SubmissionModule,
-    BucketModule
+    BucketModule,
+    FfmpegModule
   ],
   controllers: [AppController],
   providers: [AppService]
