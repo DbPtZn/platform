@@ -63,6 +63,7 @@ export class ArticleService {
           updateAt: true
         }
       })
+      console.log('articleService.findAll', result)
       result.items.forEach(item => {
         item.avatar = this.fileService.getResponsePath(item.avatar, UID)
       })

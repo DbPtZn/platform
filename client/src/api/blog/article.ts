@@ -3,7 +3,8 @@ import axios from 'axios'
 
 export interface ArticleFilter {
   authcodeId: string
-  columnId: string
+  // album: { id: string }
+  albumId: string
   type: string
   isParsed: string
   isPublish: string

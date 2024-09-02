@@ -29,6 +29,7 @@ declare module 'vue' {
     NFloatButtonGroup: typeof import('naive-ui')['NFloatButtonGroup']
     NForm: typeof import('naive-ui')['NForm']
     NFormItem: typeof import('naive-ui')['NFormItem']
+    NIcon: typeof import('naive-ui')['NIcon']
     NInput: typeof import('naive-ui')['NInput']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NPageHeader: typeof import('naive-ui')['NPageHeader']

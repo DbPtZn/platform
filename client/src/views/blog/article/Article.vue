@@ -14,6 +14,7 @@ import { useRouter } from 'vue-router'
 import { blogApi } from '@/api'
 import ArticleHeader from '../layout/ArticleHeader.vue'
 import { Icon } from '@iconify/vue'
+import BlogFooter from '../layout/BlogFooter.vue'
 import { AnimeEventService, AnimeProvider, CourseData, DialogProvider, OutlineService, Player, RootEventService, Structurer, ThemeProvider } from '@/editor'
 const themeVars = useThemeVars()
 const { settingStore } = useStore('common')
@@ -321,12 +322,12 @@ function handleMouseDown() {
   }, 1000)
 }
 
-function handleMouseUp() {
-  clearTimeout(timer)
-}
-function handleShowMenu(value: boolean) {
-  isMenuVisible.value = value
-}
+// function handleMouseUp() {
+//   clearTimeout(timer)
+// }
+// function handleShowMenu(value: boolean) {
+//   isMenuVisible.value = value
+// }
 function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
   // 弃用：该事件的检测不是很灵敏且必须在手指离开屏幕后触发，故弃用
   // if (event === 'top') {
@@ -391,7 +392,8 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
     </div>
     <div v-show="state.type === 'course'" ref="controllerRef" :class="['controller']"></div>
   </div>
-
+  <!-- 底部备案信息 -->
+  <BlogFooter v-show="false" />
   <!-- 控制器按钮组 -->
   <n-float-button-group
     :class="['mo-controller-group', isMenuVisible ? 'mo-controller-group-show' : 'mo-controller-group-hidden']"
@@ -428,7 +430,9 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
     <Icon :icon="floatBtnIcon" height="24" />
   </n-float-button>
 
+  <!-- 回到顶部 -->
   <n-back-top class="back-top" :right="100" :to="rootRef" />
+  <!-- 抽屉 -->
   <n-drawer v-model:show="drawerActive" width="50%" placement="right">
     <n-drawer-content title="Menu">
       <div>
@@ -457,14 +461,6 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
             <Icon icon="material-symbols:stop-rounded" height="20px" />
             <span>结束</span>
           </n-button>
-          <!-- <n-button>
-            <Icon icon="material-symbols:volume-down-rounded" height="20px" />
-            <span>减小音量</span>
-          </n-button>
-          <n-button>
-            <Icon icon="material-symbols:volume-up-rounded" height="20px" />
-            <span>增大音量</span>
-          </n-button> -->
         </n-flex>
 
         <n-divider class="divider" />
@@ -485,6 +481,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
       </div>
     </n-drawer-content>
   </n-drawer>
+  <!-- 查找不到时 -->
   <div v-if="isNotFound" class="cover">
     <n-result status="error" title="未找到目标文章" description="请检测链接是否正确">
       <template #footer>
@@ -495,6 +492,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
       </template>
     </n-result>
   </div>
+  <!-- 审核中 -->
   <div v-if="isExamining" class="cover">
     <n-result status="info" title="正在审核中..." description="审核通过后才能访问该文章">
       <template #footer>
@@ -505,6 +503,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
       </template>
     </n-result>
   </div>
+  <!-- 拒稿 -->
   <div v-if="isRefused" class="cover">
     <n-result status="error" title="稿件已被拒收" :description="`${refuseMsg}`">
       <template #footer>
@@ -532,7 +531,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
 .mo-controller-group {
   z-index: 1;
   opacity: 0.6;
-  bottom: 25%;
+  bottom: 15%;
   // bottom: 50%;
   // transform: translateY(50%);
   display: none;
@@ -590,7 +589,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
 }
 .wrapper {
   width: 100%;
-  height: 100%;
+  // height: 100%;
   margin: 0 auto;
 }
 

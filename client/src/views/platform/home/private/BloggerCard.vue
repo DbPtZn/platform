@@ -28,7 +28,7 @@ const handleError = (ev) => {
       </div>
     </a> -->
     <div class="card__info">
-      <span class="card__category"> Desc</span>
+      <span class="card__category"> 简介</span>
       <h3 class="card__title">{{ data?.desc }}</h3>
       <span class="card__by">
         <!-- <Icon name="material-symbols-light:arrow-right-alt" size="24" /> -->

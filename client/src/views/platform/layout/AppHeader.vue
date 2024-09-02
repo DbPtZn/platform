@@ -1,17 +1,49 @@
 <script lang="ts" setup>
-import { useRoute, useRouter } from 'vue-router'
-import Facebook from '../components/Facebook.vue'
-import Github from '../components/Github.vue'
-import MenuIcon from '../components/MenuIcon.vue'
+import useStore from '@/store'
+// import MenuIcon from './MenuIcon.vue'
 import { useThemeVars } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
-import useStore from '@/store'
+import { useRoute, useRouter } from 'vue-router'
+import { onMounted, ref } from 'vue'
+import { computed } from 'vue'
+import { reactive } from 'vue'
+import { Subscription, fromEvent } from '@tanbo/stream'
+const { settingStore } = useStore('common')
+const uid = computed(() => router.currentRoute.value.params.UID as string)
 const router = useRouter()
 const route = useRoute()
 const themeVars = useThemeVars()
-const { settingStore } = useStore('common')
-const { theme } = settingStore
 const { t } = useI18n()
+interface User {
+  UID: string
+  avatar: string
+  nickname: string
+  desc: string
+}
+const user = reactive<User>({
+  avatar: '',
+  nickname: '',
+  desc: '',
+  UID: ''
+})
+const subs: Subscription[] = []
+const visible = ref(false)
+onMounted(() => {
+  subs.push(
+    fromEvent<WheelEvent>(document.body, 'wheel').subscribe(event => {
+      // console.log(event)
+      if (event.deltaY > 0) {
+        // 用户向上滚动
+        // console.log('向上滚动')
+        visible.value = false
+      } else {
+        // 用户向下滚动
+        // console.log('向下滚动')
+        visible.value = true
+      }
+    })
+  )
+})
 const navOptions = [
   {
     key: 'home',
@@ -21,10 +53,10 @@ const navOptions = [
     }
   },
   {
-    key: 'column',
-    label: `${t('column')}`,
+    key: 'album',
+    label: `${t('album')}`,
     onClick: () => {
-      handleNavClick('column')
+      handleNavClick('album')
     }
   },
   {
@@ -45,28 +77,32 @@ const navOptions = [
   }
 ]
 function handleNavClick(to: string) {
-  const match = route.path.match(/^\/([a-zA-Z0-9_-]+)\/?.*/)
-  const uid = match ? match[1] : ''
-  router.push({ path: `/${uid}${to ? '/' + to : to}` })
+  // const match = route.path.match(/^\/([a-zA-Z0-9_-]+)\/?.*/)
+  // const uid = match ? match[1] : ''
+  router.push({ path: `/${uid.value}${to ? '/' + to : to}` })
 }
 
 function handleThemeUpdate(value: boolean) {
-  // theme.dark = value
+  settingStore.theme = value ? 'dark' : 'light'
 }
 function handleDblClick() {
   console.log('dbclick')
   router.push({ path: `/manage` })
 }
+const isDrawerVisible = ref(false)
+function handleMoreClick() {
+  isDrawerVisible.value = !isDrawerVisible.value
+}
 </script>
 
 <template>
-  <div class="nav">
+  <div :class="['nav', visible && 'visible']">
     <div class="nav-container">
       <div class="left">
         <div class="title">
-          <!-- <n-icon class="tapenote-icon" :component="HomeFilled" :size="24" />-->
-          <img class="tapenote-icon logo" src="/logo.png" alt="" @dblclick="handleDblClick" />
-          <nuxt-link class="tapenote-name" to="/">{{ $t('title') }}</nuxt-link>
+          <img class="tapenote-icon logo" :src="'/logo.png'" alt="" @dblclick="handleDblClick" />
+          <span class="tapenote-name">@筆記映畫</span>
+          <!-- <router-link class="tapenote-name" to="/"></router-link> -->
         </div>
       </div>
       <div class="right">
@@ -81,57 +117,69 @@ function handleDblClick() {
         </div>
 
         <div class="menu">
-          <n-flex align="center" :size="[12, 0]">
+          <!-- <n-flex align="center" :size="[12, 0]">
             <n-button text v-for="(item, index) in navOptions" :key="item.key" @click="item.onClick">
               <span class="menu-btn">{{ item.label }}</span>
             </n-button>
-            <!-- <n-button text>
-              <nuxt-link class="menu-btn" :to="'/' + uid">{{ $t('home') }}</nuxt-link>
-            </n-button>
-            <n-button text>
-              <nuxt-link class="menu-btn" :to="uid + '/column'">{{ $t('column') }}</nuxt-link>
-            </n-button>
-            <n-button text>
-              <nuxt-link class="menu-btn" :to="uid + '/tag'">{{ $t('tag') }}</nuxt-link>
-            </n-button>
-            <n-button text>
-              <nuxt-link class="menu-btn" :to="uid + '/about'">{{ $t('about') }}</nuxt-link>
-            </n-button> -->
-          </n-flex>
+          </n-flex> -->
         </div>
-        <n-divider class="divider" vertical />
-        <n-switch class="theme-switch" @update:value="handleThemeUpdate" :value="theme" size="medium">
-          <template #icon>
-            <span v-if="theme === 'light'">☀</span>
-            <span v-if="theme === 'dark'">🌙</span>
-          </template>
-        </n-switch>
+        <!-- <n-divider class="divider" vertical /> -->
+        <div class="theme-switch" @click="handleThemeUpdate(settingStore.theme !== 'dark')">
+          <Icon v-if="settingStore.theme === 'dark'" name="material-symbols-light:nights-stay-rounded" size="24px" />
+          <Icon v-if="settingStore.theme === 'light'" name=" material-symbols:light-mode-rounded"  size="24px" />
+        </div>
         <!-- 用户配置自定义外链（图标 + 超链接） -->
+        <!-- <n-divider class="divider" vertical /> -->
+        <!-- <n-button text>
+          <Icon name="mdi:qqchat" size="24px" />
+        </n-button>
         <n-divider class="divider" vertical />
         <n-button text>
-          <n-icon class="nav-btn" :component="Github" :size="24" />
-        </n-button>
-        <n-button text>
-          <n-icon class="nav-btn" :component="Facebook" :size="24" />
-        </n-button>
-        <Icon name="mingcute:more-1-fill" size="24px" />
-        <MenuIcon class="collapse-btn" :style="{ scale: 0.6 }" />
+          <Icon name="ic:baseline-wechat" size="24px" />
+        </n-button> -->
+        <Icon class="more-btn" name="mingcute:more-1-fill" size="24px" @click="handleMoreClick" />
+        <!-- <MenuIcon class="collapse-btn" :style="{ scale: 0.6 }" @click="handleMoreClick" /> -->
       </div>
     </div>
   </div>
+
+  <n-drawer v-model:show="isDrawerVisible" :width="'50%'" :placement="'right'">
+    <n-drawer-content title="Menu">
+      <n-flex>
+          <span>主题 ：</span>
+          <n-switch class="theme-switch" @update:value="handleThemeUpdate" :value="settingStore.theme === 'dark'" size="medium">
+            <template #icon>
+              <span v-if="settingStore.theme === 'light'">☀</span>
+              <span v-if="settingStore.theme === 'dark'">🌙</span>
+            </template>
+          </n-switch>
+        </n-flex>
+        <n-divider />
+        <n-flex align="start" :size="[12, 6]" vertical>
+          <n-button block v-for="(item, index) in navOptions" :key="item.key" @click="item.onClick">
+            <span class="menu-btn">{{ item.label }}</span>
+          </n-button>
+        </n-flex>
+    </n-drawer-content>
+  </n-drawer>
 </template>
 
 <style scoped lang="scss">
+.visible {
+  position: sticky;
+  top: 0px;
+  animation: fadeInDown 0.5s ease-in-out;
+}
 .nav {
-  position: relative;
   display: flex;
+  z-index: 1;
   width: 100%;
   height: 64px;
   min-height: 64px;
-  // padding: 0 32px;
-  border-bottom: 1px solid v-bind('themeVars.dividerColor');
+  color: v-bind('themeVars.textColor1');
+  // border: 1px solid v-bind('themeVars.dividerColor');
   background-color: v-bind('themeVars.bodyColor');
-  box-shadow: v-bind('themeVars.boxShadow1');
+  // box-shadow: v-bind('themeVars.boxShadow1');
   .nav-container {
     display: flex;
     flex-direction: row;
@@ -161,7 +209,8 @@ function handleDblClick() {
     overflow: clip;
   }
   .logo {
-    height: 24px;
+    height: 32px;
+    cursor: pointer;
   }
   .tapenote-name {
     display: block;
@@ -202,6 +251,11 @@ function handleDblClick() {
   }
   .collapse-btn {
     display: none;
+  }
+  .theme-switch {
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
   }
 }
 
@@ -256,7 +310,7 @@ function handleDblClick() {
   }
 }
 
-@include Mobile {
+@include Tablet {
   .nav {
     .nav-container {
       width: 100%;

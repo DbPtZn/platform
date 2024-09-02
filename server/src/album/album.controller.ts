@@ -39,4 +39,14 @@ export class AlbumController {
       res.status(400).send(error.message)
     }
   }
+
+  @Get('blog/list/:UID')
+  async getBlogAlbumList(@Param('UID') UID: string, @Req() req, @Res() res) {
+    try {
+      const result = await this.albumService.getBlogAlbumList(UID)
+      res.send(result)
+    } catch (error) {
+      res.status(400).send(error.message)
+    }
+  }
 }

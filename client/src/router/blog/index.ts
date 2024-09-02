@@ -4,7 +4,7 @@ import { RouteRecordRaw } from 'vue-router'
 
 const blogRoutes: Array<RouteRecordRaw> = [
   {
-    name: RouteNameEnum.BLOG,
+    name: 'blog',
     path: `/:UID`,
     component: () => import(/* webpackChunkName: "about" */ '@/views/blog/Blog.vue'),
     children: [
@@ -16,7 +16,17 @@ const blogRoutes: Array<RouteRecordRaw> = [
       },
       {
         path: `album`,
+        name: 'album',
         component: () => import(/* webpackChunkName: "about" */ '@/views/blog/album/Album.vue'),
+      },
+      {
+        name: 'album-detail',
+        path: `album/:id`,
+        component: () => import(/* webpackChunkName: "about" */ '@/views/blog/album/AlbumDetail.vue'),
+        beforeEnter: async (to, from, next) => {
+          console.log('album-detail')
+          next()
+        },
       },
       {
         path: `tag`,

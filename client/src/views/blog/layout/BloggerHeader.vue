@@ -79,7 +79,7 @@ const navOptions = [
   {
     key: 'about',
     label: `${t('about')}`,
-    disabled: true,
+    disabled: false,
     onClick: () => {
       handleNavClick('about')
     }
@@ -94,9 +94,9 @@ function handleNavClick(to: string) {
 function handleThemeUpdate(value: boolean) {
   settingStore.theme = value ? 'dark' : 'light'
 }
-function handleDblClick() {
+function handleClick() {
   console.log('dbclick')
-  router.push({ path: `/manage` })
+  router.push({ path: `/` })
 }
 const isDrawerVisible = ref(false)
 function handleMoreClick() {
@@ -108,8 +108,8 @@ function handleMoreClick() {
   <div :class="['nav', visible && 'visible']">
     <div class="nav-container">
       <div class="left">
-        <div class="title">
-          <img class="tapenote-icon logo" :src="user.avatar" alt="" @dblclick="handleDblClick" />
+        <div class="title" @click="handleClick">
+          <img class="tapenote-icon logo" :src="user.avatar" alt="" />
           <span class="tapenote-name">{{ user.nickname }}</span>
           <!-- <router-link class="tapenote-name" to="/"></router-link> -->
         </div>
@@ -127,7 +127,7 @@ function handleMoreClick() {
 
         <div class="menu">
           <n-flex align="center" :size="[12, 0]">
-            <n-button text v-for="(item, index) in navOptions" :key="item.key" @click="item.onClick">
+            <n-button text v-for="(item, index) in navOptions" :key="item.key" :disabled="item.disabled" @click="item.onClick">
               <span class="menu-btn">{{ item.label }}</span>
             </n-button>
           </n-flex>
@@ -211,6 +211,7 @@ function handleMoreClick() {
     align-items: center;
     width: 100%;
     height: 64px;
+    cursor: pointer;
   }
   .tapenote-icon {
     margin-right: 8px;

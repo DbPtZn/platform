@@ -26,7 +26,7 @@ export class ArticleController {
   ) {
     // console.log(UID)
     // console.log(limit)
-    // console.log(filter)
+    console.log(filter)
     try {
       const result = await this.articleService.findAll(
         {

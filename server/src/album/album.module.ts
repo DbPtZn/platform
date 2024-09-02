@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Album } from './album.entity';
 import { User } from 'src/user/user.entity';
 import { Article } from 'src/article/article.entity';
+import { UploadfileModule } from 'src/uploadfile/uploadfile.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Album, User, Article])],
+  imports: [TypeOrmModule.forFeature([Album, User, Article]), UploadfileModule],
   controllers: [AlbumController],
   providers: [AlbumService],
   exports: [AlbumService],

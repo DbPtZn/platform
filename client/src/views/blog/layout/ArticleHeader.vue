@@ -110,7 +110,7 @@ function handleMoreClick() {
 .nav.visible {
   position: sticky;
   top: 0px;
-  animation: fadeInDown 0.5s ease-in-out;
+  animation: fadeInDown 0.3s ease-in-out;
 }
 .nav {
   transition: all 0.3s ease-in-out;

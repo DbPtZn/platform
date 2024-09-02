@@ -6,6 +6,7 @@ import { Repository, DataSource } from 'typeorm'
 import { Album } from './album.entity'
 import { CreateAlbumDto } from './dto/create-album.dto'
 import { RemovedEnum } from 'src/enum'
+import { UploadfileService } from 'src/uploadfile/uploadfile.service'
 
 @Injectable()
 export class AlbumService {
@@ -16,6 +17,7 @@ export class AlbumService {
     private usersRepository: Repository<User>,
     @InjectRepository(Article)
     private articlesRepository: Repository<Article>,
+    private readonly fileService: UploadfileService,
     private readonly dataSource: DataSource
   ) {}
 
@@ -124,5 +126,35 @@ export class AlbumService {
 
   remove() {
     // 移除
+  }
+
+  async getBlogAlbumList(UID: string) {
+    try {
+      let albums = await this.albumsRepository.find({
+        where: {
+          UID,
+          // isDisplayed: true
+        }
+      })
+      // console.log(albums)
+      const user = await this.usersRepository.findOne({
+        where: {
+          UID
+        },
+        select: ['albumSequence']
+      })
+      console.log(user)
+      if(user && user.albumSequence) {
+        albums = albums.sort((a, b) => {
+          return user.albumSequence.indexOf(a.id) - user.albumSequence.indexOf(b.id)
+        })
+      }
+      albums.forEach(album => {
+        album.cover = album.cover ? this.fileService.getResponsePath(album.cover, UID) : ''
+      })
+      return albums
+    } catch (error) {
+      throw error
+    }
   }
 }

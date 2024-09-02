@@ -2,6 +2,7 @@
 import { useThemeVars } from 'naive-ui'
 import ItemCard from './private/ItemCard.vue'
 import { ArticleList, ArticleListItem } from '@/types'
+import BlogFooter from '../layout/BlogFooter.vue'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { onMounted } from 'vue'
@@ -46,10 +47,12 @@ onMounted(() => {
       @click="handleClick(item)"
     />
   </div>
+  <BlogFooter />
 </template>
 
 <style scoped lang="scss">
 .list {
+  min-height: 95vh;
   margin: 0 auto;
 }
 
