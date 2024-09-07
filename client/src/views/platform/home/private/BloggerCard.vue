@@ -32,7 +32,7 @@ const handleError = (ev) => {
       <h3 class="card__title">{{ data?.desc }}</h3>
       <span class="card__by">
         <!-- <Icon name="material-symbols-light:arrow-right-alt" size="24" /> -->
-        <router-link class="card__author" title="author" :to="`/${data?.UID}`">查看主页</router-link>
+        <router-link class="card__author" :to="`/${data?.UID}`">查看主页</router-link>
         <!-- <a href="#" class="card__author" title="author"></a> -->
       </span>
     </div>

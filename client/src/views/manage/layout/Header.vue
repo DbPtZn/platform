@@ -76,7 +76,7 @@ function handleBack() {
         </template> -->
         <template #avatar>
           <router-link to="/">
-            <img class="logo" src="/logo.png" />
+            <img class="logo" src="/logo2.png" />
           </router-link>
         </template>
         <template #extra>

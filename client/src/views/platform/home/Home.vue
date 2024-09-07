@@ -29,6 +29,7 @@ const isMobile = mobileDevices.test(userAgent)
   <div class="home-container">
     <AppHeader />
     <div class="home">
+      <!-- <div class="section channel">作者频道</div> -->
       <div class="section channel">频道</div>
       <div v-if="!isMobile" class="cards">
         <BloggerCard  class="blogger-card" v-for="item in users" :key="item.UID" :data="item"  />
@@ -36,7 +37,7 @@ const isMobile = mobileDevices.test(userAgent)
       <div v-if="isMobile" class="list">
         <MicroCard v-if="isMobile" v-for="item in users"  :key="item.UID" :data="item" />
       </div>
-      <!-- <div class="section recommend">推荐</div> -->
+      <!-- <div class="section recommend">作品推荐</div> -->
       <!-- <div class="section recommend">推荐</div> -->
     </div>
     <n-divider />
