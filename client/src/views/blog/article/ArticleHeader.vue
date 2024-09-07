@@ -1,20 +1,18 @@
 <script lang="ts" setup>
-import MenuIcon from './MenuIcon.vue'
+// import MenuIcon from './MenuIcon.vue'
 import { Subscription, fromEvent } from '@tanbo/stream'
 import 'animate.css'
-import type { ArticleUserInfo } from '@/types'
+import type { ArticleUserInfo, PublicArticleType } from '@/types'
 import { useI18n } from 'vue-i18n'
-import { useThemeVars } from 'naive-ui'
+import { useDialog, useMessage, useThemeVars } from 'naive-ui'
 import { useRoute, useRouter } from 'vue-router'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import useStore from '@/store'
-const router = useRouter()
-const route = useRoute()
-const themeVars = useThemeVars()
-const { settingStore } = useStore('common')
-const { t } = useI18n()
+import { useShare } from './hooks/useShare'
+
 const props = defineProps<{
   user: ArticleUserInfo
+  data: PublicArticleType
 }>()
 const emits = defineEmits<{
   outlineVisible: [boolean]
@@ -25,7 +23,14 @@ defineExpose({
     visible.value = value
   }
 })
-
+const { settingStore } = useStore('common')
+const { t } = useI18n()
+const router = useRouter()
+const route = useRoute()
+const themeVars = useThemeVars()
+const message = useMessage()
+const dialog = useDialog()
+const share = useShare()
 function handleNavClick(to: string) {
   const match = route.path.match(/^\/([a-zA-Z0-9_-]+)\/?.*/)
   const uid = match ? match[1] : ''
@@ -48,9 +53,6 @@ const subs: Subscription[] = []
 const visible = ref(false)
 onMounted(() => {
   subs.push(
-    // fromEvent(window, 'scroll').subscribe(() => {
-    //   console.log('scro')
-    // }),
     fromEvent<WheelEvent>(window, 'wheel').subscribe(event => {
       // console.log(event)
       if (event.deltaY > 0) {
@@ -74,6 +76,7 @@ function handleError(event: Event) {
 function handleMoreClick() {
   emits('moreClick')
 }
+
 </script>
 
 <template>
@@ -98,9 +101,15 @@ function handleMoreClick() {
           <div class="theme-switch" @click="handleThemeUpdate">
             <Icon :name="themeIconVar" size="24px" />
           </div>
+          <n-divider class="divider" vertical />
+          <div @click="share(data.title)">
+            <Icon name="material-symbols:share" size="24px" />
+          </div>
+     
+          
         </div>
         <Icon class="more-btn" name="mingcute:more-1-fill" size="24px" @click="handleMoreClick" />
-        <MenuIcon class="collapse-btn" :style="{ scale: 0.6 }" @click="handleMoreClick"/>
+        <!-- <MenuIcon class="collapse-btn" :style="{ scale: 0.6 }" @click="handleMoreClick"/> -->
       </div>
     </div>
   </div>
@@ -269,9 +278,9 @@ function handleMoreClick() {
     .tools {
       display: none;
     }
-    // .theme-switch {
-    //   display: none;
-    // }
+    .more-btn {
+      display: block;
+    }
     .nav-btn {
       display: none;
     }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UserAvatar from './icons/UserAvatar.vue'
+// import UserAvatar from './icons/UserAvatar.vue'
 import type { PublicArticleType } from '@/types'
 import dayjs from 'dayjs'
 import { usePlayer } from './hooks/usePlayer'
@@ -12,14 +12,16 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import useStore from '@/store'
 import { useRouter } from 'vue-router'
 import { blogApi } from '@/api'
-import ArticleHeader from '../layout/ArticleHeader.vue'
+import ArticleHeader from './ArticleHeader.vue'
 import { Icon } from '@iconify/vue'
 import BlogFooter from '../layout/BlogFooter.vue'
 import { AnimeEventService, AnimeProvider, CourseData, DialogProvider, OutlineService, Player, RootEventService, Structurer, ThemeProvider } from '@/editor'
+import { useShare } from './hooks/useShare'
 const themeVars = useThemeVars()
 const { settingStore } = useStore('common')
 const router = useRouter()
 const message = useMessage()
+const share = useShare()
 const agentId = computed(() => router.currentRoute.value.params.id as string)
 const id = computed(() => router.currentRoute.value.query.id as string)
 const isExamining = ref(false)
@@ -357,7 +359,7 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
 </script>
 
 <template>
-  <ArticleHeader ref="navRef" :user="state.user" @outline-visible="handleOutlineVisible" @more-click="handleMoreClick" />
+  <ArticleHeader ref="navRef" :user="state.user" :data="state" @outline-visible="handleOutlineVisible" @more-click="handleMoreClick" />
   <div ref="rootRef" class="article">
     <div class="wrapper" v-touch:swipe="handleSwipe">
       <div class="header">
@@ -443,8 +445,13 @@ function handleSwipe(event: 'top' | 'bottom' | 'left' | 'right') {
   <n-back-top class="back-top" :right="100" :to="rootRef" />
   <!-- 抽屉 -->
   <n-drawer v-model:show="drawerActive" width="50%" placement="right">
-    <n-drawer-content title="Menu">
+    <n-drawer-content title="菜单">
       <div>
+        <n-button block @click="share(state.title)">
+          <Icon icon="material-symbols:share" height="20px" />
+          <span>分享</span>
+        </n-button>
+        <n-divider class="divider" />
         <n-flex>
           <span>主题 ：</span>
           <n-switch
