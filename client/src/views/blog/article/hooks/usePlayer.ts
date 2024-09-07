@@ -138,21 +138,29 @@ export function usePlayer(args: {
   const { data, rootRef, editorRef, scrollerRef, outlineRef, controllerRef } = args
   let editor: Editor
   return new Promise<Editor>(async (resolve, reject) => {
-    // console.log(data)
-    // 音频换源
-    const aud = new Audio()
-    const result = aud.canPlayType('audio/ogg')
-    if (result === '') data.audio = data.audio.replace('.ogg', '.mp3')
+    /** 判断设备 */
+    const userAgent = navigator.userAgent.toLowerCase()
+    // 常见的移动设备标识
+    const mobileDevices = /iphone|ipad|ipod|android|blackberry|mini|windows\sce|palm/i
+    const isMobile = mobileDevices.test(userAgent)
+    // 非移动端的时候，自动加载/缓存音频数据 (某些移动端浏览器可能禁止自动加载媒体数据)
+    let courseData: CourseData | null = null
+    if (!isMobile) {
+      // 音频换源
+      const aud = new Audio()
+      const result = aud.canPlayType('audio/ogg')
+      if (result === '') data.audio = data.audio.replace('.ogg', '.mp3')
 
-    const courseData: CourseData = {
-      audio: data.audio,
-      duration: data.duration || 0,
-      promoterSequence: data.promoterSequence,
-      keyframeSequence: data.keyframeSequence,
-      subtitleSequence: data.subtitleSequence,
-      subtitleKeyframeSequence: data.subtitleKeyframeSequence
+      courseData = {
+        audio: data.audio,
+        duration: data.duration || 0,
+        promoterSequence: data.promoterSequence,
+        keyframeSequence: data.keyframeSequence,
+        subtitleSequence: data.subtitleSequence,
+        subtitleKeyframeSequence: data.subtitleKeyframeSequence
+      }
     }
-    console.log(courseData)
+    // console.log(courseData)
     const content = data.content
     // console.log(content)
     try {
@@ -179,7 +187,7 @@ export function usePlayer(args: {
           }
         )
         /** 载入微课数据 */
-        if (data.type === 'course') {
+        if (data.type === 'course' && courseData) {
           const player = editor?.get(Player)
           player.loadData([courseData]).catch((error) => {
             console.error('加载动画数据失败:', error)

@@ -28,7 +28,7 @@ const handleError = (ev) => {
       </div>
     </a> -->
     <div class="card__info">
-      <span class="card__category"> 简介</span>
+      <span class="card__category">简介</span>
       <h3 class="card__title">{{ data?.desc }}</h3>
       <span class="card__by">
         <!-- <Icon name="material-symbols-light:arrow-right-alt" size="24" /> -->
@@ -62,21 +62,13 @@ const handleError = (ev) => {
 }
 
 .card__img {
-  // visibility: hidden;
-  // background-size: cover;
-  // background-position: center;
-  // background-repeat: no-repeat;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  // height: 120px;
   flex: 1;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-  // object-fit: cover;
-  // overflow: hidden;
+  // background-color: v-bind('themeVars.clearColor');
   .card__avatar {
     // margin: auto auto;
     height: 60px;
@@ -107,41 +99,24 @@ const handleError = (ev) => {
   top: 0;
 }
 
-// .card__img--hover {
-//   transition: 0.2s all ease-out;
-//   background-size: cover;
-//   background-position: center;
-//   background-repeat: no-repeat;
-//   width: 100%;
-//   position: absolute;
-//   height: 200px;
-//   border-top-left-radius: 12px;
-//   border-top-right-radius: 12px;
-//   top: 0;
-// }
 .card {
   display: flex;
   flex-direction: column;
   margin-right: 25px;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0, 1);
   width: 240px;
-  height: 336px;
+  height: 320px;
   position: relative;
-  border-radius: 12px;
+  border-radius: 3px;
   overflow: hidden;
   background-color: v-bind('themeVars.bodyColor');
   box-shadow: v-bind('themeVars.boxShadow1');
 }
-// .card:hover {
-//   box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.1);
-//   transform: scale(1.1, 1.1);
-// }
+
 
 .card__info {
   z-index: 2;
   background-color: v-bind('themeVars.cardColor');
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
   padding: 16px 24px 24px 24px;
 }
 
@@ -155,9 +130,14 @@ const handleError = (ev) => {
 }
 
 .card__title {
+  font-size: 12px;
   margin-top: 5px;
   margin-bottom: 10px;
-  font-family: 'Roboto Slab', serif;
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .card__by {
@@ -173,11 +153,6 @@ const handleError = (ev) => {
   text-decoration: none;
   color: #ad7d52;
 }
-
-// .card:hover .card__img--hover {
-//   height: 100%;
-//   opacity: 0.3;
-// }
 
 .card:hover .card__info {
   background-color: transparent;

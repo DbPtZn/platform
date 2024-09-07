@@ -233,22 +233,31 @@ const isPlaying = ref(false)
 const floatBtnIcon = computed(() => (isPlaying.value ? 'material-symbols:pause-rounded' : 'material-symbols:play-arrow-rounded'))
 async function handleFloatBtnClick() {
   const controller = player.get(Player)
-  // if(!controller.isLoaded) {
-  //   const data = state.value
-  //   const courseData: CourseData = {
-  //     audio: data.audio,
-  //     duration: data.duration || 0,
-  //     promoterSequence: data.promoterSequence,
-  //     keyframeSequence: data.keyframeSequence,
-  //     subtitleSequence: data.subtitleSequence,
-  //     subtitleKeyframeSequence: data.subtitleKeyframeSequence
-  //   }
-  //   try {
-  //     await controller.loadData([courseData])
-  //   } catch (error) {
-  //     console.error('加载数据失败:', error)
-  //   }
-  // }
+
+  // 如果播放器未装载数据源，则先装载数据
+  if(!controller.isLoaded) {
+    const data = state.value
+    // 音频换源
+    const aud = new Audio()
+    const result = aud.canPlayType('audio/ogg')
+    if (result === '') data.audio = data.audio.replace('.ogg', '.mp3')
+
+    const courseData: CourseData = {
+      audio: data.audio,
+      duration: data.duration || 0,
+      promoterSequence: data.promoterSequence,
+      keyframeSequence: data.keyframeSequence,
+      subtitleSequence: data.subtitleSequence,
+      subtitleKeyframeSequence: data.subtitleKeyframeSequence
+    }
+    try {
+      await controller.loadData([courseData])
+    } catch (error) {
+      console.error('加载数据失败:', error)
+      message.error('播放器装载数据失败')
+    }
+  }
+
   if (!controller.isPlaying && !controller.isPause) {
     controller.start()
     isPlaying.value = true

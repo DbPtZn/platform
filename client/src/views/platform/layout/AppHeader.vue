@@ -100,7 +100,7 @@ function handleMoreClick() {
     <div class="nav-container">
       <div class="left">
         <div class="title">
-          <img class="tapenote-icon logo" :src="'/logo.png'" alt="" @dblclick="handleDblClick" />
+          <img class="tapenote-icon logo" :src="'/logo2.png'" alt="" @dblclick="handleDblClick" />
           <span class="tapenote-name">@筆記映畫</span>
           <!-- <router-link class="tapenote-name" to="/"></router-link> -->
         </div>
@@ -126,7 +126,7 @@ function handleMoreClick() {
         <!-- <n-divider class="divider" vertical /> -->
         <div class="theme-switch" @click="handleThemeUpdate(settingStore.theme !== 'dark')">
           <Icon v-if="settingStore.theme === 'dark'" name="material-symbols-light:nights-stay-rounded" size="24px" />
-          <Icon v-if="settingStore.theme === 'light'" name=" material-symbols:light-mode-rounded"  size="24px" />
+          <Icon v-if="settingStore.theme === 'light'" name="material-symbols-light:light-mode-rounded" size="24px" />
         </div>
         <!-- 用户配置自定义外链（图标 + 超链接） -->
         <!-- <n-divider class="divider" vertical /> -->
@@ -143,7 +143,7 @@ function handleMoreClick() {
     </div>
   </div>
 
-  <n-drawer v-model:show="isDrawerVisible" :width="'50%'" :placement="'right'">
+  <!-- <n-drawer v-model:show="isDrawerVisible" :width="'50%'" :placement="'right'">
     <n-drawer-content title="Menu">
       <n-flex>
           <span>主题 ：</span>
@@ -161,7 +161,7 @@ function handleMoreClick() {
           </n-button>
         </n-flex>
     </n-drawer-content>
-  </n-drawer>
+  </n-drawer> -->
 </template>
 
 <style scoped lang="scss">
@@ -253,6 +253,7 @@ function handleMoreClick() {
     display: none;
   }
   .theme-switch {
+    color: v-bind('themeVars.textColor1');
     height: 30px;
     width: 30px;
     cursor: pointer;
@@ -294,9 +295,9 @@ function handleMoreClick() {
     .divider {
       display: none;
     }
-    .theme-switch {
-      display: none;
-    }
+    // .theme-switch {
+    //   display: none;
+    // }
     .nav-btn {
       display: none;
     }
@@ -338,9 +339,9 @@ function handleMoreClick() {
     .tools {
       display: none;
     }
-    .theme-switch {
-      display: none;
-    }
+    // .theme-switch {
+    //   display: none;
+    // }
     .nav-btn {
       display: none;
     }
